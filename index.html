@@ -2087,6 +2087,145 @@ body.playerShareMode #publicPickHint{
 }
 </style>
 
+
+<style id="matt-v85-shared-one-row-final">
+body.playerShareMode .publicPickPanel{
+  padding:12px!important;
+}
+body.playerShareMode #sharedFillShell{
+  display:grid!important;
+  gap:8px!important;
+}
+body.playerShareMode #sharedFillHeader{
+  display:grid!important;
+  grid-template-columns:minmax(0,1fr) auto!important;
+  gap:12px!important;
+  align-items:start!important;
+}
+body.playerShareMode #sharedFillTopRow{
+  display:grid!important;
+  grid-template-columns:minmax(0,1fr) 122px!important;
+  gap:12px!important;
+  align-items:end!important;
+  margin:0!important;
+}
+body.playerShareMode #sharedNameBox{
+  min-width:0!important;
+  margin:0!important;
+}
+body.playerShareMode #publicPlayerName{
+  width:100%!important;
+  min-height:42px!important;
+}
+body.playerShareMode #sharedColorBox{
+  width:122px!important;
+  margin:0!important;
+  justify-self:end!important;
+  align-self:end!important;
+  text-align:center!important;
+}
+body.playerShareMode #sharedColorBox .participantColorLabel{
+  margin:0 0 4px!important;
+}
+body.playerShareMode #sharedColorBox .wheelMiniWrap,
+body.playerShareMode #sharedColorBox .wheelCanvas{
+  width:88px!important;
+  height:88px!important;
+  max-width:88px!important;
+  margin:0 auto!important;
+}
+body.playerShareMode #sharedFillBottomRow{
+  display:grid!important;
+  grid-template-columns:minmax(180px,1fr) 90px 170px 150px 170px!important;
+  gap:8px!important;
+  align-items:end!important;
+  margin:0!important;
+}
+body.playerShareMode #sharedActiveCard{
+  min-height:46px!important;
+  padding:7px 10px!important;
+  margin:0!important;
+}
+body.playerShareMode #sharedActiveDot{
+  width:25px!important;
+  height:25px!important;
+}
+body.playerShareMode #sharedActiveText{
+  font-size:15px!important;
+}
+body.playerShareMode #sharedRandomQtyBox{
+  margin:0!important;
+}
+body.playerShareMode #sharedRandomQtyBox label{
+  margin:0 0 3px!important;
+}
+body.playerShareMode #publicRandomQty,
+body.playerShareMode #publicRandomBtn,
+body.playerShareMode #selectToggle,
+body.playerShareMode #publicSavePicks{
+  width:100%!important;
+  min-height:46px!important;
+  margin:0!important;
+  font-size:14px!important;
+  font-weight:900!important;
+}
+body.playerShareMode #sharedManualRow{
+  display:contents!important;
+}
+body.playerShareMode #publicPickHint{
+  margin:0!important;
+  padding:6px 8px!important;
+}
+
+/* tablet: keep buttons in one row as long as possible */
+@media(max-width:900px){
+  body.playerShareMode #sharedFillBottomRow{
+    grid-template-columns:minmax(155px,1fr) 80px 145px 130px 145px!important;
+    gap:6px!important;
+  }
+  body.playerShareMode #publicRandomQty,
+  body.playerShareMode #publicRandomBtn,
+  body.playerShareMode #selectToggle,
+  body.playerShareMode #publicSavePicks{
+    font-size:13px!important;
+  }
+}
+
+/* phone: allow two compact rows rather than overlap */
+@media(max-width:620px){
+  body.playerShareMode #sharedFillHeader{
+    grid-template-columns:1fr!important;
+  }
+  body.playerShareMode #sharedFillHelper{
+    text-align:left!important;
+    white-space:normal!important;
+  }
+  body.playerShareMode #sharedFillTopRow{
+    grid-template-columns:minmax(0,1fr) 96px!important;
+    gap:8px!important;
+  }
+  body.playerShareMode #sharedColorBox{
+    width:96px!important;
+  }
+  body.playerShareMode #sharedColorBox .wheelMiniWrap,
+  body.playerShareMode #sharedColorBox .wheelCanvas{
+    width:72px!important;
+    height:72px!important;
+    max-width:72px!important;
+  }
+  body.playerShareMode #sharedFillBottomRow{
+    grid-template-columns:minmax(0,1fr) 72px 1fr!important;
+    gap:7px!important;
+  }
+  body.playerShareMode #selectToggle{
+    grid-column:1 / 2!important;
+  }
+  body.playerShareMode #publicSavePicks{
+    grid-column:2 / 4!important;
+  }
+}
+</style>
+
 </head>
 
 <style id="v79-14-share-code-style">
@@ -3470,6 +3609,142 @@ $('name').addEventListener('input',()=>{const existing=pc($('name').value);if(ex
   }else{
     setTimeout(applySharedFillLook, 180);
   }
+})();
+</script>
+
+
+<script id="matt-v85-shared-one-row-dom">
+(function(){
+  function arrange(){
+    if(!new URLSearchParams(location.search).get('board')) return;
+    const bottom=document.getElementById('sharedFillBottomRow');
+    const manual=document.getElementById('sharedManualRow');
+    const select=document.getElementById('selectToggle');
+    const confirm=document.getElementById('publicSavePicks');
+    if(!bottom || !select || !confirm) return;
+
+    if(manual){
+      if(!bottom.contains(select)) bottom.appendChild(select);
+      if(!bottom.contains(confirm)) bottom.appendChild(confirm);
+      manual.remove();
+    }else{
+      if(!bottom.contains(select)) bottom.appendChild(select);
+      if(!bottom.contains(confirm)) bottom.appendChild(confirm);
+    }
+  }
+  if(document.readyState==='loading'){
+    document.addEventListener('DOMContentLoaded',()=>setTimeout(arrange,240));
+  }else{
+    setTimeout(arrange,240);
+  }
+})();
+</script>
+
+
+<script id="matt-v85-owner-live-board-sync">
+(function(){
+  const API='https://script.google.com/macros/s/AKfycbxaB2NC-8eKWBrUqplCGtSQ2tJmOQKlUyh03YjfmaL_KPQIAg-cpryEr13hcDaM7R4-/exec';
+  let ownerSyncBusy=false;
+
+  async function apiGet(params){
+    const u=new URL(API);
+    Object.entries(params||{}).forEach(([k,v])=>u.searchParams.set(k,String(v)));
+    const r=await fetch(u.toString(),{method:'GET',cache:'no-store',redirect:'follow'});
+    const j=await r.json();
+    if(!j.ok) throw new Error(j.error||'Live board request failed');
+    return j;
+  }
+
+  function mergeRemoteIntoLocal(remote, localId){
+    if(!remote || !Array.isArray(remote.board)) return null;
+    const list=(typeof getSaved==='function'?getSaved():[]);
+    const idx=list.findIndex(x=>String(x.id)===String(localId) ||
+      String(x.boardId||x.id)===String(remote.boardId||localId));
+
+    const previous=idx>=0?list[idx]:{};
+    const merged={
+      ...previous,
+      ...remote,
+      id: previous.id || localId || remote.boardId,
+      boardId: remote.boardId || previous.boardId || localId,
+      shareToken: remote.shareToken || previous.shareToken || '',
+      title: remote.title || remote.gameName || previous.title || 'Board',
+      claimed: remote.claimed ?? remote.board.filter(x=>x&&(x.player||x.img)).length,
+      updated: remote.updated || new Date().toISOString()
+    };
+
+    const next=list.slice();
+    if(idx>=0) next[idx]=merged;
+    else next.unshift(merged);
+
+    if(typeof safeStoreSaved==='function') safeStoreSaved(next);
+    if(typeof renderSavedList==='function') renderSavedList();
+    if(typeof renderModal==='function') renderModal();
+    return merged;
+  }
+
+  async function refreshOwnerBoard(localId, showMessage=true){
+    if(ownerSyncBusy || !localId) return false;
+    ownerSyncBusy=true;
+    try{
+      const boardId=(typeof getSaved==='function'?getSaved():[])
+        .find(x=>String(x.id)===String(localId))?.boardId || localId;
+
+      const j=await apiGet({action:'getBoardById',boardId:boardId,_:Date.now()});
+      if(!j.board) throw new Error('Live board data was unavailable.');
+
+      const merged=mergeRemoteIntoLocal(j.board,localId);
+      if(!merged) throw new Error('Live board data was incomplete.');
+
+      if(typeof setState==='function') setState(merged);
+      if(showMessage){
+        const claimed=merged.claimed ?? merged.board.filter(x=>x&&(x.player||x.img)).length;
+        const st=document.getElementById('status');
+        if(st) st.textContent='Live board synced — '+claimed+'/100 claimed.';
+        if(typeof toast==='function') toast('Latest shared picks loaded.');
+      }
+      return true;
+    }catch(err){
+      console.error('Owner live sync',err);
+      if(showMessage){
+        const st=document.getElementById('status');
+        if(st) st.textContent='Loaded local board. Live sync retry available.';
+      }
+      return false;
+    }finally{
+      ownerSyncBusy=false;
+    }
+  }
+
+  window.refreshOwnerBoardV85=refreshOwnerBoard;
+
+  // Replace stale local-only Load behavior with local + cloud refresh.
+  if(typeof window.loadState==='function'){
+    const oldLoad=window.loadState;
+    window.loadState=function(id){
+      oldLoad(id);
+      setTimeout(()=>refreshOwnerBoard(id,true),80);
+    };
+  }else if(typeof loadState==='function'){
+    const oldLoad=loadState;
+    loadState=function(id){
+      oldLoad(id);
+      setTimeout(()=>refreshOwnerBoard(id,true),80);
+    };
+  }
+
+  // Safely refresh an already-open saved board while Matt is viewing it.
+  // Never refresh during selection/editing.
+  setInterval(()=>{
+    try{
+      const token=new URLSearchParams(location.search).get('board');
+      if(token) return; // participant page, not owner page
+      if(typeof activeBoardId==='undefined' || !activeBoardId) return;
+      if(typeof selectionOn!=='undefined' && selectionOn) return;
+      if(document.hidden) return;
+      refreshOwnerBoard(activeBoardId,false);
+    }catch(e){}
+  },5000);
 })();
 </script>
 
