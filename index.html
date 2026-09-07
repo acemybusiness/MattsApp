@@ -2313,6 +2313,7 @@ body.playerShareMode #sharedColorBox .wheelCanvas{
 }
 </style>
 
+<meta name="matt-v85-fix" content="fast-batch-square-save">
 </head>
 
 <style id="v79-14-share-code-style">
@@ -3239,79 +3240,64 @@ $('name').addEventListener('input',()=>{const existing=pc($('name').value);if(ex
     const indexes=[...pending];
     const btn=document.getElementById('publicSavePicks');
     const randomBtn=document.getElementById('publicRandomBtn');
+    const undoBtn=document.getElementById('publicUndoBtn');
     if(btn) btn.disabled=true;
     if(randomBtn) randomBtn.disabled=true;
-
-    let ok=0, fail=0, already=0;
-    const successful=[];
-
-    async function claimOne(index, attempt=1){
-      try{
-        await post({
-          action:'claimSquare',
-          token:TOKEN,
-          squareIndex:index,
-          playerName:name,
-          playerColor:color,
-          requestId:(crypto.randomUUID?crypto.randomUUID():Date.now()+'-'+index+'-'+attempt)
-        });
-        return {index,ok:true};
-      }catch(err){
-        const msg=String(err&&err.message||err||'');
-        if(/already taken|locked/i.test(msg)) return {index,ok:false,already:true,error:msg};
-        if(attempt<2){
-          await new Promise(r=>setTimeout(r,350));
-          return claimOne(index,2);
-        }
-        return {index,ok:false,error:msg};
-      }
-    }
+    if(undoBtn) undoBtn.disabled=true;
 
     hint(`Saving ${indexes.length} pick${indexes.length===1?'':'s'}…`);
 
-    // Four at a time: much faster than one-by-one, while avoiding too many
-    // simultaneous Apps Script lock requests.
-    for(let i=0;i<indexes.length;i+=4){
-      const batch=indexes.slice(i,i+4);
-      const results=await Promise.all(batch.map(index=>claimOne(index)));
-      for(const r of results){
-        if(r.ok){
-          ok++;
-          successful.push(r.index);
-          if(typeof board!=='undefined' && board[r.index]){
-            board[r.index]={
-              ...board[r.index],
-              player:name,
-              color:color,
-              img:null,
-              time:Date.now()
-            };
-          }
-        }else{
-          fail++;
-          if(r.already) already++;
+    try{
+      // v85 FAST BATCH SAVE: all selected squares are sent in ONE request.
+      const result=await post({
+        action:'claimSquares',
+        token:TOKEN,
+        squareIndexes:indexes,
+        playerName:name,
+        playerColor:color,
+        requestId:(crypto.randomUUID?crypto.randomUUID():Date.now()+'-batch')
+      });
+
+      const claimedIndexes=Array.isArray(result.claimedIndexes)?result.claimedIndexes:[];
+      const skippedIndexes=Array.isArray(result.skippedIndexes)?result.skippedIndexes:[];
+
+      // Update the visible board all at once.
+      for(const index of claimedIndexes){
+        if(typeof board!=='undefined' && board[index]){
+          board[index]={
+            ...board[index],
+            player:name,
+            color:(result.playerColor||color),
+            img:null,
+            time:Date.now()
+          };
         }
       }
 
-      // Show progress immediately instead of looking frozen.
+      pending.clear();
+      document.querySelectorAll('#board .publicPending').forEach(x=>x.classList.remove('publicPending'));
       if(typeof render==='function') render();
-      hint(`Saving… ${Math.min(i+batch.length,indexes.length)}/${indexes.length}`);
+
+      // One canonical refresh after the whole batch has committed.
+      try{ await loadLive(true); }catch(e){}
+
+      if(skippedIndexes.length){
+        hint(`${claimedIndexes.length} saved. ${skippedIndexes.length} square${skippedIndexes.length===1?' was':'s were'} already taken.`);
+      }else{
+        hint(`${claimedIndexes.length} pick${claimedIndexes.length===1?'':'s'} saved successfully.`);
+      }
+    }catch(err){
+      console.error('Fast batch save failed',err);
+      hint('Unable to save picks: '+String(err&&err.message||err));
     }
 
-    pending.clear();
-    document.querySelectorAll('#board .publicPending').forEach(x=>x.classList.remove('publicPending'));
-    if(typeof render==='function') render();
-
-    // Pull the canonical live board after the optimistic update.
-    try{ await loadLive(true); }catch(e){}
-
-    if(fail){
-      hint(`${ok} pick${ok===1?'':'s'} saved. ${fail} could not be saved${already?' because '+already+' '+(already===1?'square was':'squares were')+' already taken':''}.`);
-    }else{
-      hint(`${ok} pick${ok===1?'':'s'} saved successfully.`);
-    }
-
-    if(typeof selectionOn!=='undefined') selectionOn=false;
+    // Shared boards remain permanently in selection mode.
+    if(typeof selectionOn!=='undefined') selectionOn=true;
+    const selectBtn=document.getElementById('selectToggle');
+    if(selectBtn) selectBtn.style.display='none';
+    if(btn) btn.disabled=false;
+    if(randomBtn) randomBtn.disabled=false;
+    if(undoBtn) undoBtn.disabled=false;
     const selectBtn=document.getElementById('selectToggle');
     if(selectBtn) selectBtn.textContent='Select Squares';
     if(btn) btn.disabled=false;
