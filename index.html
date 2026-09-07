@@ -2226,149 +2226,6 @@ body.playerShareMode #publicPickHint{
 }
 </style>
 
-
-<style id="matt-v85-shared-tight-stable-final">
-body.playerShareMode .publicPickPanel{
-  padding:8px 10px 7px!important;
-}
-body.playerShareMode #sharedFillShell{
-  display:grid!important;
-  gap:5px!important;
-}
-body.playerShareMode #sharedFillHeader{
-  display:grid!important;
-  grid-template-columns:minmax(0,1fr) auto!important;
-  gap:8px!important;
-  align-items:start!important;
-  margin:0!important;
-}
-body.playerShareMode #sharedFillHeader h3{
-  margin:0!important;
-  line-height:.95!important;
-  font-size:clamp(24px,3.3vw,42px)!important;
-}
-body.playerShareMode #sharedFillHelper{
-  font-size:10px!important;
-  padding-top:1px!important;
-}
-body.playerShareMode #sharedFillTopRow{
-  display:grid!important;
-  grid-template-columns:minmax(0,1fr) 88px!important;
-  gap:8px!important;
-  align-items:end!important;
-  margin:0!important;
-}
-body.playerShareMode #sharedNameBox{
-  min-width:0!important;
-  margin:0!important;
-}
-body.playerShareMode #sharedNameBox label,
-body.playerShareMode #sharedColorBox .participantColorLabel,
-body.playerShareMode #sharedRandomQtyBox label{
-  margin:0 0 2px!important;
-  font-size:10px!important;
-}
-body.playerShareMode #publicPlayerName{
-  width:100%!important;
-  min-height:34px!important;
-  padding:5px 8px!important;
-  font-size:14px!important;
-}
-body.playerShareMode #sharedColorBox{
-  width:88px!important;
-  margin:0!important;
-  justify-self:end!important;
-  text-align:center!important;
-}
-body.playerShareMode #sharedColorBox .wheelMiniWrap,
-body.playerShareMode #sharedColorBox .wheelCanvas{
-  width:60px!important;
-  height:60px!important;
-  max-width:60px!important;
-  margin:0 auto!important;
-}
-body.playerShareMode #sharedFillBottomRow{
-  display:grid!important;
-  grid-template-columns:minmax(145px,1fr) 68px 140px 115px 145px!important;
-  gap:6px!important;
-  align-items:end!important;
-  margin:0!important;
-}
-body.playerShareMode #sharedActiveCard{
-  min-height:36px!important;
-  padding:4px 8px!important;
-  margin:0!important;
-}
-body.playerShareMode #sharedActiveDot{
-  width:18px!important;
-  height:18px!important;
-}
-body.playerShareMode #sharedActiveText{
-  font-size:13px!important;
-}
-body.playerShareMode #sharedRandomQtyBox{
-  margin:0!important;
-}
-body.playerShareMode #publicRandomQty,
-body.playerShareMode #publicRandomBtn,
-body.playerShareMode #selectToggle,
-body.playerShareMode #publicSavePicks{
-  width:100%!important;
-  min-height:36px!important;
-  margin:0!important;
-  padding:5px 8px!important;
-  font-size:12px!important;
-  font-weight:900!important;
-}
-body.playerShareMode #sharedManualRow{
-  display:contents!important;
-}
-body.playerShareMode #publicPickHint{
-  margin:0!important;
-  min-height:0!important;
-  padding:4px 7px!important;
-  font-size:10px!important;
-}
-@media(max-width:900px){
-  body.playerShareMode #sharedFillBottomRow{
-    grid-template-columns:minmax(125px,1fr) 64px 122px 100px 125px!important;
-    gap:5px!important;
-  }
-}
-@media(max-width:620px){
-  body.playerShareMode #sharedFillHeader{
-    grid-template-columns:1fr!important;
-  }
-  body.playerShareMode #sharedFillHelper{
-    text-align:left!important;
-    white-space:normal!important;
-  }
-  body.playerShareMode #sharedFillTopRow{
-    grid-template-columns:minmax(0,1fr) 76px!important;
-    gap:6px!important;
-  }
-  body.playerShareMode #sharedColorBox{
-    width:76px!important;
-  }
-  body.playerShareMode #sharedColorBox .wheelMiniWrap,
-  body.playerShareMode #sharedColorBox .wheelCanvas{
-    width:52px!important;
-    height:52px!important;
-    max-width:52px!important;
-  }
-  body.playerShareMode #sharedFillBottomRow{
-    grid-template-columns:minmax(0,1fr) 58px 1fr!important;
-    gap:5px!important;
-  }
-  body.playerShareMode #selectToggle{
-    grid-column:1 / 2!important;
-  }
-  body.playerShareMode #publicSavePicks{
-    grid-column:2 / 4!important;
-  }
-}
-</style>
-
 </head>
 
 <style id="v79-14-share-code-style">
@@ -3232,25 +3089,32 @@ $('name').addEventListener('input',()=>{const existing=pc($('name').value);if(ex
 
     let color=(document.getElementById('playerColor')?.value||'#219a12');
 
-    // v85 safeguard restored:
-    // 1) A returning player keeps the color already assigned on this board.
-    // 2) A new player cannot use another player's color.
-    const cleanName=name.toLowerCase();
-    const claimedCells=(typeof board!=='undefined' && Array.isArray(board)) ? board.filter(x=>x&&x.player) : [];
-    const existingPlayerCell=claimedCells.find(x=>String(x.player||'').trim().toLowerCase()===cleanName);
-    if(existingPlayerCell && existingPlayerCell.color){
-      color=existingPlayerCell.color;
+    // v85 color safeguard:
+    // New players may freely choose a color while editing.
+    // Returning players keep the color already assigned on this board.
+    // A new player's confirm is blocked only if that chosen color belongs to someone else.
+    const playerKey=name.trim().toLowerCase();
+    const claimedCells=(typeof board!=='undefined' && Array.isArray(board))
+      ? board.filter(x=>x&&x.player)
+      : [];
+
+    const returning=claimedCells.find(
+      x=>String(x.player||'').trim().toLowerCase()===playerKey
+    );
+
+    if(returning && returning.color){
+      color=returning.color;
       const colorInput=document.getElementById('playerColor');
       if(colorInput) colorInput.value=color;
       if(typeof renderColorWheel==='function') renderColorWheel();
     }else{
-      const wanted=String(color||'').trim().toLowerCase();
-      const colorOwner=claimedCells.find(x=>
-        String(x.color||'').trim().toLowerCase()===wanted &&
-        String(x.player||'').trim().toLowerCase()!==cleanName
+      const chosen=String(color||'').trim().toLowerCase();
+      const owner=claimedCells.find(
+        x=>String(x.color||'').trim().toLowerCase()===chosen &&
+           String(x.player||'').trim().toLowerCase()!==playerKey
       );
-      if(colorOwner){
-        hint('That color is already used by '+colorOwner.player+'. Choose a different color.');
+      if(owner){
+        hint('That color is already used by '+owner.player+'. Choose a different color.');
         return;
       }
     }
@@ -3916,60 +3780,43 @@ $('name').addEventListener('input',()=>{const existing=pc($('name').value);if(ex
 </script>
 
 
-<script id="matt-v85-shared-color-safeguard">
+<script id="matt-v85-returning-player-color-helper">
 (function(){
-  function applyExistingPlayerColor(){
+  function restoreReturningPlayerColor(){
     if(!new URLSearchParams(location.search).get('board')) return;
-    const nameInput=document.getElementById('publicPlayerName');
-    if(!nameInput) return;
+    const publicName=document.getElementById('publicPlayerName');
+    if(!publicName) return;
 
-    const name=(nameInput.value||'').trim().toLowerCase();
+    const name=(publicName.value||'').trim().toLowerCase();
     if(!name) return;
 
     const cells=(typeof board!=='undefined' && Array.isArray(board)) ? board : [];
-    const existing=cells.find(x=>x&&x.player&&String(x.player).trim().toLowerCase()===name);
-    if(existing && existing.color){
-      const input=document.getElementById('playerColor');
-      if(input) input.value=existing.color;
+    const returning=cells.find(
+      x=>x&&x.player&&String(x.player).trim().toLowerCase()===name
+    );
+
+    if(returning && returning.color){
+      const colorInput=document.getElementById('playerColor');
+      if(colorInput) colorInput.value=returning.color;
       if(typeof renderColorWheel==='function') renderColorWheel();
-      const dot=document.getElementById('sharedActiveDot');
-      if(dot) dot.style.background=existing.color;
-      const hint=document.getElementById('publicPickHint');
-      if(hint) hint.textContent=nameInput.value.trim()+' already has a color. That color is locked for this board.';
+
+      const activeDot=document.getElementById('sharedActiveDot');
+      if(activeDot) activeDot.style.background=returning.color;
     }
   }
 
   function wire(){
-    if(!new URLSearchParams(location.search).get('board')) return;
-    const nameInput=document.getElementById('publicPlayerName');
-    if(!nameInput) return;
-    nameInput.addEventListener('input',applyExistingPlayerColor);
-    nameInput.addEventListener('change',applyExistingPlayerColor);
-    setTimeout(applyExistingPlayerColor,50);
+    const publicName=document.getElementById('publicPlayerName');
+    if(!publicName) return;
+    publicName.addEventListener('change',restoreReturningPlayerColor);
+    publicName.addEventListener('blur',restoreReturningPlayerColor);
   }
 
-  if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',()=>setTimeout(wire,250));
-  else setTimeout(wire,250);
-})();
-</script>
-
-
-<script id="matt-v85-shared-controls-one-row-final">
-(function(){
-  function arrange(){
-    if(!new URLSearchParams(location.search).get('board')) return;
-    const bottom=document.getElementById('sharedFillBottomRow');
-    const select=document.getElementById('selectToggle') || document.getElementById('sharedSelectBtn');
-    const confirm=document.getElementById('publicSavePicks');
-    const manual=document.getElementById('sharedManualRow');
-    if(!bottom || !select || !confirm) return;
-    select.id='selectToggle';
-    if(!bottom.contains(select)) bottom.appendChild(select);
-    if(!bottom.contains(confirm)) bottom.appendChild(confirm);
-    if(manual && manual.parentNode) manual.remove();
+  if(document.readyState==='loading'){
+    document.addEventListener('DOMContentLoaded',()=>setTimeout(wire,250));
+  }else{
+    setTimeout(wire,250);
   }
-  if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',()=>setTimeout(arrange,300));
-  else setTimeout(arrange,300);
 })();
 </script>
 
