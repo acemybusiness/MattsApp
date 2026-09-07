@@ -2227,97 +2227,6 @@ body.playerShareMode #publicPickHint{
 </style>
 
 <meta name="matt-v85-fix" content="shared-color-survives-live-refresh">
-
-<style id="matt-v85-shared-always-select-undo">
-/* Shared boards: selection is always active. Keep original select control hidden
-   for the app's internal updateControls() logic, but do not show it to players. */
-body.playerShareMode #selectToggle{
-  display:none!important;
-}
-
-/* Compact shared controls: Active | Qty | Random | Undo | Confirm */
-body.playerShareMode #sharedFillBottomRow{
-  grid-template-columns:minmax(145px,1fr) 68px 132px 105px 145px!important;
-  gap:6px!important;
-  align-items:end!important;
-}
-
-body.playerShareMode #publicRandomQty,
-body.playerShareMode #publicRandomBtn,
-body.playerShareMode #publicUndoBtn,
-body.playerShareMode #publicSavePicks{
-  min-height:36px!important;
-  height:36px!important;
-  padding:4px 7px!important;
-  margin:0!important;
-  font-size:12px!important;
-  font-weight:900!important;
-  line-height:1.05!important;
-}
-
-body.playerShareMode #publicUndoBtn{
-  display:flex!important;
-  align-items:center!important;
-  justify-content:center!important;
-  gap:5px!important;
-  white-space:nowrap!important;
-}
-
-body.playerShareMode #publicUndoBtn .undoIcon{
-  font-size:18px!important;
-  line-height:1!important;
-}
-
-body.playerShareMode #sharedActiveCard{
-  min-height:36px!important;
-  padding:4px 8px!important;
-}
-
-body.playerShareMode #publicPickHint{
-  padding:4px 7px!important;
-  min-height:0!important;
-}
-
-/* Keep the name/color area tight as well. */
-body.playerShareMode #sharedFillShell{gap:5px!important;}
-body.playerShareMode #sharedFillTopRow{
-  grid-template-columns:minmax(0,1fr) 88px!important;
-  gap:8px!important;
-}
-body.playerShareMode #sharedColorBox{width:88px!important;}
-body.playerShareMode #sharedColorBox .wheelMiniWrap,
-body.playerShareMode #sharedColorBox .wheelCanvas{
-  width:60px!important;
-  height:60px!important;
-  max-width:60px!important;
-}
-
-@media(max-width:900px){
-  body.playerShareMode #sharedFillBottomRow{
-    grid-template-columns:minmax(125px,1fr) 62px 116px 92px 126px!important;
-    gap:5px!important;
-  }
-}
-
-@media(max-width:620px){
-  body.playerShareMode #sharedFillBottomRow{
-    grid-template-columns:minmax(0,1fr) 58px 1fr!important;
-    gap:5px!important;
-  }
-  body.playerShareMode #publicUndoBtn{
-    grid-column:1 / 2!important;
-  }
-  body.playerShareMode #publicSavePicks{
-    grid-column:2 / 4!important;
-  }
-}
-</style>
-
-<meta name="matt-v85-fix" content="fast-batch-square-save">
-<meta name="matt-v85-fix" content="owner-additive-cloud-merge-no-revert">
-<meta name="matt-v85-fix" content="owner-select-preserves-color">
-<meta name="matt-v85-fix" content="owner-refresh-no-setstate-no-revert">
-<meta name="matt-v85-fix" content="random-select-script-repair">
 </head>
 
 <style id="v79-14-share-code-style">
@@ -2925,53 +2834,8 @@ async function boot(){
  $('board').addEventListener('pointerdown',e=>{const cell=e.target.closest('.cell');if(!cell)return;if(selectionOn){e.preventDefault();dragging=true;squareAction(+cell.dataset.index,true)}else{dragging=false;toast('Turn Selection ON before choosing or removing squares.')}});
  $('board').addEventListener('pointerover',e=>{if(!dragging||!selectionOn)return;const cell=e.target.closest('.cell');if(cell){e.preventDefault();squareAction(+cell.dataset.index,false)}});window.addEventListener('pointerup',()=>dragging=false);
  if($('players'))$('players').addEventListener('click',e=>{const row=e.target.closest('.playerLine');if(!row)return;$('playerName').value=row.dataset.name;$('playerColor').value=row.dataset.color;if($('huePicker'))$('huePicker').value=rgbToHue(row.dataset.color);render();toast('Selected '+row.dataset.name)});if($('playerPickGrid'))$('playerPickGrid').addEventListener('click',e=>{const row=e.target.closest('.playerPickBtn');if(!row)return;if(activeBoardLocked){toast('This board is locked and cannot be changed.');return}$('playerName').value=row.dataset.name;$('playerColor').value=row.dataset.color;if($('huePicker'))$('huePicker').value=rgbToHue(row.dataset.color);render();toast('Selected '+row.dataset.name)});
- $('selectToggle').onclick=()=>{
-  if(activeBoardLocked){toast('This board is locked and cannot be changed.');return}
-
-  // Preserve the active player's in-progress identity/color while toggling Select.
-  // render() rebuilds several UI elements and must not reset the chosen color.
-  const keepName=$('playerName')?.value||'';
-  const keepColor=$('playerColor')?.value||'#219a12';
-  const keepHue=$('huePicker')?.value||'';
-
-  selectionOn=!selectionOn;
-  if(!selectionOn)dragging=false;
-
-  render();
-
-  if($('playerName')) $('playerName').value=keepName;
-  if($('playerColor')) $('playerColor').value=keepColor;
-  if($('huePicker') && keepHue!=='') $('huePicker').value=keepHue;
-
-  updateActiveBadge();
-  renderColorWheel();
-  renderVariants();
-  updateControls();
-
-  toast(selectionOn?'Selection on.':'Selection off. Scroll is safe.');
-};
- $('actionToggle').onclick=()=>{
-  if(activeBoardLocked){toast('This board is locked and cannot be changed.');return}
-  subtractMode=false;
-  if(!selectionOn){toast('Turn Select ON before choosing squares.');return}
-
-  const keepName=$('playerName')?.value||'';
-  const keepColor=$('playerColor')?.value||'#219a12';
-  const keepHue=$('huePicker')?.value||'';
-
-  render();
-
-  if($('playerName')) $('playerName').value=keepName;
-  if($('playerColor')) $('playerColor').value=keepColor;
-  if($('huePicker') && keepHue!=='') $('huePicker').value=keepHue;
-
-  updateActiveBadge();
-  renderColorWheel();
-  renderVariants();
-  updateControls();
-
-  toast('Add mode ready.');
-};
+ $('selectToggle').onclick=()=>{if(activeBoardLocked){toast('This board is locked and cannot be changed.');return}selectionOn=!selectionOn;if(!selectionOn)dragging=false;render();toast(selectionOn?'Selection on.':'Selection off. Scroll is safe.')};
+ $('actionToggle').onclick=()=>{if(activeBoardLocked){toast('This board is locked and cannot be changed.');return}subtractMode=false;if(!selectionOn){toast('Turn Select ON before choosing squares.');return}render();toast('Add mode ready.')};
  $('undoBtn').onclick=()=>{if(activeBoardLocked){toast('This board is locked and cannot be changed.');return}const snap=undoStack.pop();if(snap){const state=JSON.parse(snap);board=state.board;topNums=state.topNums||[];leftNums=state.leftNums||[];lastSnapshot=undoStack.length?undoStack[undoStack.length-1]:null;render();toast('Undo applied.')}else toast('Nothing to undo yet.')};
  $('doneBtn').onclick=doneSave;$('randomBtn').onclick=randomFill;$('saveBtn').onclick=()=>persistManualSave(boardFull());$('newBtn').onclick=startNewBoard;$('loadBtn').onclick=()=>{renderModal();$('loadModal').classList.add('show')};$('closeModal').onclick=()=>$('loadModal').classList.remove('show');$('pngBtn').onclick=()=>exportPNG('download');if($('replaceBoardNameBtn'))$('replaceBoardNameBtn').onclick=resolveReplaceSavedName;if($('startNewFromNameBtn'))$('startNewFromNameBtn').onclick=resolveStartNewBoardFromRenamedName;if($('cancelRenameBoardBtn'))$('cancelRenameBoardBtn').onclick=hideRenameBoardPrompt;const toggleOcr=()=>{const p=$('ocrPanel');const closed=p.classList.toggle('collapsed');const btn=$('toggleOcrPanel');if(btn)btn.textContent=closed?'Open':'Hide';if(!closed){p.scrollIntoView({behavior:'smooth',block:'start'})}};$('toggleOcrPanel').onclick=toggleOcr;$('ocrFile').addEventListener('change',()=>{if($('ocrPanel').classList.contains('collapsed'))toggleOcr();if($('ocrFile').files?.[0])$('ocrCameraFile').value='';previewOcrFile()});$('ocrCameraBtn').onclick=()=>$('ocrCameraFile').click();$('ocrCameraFile').addEventListener('change',()=>{if($('ocrPanel').classList.contains('collapsed'))toggleOcr();if($('ocrCameraFile').files?.[0])$('ocrFile').value='';previewOcrFile()});$('ocrImportImagesBtn').onclick=importGridAsImages;if($('ocrImportImagesTopBtn'))$('ocrImportImagesTopBtn').onclick=importGridAsImages;['ocrLeft','ocrTop','ocrSize'].forEach(id=>$(id).addEventListener('input',()=>{syncCropToSliders();drawOcrStage()}));
  $('ocrStageCanvas').addEventListener('pointerdown',beginOcrCornerDrag,{passive:false});$('ocrStageCanvas').addEventListener('pointermove',moveOcrCornerDrag,{passive:false});$('ocrStageCanvas').addEventListener('pointerup',endOcrCornerDrag);$('ocrStageCanvas').addEventListener('pointercancel',endOcrCornerDrag);$('ocrStageCanvas').addEventListener('pointerleave',endOcrCornerDrag);['gameName','gameDate','cost','playerName','playerColor'].forEach(id=>$(id).addEventListener('input',()=>{if(activeBoardLocked)return;if(id==='playerName'){const existing=playerAssignedColor($('playerName').value);if(existing){$('playerColor').value=existing;if($('huePicker'))$('huePicker').value=rgbToHue(existing)}}else if(id==='playerColor'){const chosen=$('playerColor').value;const name=$('playerName').value.trim();const existing=playerAssignedColor(name);const owner=colorAssignedTo(chosen,name);if(existing&&normColor(chosen)!==existing){$('playerColor').value=existing;toast(name+' already has a color. Each player keeps one color.')}else if(owner){toast('That color is already used by '+owner+'. Pick a different color.')}if($('huePicker'))$('huePicker').value=rgbToHue($('playerColor').value)}render()}));if($('huePicker'))$('huePicker').addEventListener('input',()=>{if(activeBoardLocked)return;const v=hslToHex(parseInt($('huePicker').value),96,50);applyRequestedColor(v)});const wheel=$('colorWheelCanvas');if(wheel){wheel.addEventListener('click',pickWheelColor);wheel.addEventListener('touchstart',e=>{pickWheelColor(e);e.preventDefault()},{passive:false});wheel.addEventListener('touchmove',e=>{pickWheelColor(e);e.preventDefault()},{passive:false});}if($('variantGrid'))$('variantGrid').addEventListener('click',e=>{const b=e.target.closest('.variantSwatch');if(!b)return;applyRequestedColor(b.dataset.color)});const auto=localStorage.getItem(AUTO_KEY);if(auto){try{setState(JSON.parse(auto));return}catch(e){}}render();
@@ -3289,65 +3153,83 @@ $('name').addEventListener('input',()=>{const existing=pc($('name').value);if(ex
     const indexes=[...pending];
     const btn=document.getElementById('publicSavePicks');
     const randomBtn=document.getElementById('publicRandomBtn');
-    const undoBtn=document.getElementById('publicUndoBtn');
     if(btn) btn.disabled=true;
     if(randomBtn) randomBtn.disabled=true;
-    if(undoBtn) undoBtn.disabled=true;
+
+    let ok=0, fail=0, already=0;
+    const successful=[];
+
+    async function claimOne(index, attempt=1){
+      try{
+        await post({
+          action:'claimSquare',
+          token:TOKEN,
+          squareIndex:index,
+          playerName:name,
+          playerColor:color,
+          requestId:(crypto.randomUUID?crypto.randomUUID():Date.now()+'-'+index+'-'+attempt)
+        });
+        return {index,ok:true};
+      }catch(err){
+        const msg=String(err&&err.message||err||'');
+        if(/already taken|locked/i.test(msg)) return {index,ok:false,already:true,error:msg};
+        if(attempt<2){
+          await new Promise(r=>setTimeout(r,350));
+          return claimOne(index,2);
+        }
+        return {index,ok:false,error:msg};
+      }
+    }
 
     hint(`Saving ${indexes.length} pick${indexes.length===1?'':'s'}…`);
 
-    try{
-      // v85 FAST BATCH SAVE: all selected squares are sent in ONE request.
-      const result=await post({
-        action:'claimSquares',
-        token:TOKEN,
-        squareIndexes:indexes,
-        playerName:name,
-        playerColor:color,
-        requestId:(crypto.randomUUID?crypto.randomUUID():Date.now()+'-batch')
-      });
-
-      const claimedIndexes=Array.isArray(result.claimedIndexes)?result.claimedIndexes:[];
-      const skippedIndexes=Array.isArray(result.skippedIndexes)?result.skippedIndexes:[];
-
-      // Update the visible board all at once.
-      for(const index of claimedIndexes){
-        if(typeof board!=='undefined' && board[index]){
-          board[index]={
-            ...board[index],
-            player:name,
-            color:(result.playerColor||color),
-            img:null,
-            time:Date.now()
-          };
+    // Four at a time: much faster than one-by-one, while avoiding too many
+    // simultaneous Apps Script lock requests.
+    for(let i=0;i<indexes.length;i+=4){
+      const batch=indexes.slice(i,i+4);
+      const results=await Promise.all(batch.map(index=>claimOne(index)));
+      for(const r of results){
+        if(r.ok){
+          ok++;
+          successful.push(r.index);
+          if(typeof board!=='undefined' && board[r.index]){
+            board[r.index]={
+              ...board[r.index],
+              player:name,
+              color:color,
+              img:null,
+              time:Date.now()
+            };
+          }
+        }else{
+          fail++;
+          if(r.already) already++;
         }
       }
 
-      pending.clear();
-      document.querySelectorAll('#board .publicPending').forEach(x=>x.classList.remove('publicPending'));
+      // Show progress immediately instead of looking frozen.
       if(typeof render==='function') render();
-
-      // One canonical refresh after the whole batch has committed.
-      try{ await loadLive(true); }catch(e){}
-
-      if(skippedIndexes.length){
-        hint(`${claimedIndexes.length} saved. ${skippedIndexes.length} square${skippedIndexes.length===1?' was':'s were'} already taken.`);
-      }else{
-        hint(`${claimedIndexes.length} pick${claimedIndexes.length===1?'':'s'} saved successfully.`);
-      }
-    }catch(err){
-      console.error('Fast batch save failed',err);
-      hint('Unable to save picks: '+String(err&&err.message||err));
+      hint(`Saving… ${Math.min(i+batch.length,indexes.length)}/${indexes.length}`);
     }
 
-    // Shared boards remain permanently in selection mode.
-    if(typeof selectionOn!=='undefined') selectionOn=true;
+    pending.clear();
+    document.querySelectorAll('#board .publicPending').forEach(x=>x.classList.remove('publicPending'));
+    if(typeof render==='function') render();
+
+    // Pull the canonical live board after the optimistic update.
+    try{ await loadLive(true); }catch(e){}
+
+    if(fail){
+      hint(`${ok} pick${ok===1?'':'s'} saved. ${fail} could not be saved${already?' because '+already+' '+(already===1?'square was':'squares were')+' already taken':''}.`);
+    }else{
+      hint(`${ok} pick${ok===1?'':'s'} saved successfully.`);
+    }
+
+    if(typeof selectionOn!=='undefined') selectionOn=false;
     const selectBtn=document.getElementById('selectToggle');
-    if(selectBtn) selectBtn.style.display='none';
+    if(selectBtn) selectBtn.textContent='Select Squares';
     if(btn) btn.disabled=false;
     if(randomBtn) randomBtn.disabled=false;
-    if(undoBtn) undoBtn.disabled=false;
-    if(selectBtn) selectBtn.style.display='none';
   }
 
   function randomParticipantSelect(qty){
@@ -3373,8 +3255,7 @@ $('name').addEventListener('input',()=>{const existing=pc($('name').value);if(ex
 
     pending.clear();
     if(typeof selectionOn!=='undefined') selectionOn=true;
-    const boardEl=document.getElementById('board');
-    if(boardEl) boardEl.classList.add('selectionOn');
+    if(typeof render==='function') render();
 
     open.slice(0,qty).forEach(index=>{
       pending.add(index);
@@ -3383,7 +3264,7 @@ $('name').addEventListener('input',()=>{const existing=pc($('name').value);if(ex
     });
 
     const selectBtn=document.getElementById('selectToggle');
-    if(selectBtn) selectBtn.style.display='none';
+    if(selectBtn) selectBtn.textContent='Select: ON';
     hint(`${qty} random square${qty===1?'':'s'} selected. Tap Confirm Picks to save.`);
     return qty;
   }
@@ -3838,73 +3719,21 @@ $('name').addEventListener('input',()=>{const existing=pc($('name').value);if(ex
 
   function mergeRemoteIntoLocal(remote, localId){
     if(!remote || !Array.isArray(remote.board)) return null;
-
     const list=(typeof getSaved==='function'?getSaved():[]);
     const idx=list.findIndex(x=>String(x.id)===String(localId) ||
       String(x.boardId||x.id)===String(remote.boardId||localId));
 
     const previous=idx>=0?list[idx]:{};
-
-    // If Matt currently has this board open, use the CURRENT visible state
-    // instead of the older localStorage snapshot. This prevents the 5-second
-    // cloud poll from "undoing" unsaved local selections/fills.
-    let current=previous;
-    try{
-      if(typeof activeBoardId!=='undefined' &&
-         String(activeBoardId)===String(localId) &&
-         typeof getState==='function'){
-        current={...previous,...getState()};
-      }
-    }catch(e){}
-
-    const localBoard=Array.isArray(current.board)?current.board:[];
-    const remoteBoard=remote.board;
-
-    // Additive merge:
-    // - remote/shared claims fill LOCAL OPEN cells
-    // - local occupied cells are NEVER erased by an older/stale remote copy
-    // - if both sides have a claim, keep the local visible claim until Matt
-    //   explicitly saves/reloads, avoiding surprise reversions.
-    const mergedBoard=Array.from({length:100},(_,i)=>{
-      const l=localBoard[i]||{};
-      const r=remoteBoard[i]||{};
-      const localOccupied=!!(l.player||l.img);
-      const remoteOccupied=!!(r.player||r.img);
-
-      if(localOccupied) return {...l};
-      if(remoteOccupied) return {...r};
-
-      // Preserve slot/empty-cell metadata without changing ownership.
-      return {...r,...l,slot:(l.slot||r.slot||i+1)};
-    });
-
-    const mergedClaimed=mergedBoard.filter(x=>x&&(x.player||x.img)).length;
-
     const merged={
       ...previous,
-      ...current,
-      // Remote metadata can advance the board, but it must not replace
-      // Matt's current visible square ownership.
-      board:mergedBoard,
-      boardId:remote.boardId || current.boardId || previous.boardId || localId,
-      shareToken:remote.shareToken || current.shareToken || previous.shareToken || '',
-      gameName:current.gameName || remote.gameName || previous.gameName || '',
-      title:current.title || remote.title || remote.gameName || previous.title || 'Board',
-      cost:current.cost ?? remote.cost ?? previous.cost ?? 0,
-      claimed:mergedClaimed,
-      updated:remote.updated || current.updated || new Date().toISOString(),
-      version:remote.version || current.version || 'v85'
+      ...remote,
+      id: previous.id || localId || remote.boardId,
+      boardId: remote.boardId || previous.boardId || localId,
+      shareToken: remote.shareToken || previous.shareToken || '',
+      title: remote.title || remote.gameName || previous.title || 'Board',
+      claimed: remote.claimed ?? remote.board.filter(x=>x&&(x.player||x.img)).length,
+      updated: remote.updated || new Date().toISOString()
     };
-
-    // Only adopt cloud-generated numbers/lock state when the cloud board is
-    // actually complete. This prevents a stale poll from disturbing an
-    // in-progress owner board.
-    if(remote.final || remote.locked || remote.claimed===100){
-      if(Array.isArray(remote.topNums) && remote.topNums.length===10) merged.topNums=[...remote.topNums];
-      if(Array.isArray(remote.leftNums) && remote.leftNums.length===10) merged.leftNums=[...remote.leftNums];
-      merged.locked=!!remote.locked;
-      merged.final=!!remote.final;
-    }
 
     const next=list.slice();
     if(idx>=0) next[idx]=merged;
@@ -3929,50 +3758,7 @@ $('name').addEventListener('input',()=>{const existing=pc($('name').value);if(ex
       const merged=mergeRemoteIntoLocal(j.board,localId);
       if(!merged) throw new Error('Live board data was incomplete.');
 
-      // IMPORTANT: do NOT call setState() here.
-      // setState() is a full-load routine; it resets selectionOn and rebuilds
-      // the active player controls. That caused the apparent automatic Undo /
-      // color reset when a cloud refresh completed after Matt started editing.
-
-      const keepName=document.getElementById('playerName')?.value||'';
-      const keepColor=document.getElementById('playerColor')?.value||'#219a12';
-      const keepHue=document.getElementById('huePicker')?.value||'';
-      const keepSelection=(typeof selectionOn!=='undefined') ? selectionOn : false;
-      const keepDragging=(typeof dragging!=='undefined') ? dragging : false;
-
-      // Apply only the canonical board data + completion state.
-      if(Array.isArray(merged.board) && merged.board.length===100){
-        board=merged.board.map((x,i)=>({
-          slot:x.slot||x.n||i+1,
-          player:x.player||null,
-          color:x.color||null,
-          img:x.img||null,
-          time:x.time||null
-        }));
-      }
-
-      if(Array.isArray(merged.topNums)) topNums=[...merged.topNums];
-      if(Array.isArray(merged.leftNums)) leftNums=[...merged.leftNums];
-
-      if(merged.final || merged.locked){
-        activeBoardLocked=true;
-      }
-
-      // Re-render the board, then restore Matt's in-progress controls exactly.
-      if(typeof render==='function') render();
-
-      if(document.getElementById('playerName')) document.getElementById('playerName').value=keepName;
-      if(document.getElementById('playerColor')) document.getElementById('playerColor').value=keepColor;
-      if(document.getElementById('huePicker') && keepHue!=='') document.getElementById('huePicker').value=keepHue;
-
-      if(typeof selectionOn!=='undefined') selectionOn=keepSelection;
-      if(typeof dragging!=='undefined') dragging=keepDragging;
-
-      if(typeof updateActiveBadge==='function') updateActiveBadge();
-      if(typeof renderColorWheel==='function') renderColorWheel();
-      if(typeof renderVariants==='function') renderVariants();
-      if(typeof updateControls==='function') updateControls();
-
+      if(typeof setState==='function') setState(merged);
       if(showMessage){
         const claimed=merged.claimed ?? merged.board.filter(x=>x&&(x.player||x.img)).length;
         const st=document.getElementById('status');
@@ -4017,116 +3803,11 @@ $('name').addEventListener('input',()=>{const existing=pc($('name').value);if(ex
       if(token) return; // participant page, not owner page
       if(typeof activeBoardId==='undefined' || !activeBoardId) return;
       if(typeof selectionOn!=='undefined' && selectionOn) return;
-      if(typeof dragging!=='undefined' && dragging) return;
       if(document.hidden) return;
       refreshOwnerBoard(activeBoardId,false);
     }catch(e){}
   },5000);
 })();
 </script>
-
-<script id="matt-v85-shared-always-select-undo">
-(function(){
-  function isShared(){
-    return !!new URLSearchParams(location.search).get('board');
-  }
-
-  function forceSharedSelectOn(){
-    if(!isShared()) return;
-    try{
-      if(typeof selectionOn!=='undefined') selectionOn=true;
-      const boardEl=document.getElementById('board');
-      if(boardEl) boardEl.classList.add('selectionOn');
-    }catch(e){}
-  }
-
-  function undoLastPending(){
-    if(!isShared()) return;
-    if(typeof pending==='undefined' || !pending || !pending.size){
-      const h=document.getElementById('publicPickHint');
-      if(h) h.textContent='Nothing selected to undo.';
-      return;
-    }
-
-    const picks=[...pending];
-    const index=picks[picks.length-1];
-    pending.delete(index);
-
-    const cell=document.querySelector(`#board .cell[data-index="${index}"]`);
-    if(cell) cell.classList.remove('publicPending');
-
-    const h=document.getElementById('publicPickHint');
-    if(h){
-      h.textContent=pending.size
-        ? `${pending.size} square${pending.size===1?'':'s'} selected. Tap Confirm Picks to save.`
-        : 'Selection cleared. Tap any open square to choose again.';
-    }
-
-    forceSharedSelectOn();
-  }
-
-  function install(){
-    if(!isShared()) return;
-
-    forceSharedSelectOn();
-
-    const bottom=document.getElementById('sharedFillBottomRow');
-    const select=document.getElementById('selectToggle');
-    const confirm=document.getElementById('publicSavePicks');
-    if(!bottom || !confirm) return;
-
-    // Keep the original Select element in the DOM for internal app logic,
-    // but it is hidden by CSS and never required by the shared player.
-    if(select) select.style.display='none';
-
-    let undo=document.getElementById('publicUndoBtn');
-    if(!undo){
-      undo=document.createElement('button');
-      undo.id='publicUndoBtn';
-      undo.type='button';
-      undo.className='secondary';
-      undo.innerHTML='<span class="undoIcon" aria-hidden="true">↶</span><span>Undo</span>';
-      undo.setAttribute('aria-label','Undo last selected square');
-      undo.addEventListener('click',function(e){
-        e.preventDefault();
-        e.stopPropagation();
-        undoLastPending();
-      });
-    }
-
-    // Order: Active | Random Qty | Random Select | Undo | Confirm
-    if(confirm.parentNode===bottom){
-      bottom.insertBefore(undo,confirm);
-    }else{
-      bottom.appendChild(undo);
-      bottom.appendChild(confirm);
-    }
-
-    const hint=document.getElementById('publicPickHint');
-    if(hint && !pending.size){
-      hint.textContent='Tap any open squares you want, then Confirm Picks.';
-    }
-
-    // The shared board is always selection-enabled, including after Confirm.
-    confirm.addEventListener('click',()=>setTimeout(forceSharedSelectOn,0),true);
-
-    const grid=document.getElementById('board');
-    if(grid){
-      grid.addEventListener('pointerdown',forceSharedSelectOn,true);
-      grid.addEventListener('click',forceSharedSelectOn,true);
-    }
-  }
-
-  if(document.readyState==='loading'){
-    document.addEventListener('DOMContentLoaded',()=>setTimeout(install,420));
-  }else{
-    setTimeout(install,420);
-  }
-
-  // Reassert after late render/setup passes without changing any board data.
-  setTimeout(install,900);
-})();
-</script>
-
 </body>
 </html>
