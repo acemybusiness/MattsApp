@@ -1632,7 +1632,12 @@ function lockSavedListToThree(){const list=$('savedList');if(!list)return;const 
 function renderSavedList(){const list=getSaved();const html=list.length?list.map(s=>`<div class="savedCard"><div class="savedTitleLine"><strong class="savedBoardName">${esc(s.title||s.gameName||'Untitled Board')}</strong><span class="shareCodeLine">Share Code: <b>${esc(s.shareCode||'—')}</b></span></div><span class="tiny">${esc(s.boardId||s.id)}${s.gameDate?' • '+esc(s.gameDate):''} • ${new Date(s.updated||Date.now()).toLocaleString()} • ${(s.claimed??((s.board||[]).filter(c=>c.player||c.img).length))}/100 claimed${s.final?' • COMPLETE • LOCKED':(s.locked?' • LOCKED':' • OPEN — SHAREABLE')}</span><div class="savedActions"><button onclick="loadState('${s.id}')">Load</button><button class="secondary" onclick="shareSaved('${s.id}')">Share</button><button class="secondary" onclick="exportSaved('${s.id}')">PNG</button><button class="danger" onclick="deleteSaved('${s.id}')">Delete</button></div></div>`).join(''):'<p class="tiny">No saved boards yet.</p>';$('savedList').innerHTML=html;requestAnimationFrame(lockSavedListToThree)}
 function renderModal(){const list=getSaved();$('modalSaved').innerHTML=list.length?list.map(s=>`<div class="savedCard"><div class="savedTitleLine"><strong class="savedBoardName">${esc(s.title||s.gameName||'Untitled Board')}</strong><span class="shareCodeLine">Share Code: <b>${esc(s.shareCode||'—')}</b></span></div><span class="tiny">${esc(s.boardId||s.id)}${s.gameDate?' • '+esc(s.gameDate):''} • ${new Date(s.updated||Date.now()).toLocaleString()}</span><div class="savedActions"><button onclick="loadState('${s.id}')">Load This Board</button><button class="secondary" onclick="shareSaved('${s.id}')">Share</button><button class="danger" onclick="deleteSaved('${s.id}')">Delete</button></div></div>`).join(''):'<p>No saved boards yet.</p>'}
 function loadState(id){const f=getSaved().find(x=>x.id===id);if(f){clearOcrState(true);setState(f);showShareFor(f);$('loadModal').classList.remove('show');toast('Board loaded. OCR cleared.')}}
-function shareSaved(id){const f=getSaved().find(x=>x.id===id);if(f){exportSaved(id,'share')}}
+async function shareSaved(id){
+  const f=getSaved().find(x=>x.id===id);
+  if(!f)return;
+  if(typeof cloudSave==='function'){try{await cloudSave(f)}catch(e){}}
+  showShareFor(f);
+}
 function deleteSaved(id){safeStoreSaved(getSaved().filter(x=>x.id!==id));renderSavedList();renderModal();toast('Saved board deleted.')}
 function exportSaved(id,action='download'){const cur=getState(),f=getSaved().find(x=>x.id===id);if(f){setState(f);setTimeout(()=>{exportPNG(action);setTimeout(()=>setState(cur),120)},60)}}
 function clearBoard(){if(confirm('Clear the current board? Saved boards will stay saved.')){saveSnapshot();board=Array.from({length:100},(_,i)=>({slot:i+1,player:null,color:null,img:null,time:null}));topNums=[];leftNums=[];render();toast('Board cleared.')}}
@@ -2002,23 +2007,41 @@ $('name').addEventListener('input',()=>{const existing=pc($('name').value);if(ex
   }
   async function shareInteractive(saved){
     if(!saved)return;
-    const html=participantHtml(saved);
-    const fn=safeName(saved.gameName||saved.title)+'_'+String(saved.shareCode||'board').toLowerCase()+'_interactive_board.html';
-    const blob=new Blob([html],{type:'text/html'});
-    const file=new File([blob],fn,{type:'text/html'});
-    if(navigator.share && navigator.canShare && navigator.canShare({files:[file]})){
-      try{
-        await navigator.share({title:(saved.gameName||"Matt's Square App Board")+' ['+(saved.shareCode||'')+']',text:'Matt\'s Square App board code '+(saved.shareCode||'')+'. Open this file and pick your open squares.',files:[file]});
-        const st=document.getElementById('status');if(st)st.textContent='Interactive board shared: '+fn;
-        if(typeof toast==='function')toast('Interactive board ready to share.');
-        return;
-      }catch(err){if(err&&err.name==='AbortError')return}
+    const live=saved.shareToken?'https://acemybusiness.github.io/MattsApp/?board='+encodeURIComponent(saved.shareToken):'';
+    if(!live){if(typeof toast==='function')toast('Save the board first.');return;}
+    try{
+      if(navigator.share){
+        await navigator.share({title:saved.gameName||"Matt's Square App Board",url:live});
+      }else if(navigator.clipboard && navigator.clipboard.writeText){
+        await navigator.clipboard.writeText(live);
+        if(typeof toast==='function')toast('Live board link copied.');
+      }else{
+        const ta=document.createElement('textarea');
+        ta.value=live;ta.style.position='fixed';ta.style.opacity='0';
+        document.body.appendChild(ta);ta.focus();ta.select();
+        document.execCommand('copy');ta.remove();
+        if(typeof toast==='function')toast('Live board link copied.');
+      }
+    }catch(e){
+      if(e&&e.name!=='AbortError'){
+        const ta=document.createElement('textarea');
+        ta.value=live;ta.style.position='fixed';ta.style.opacity='0';
+        document.body.appendChild(ta);ta.focus();ta.select();
+        try{document.execCommand('copy');if(typeof toast==='function')toast('Live board link copied.')}catch(_){}
+        ta.remove();
+      }
     }
-    const u=URL.createObjectURL(blob),a=document.createElement('a');a.href=u;a.download=fn;a.style.display='none';document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(u),2500);
-    const st=document.getElementById('status');if(st)st.textContent='Interactive board saved: '+fn;
-    if(typeof toast==='function')toast('Interactive board saved — share the HTML file from Downloads/Files.');
   }
-  window.shareSaved=function(id){const f=(typeof getSaved==='function'?getSaved():[]).find(x=>x.id===id);if(f)shareInteractive(f)};
+  window.shareSaved=function(id){
+    const f=(typeof getSaved==='function'?getSaved():[]).find(x=>x.id===id);
+    if(f){
+      if(typeof cloudSave==='function'){
+        cloudSave(f).then(()=>showShareFor(f));
+      }else{
+        showShareFor(f);
+      }
+    }
+  };
   window.showShareFor=function(saved){
     if(!saved)return;
     const card=document.getElementById('shareCard'),id=document.getElementById('shareBoardId'),url=document.getElementById('shareBoardUrl');if(!card)return;
@@ -2252,6 +2275,53 @@ $('name').addEventListener('input',()=>{const existing=pc($('name').value);if(ex
 
   if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',start);
   else start();
+})();
+</script>
+
+
+<script id="matt-v80-share-link-hard-lock">
+(function(){
+  const BASE='https://acemybusiness.github.io/MattsApp/';
+  function live(saved){
+    return saved&&saved.shareToken?BASE+'?board='+encodeURIComponent(saved.shareToken):'';
+  }
+  async function copyLive(saved){
+    const link=live(saved);
+    if(!link){ if(typeof toast==='function')toast('Save the board first.'); return; }
+    try{
+      if(navigator.clipboard && navigator.clipboard.writeText){
+        await navigator.clipboard.writeText(link);
+      }else{
+        const ta=document.createElement('textarea');
+        ta.value=link;ta.style.position='fixed';ta.style.opacity='0';
+        document.body.appendChild(ta);ta.focus();ta.select();document.execCommand('copy');ta.remove();
+      }
+      if(typeof toast==='function')toast('Live board link copied.');
+      const u=document.getElementById('shareBoardUrl');if(u)u.textContent=link;
+    }catch(e){
+      const u=document.getElementById('shareBoardUrl');if(u)u.textContent=link;
+      if(typeof toast==='function')toast('Press and hold the link to copy it.');
+    }
+  }
+  window.shareSaved=function(id){
+    const saved=(typeof getSaved==='function'?getSaved():[]).find(x=>x.id===id);
+    if(!saved)return;
+    const finish=()=>{
+      if(typeof showShareFor==='function')showShareFor(saved);
+      setTimeout(()=>copyLive(saved),50);
+    };
+    if(typeof cloudSave==='function') cloudSave(saved).then(finish).catch(finish);
+    else finish();
+  };
+  window.shareInteractive=copyLive;
+  document.addEventListener('click',function(e){
+    const b=e.target.closest('#copyShareBtn');
+    if(!b)return;
+    e.preventDefault();e.stopImmediatePropagation();
+    const id=(typeof activeBoardId!=='undefined'?activeBoardId:'');
+    const saved=(typeof getSaved==='function'?getSaved():[]).find(x=>String(x.id)===String(id)||String(x.boardId)===String(id));
+    if(saved)copyLive(saved);
+  },true);
 })();
 </script>
 
