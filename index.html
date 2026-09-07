@@ -12,6 +12,7 @@
 
 select,textarea{font:inherit}select,textarea{width:100%;border:1px solid #46506a;background:#06080d;color:#fff;border-radius:12px;padding:12px;outline:none}textarea{min-height:140px;resize:vertical}.ocrPreview{width:100%;max-height:220px;object-fit:contain;border:1px solid #46506a;border-radius:12px;background:#080c14;display:none}.ocrRow{display:grid;grid-template-columns:1fr 1fr;gap:10px}.subtle{font-size:12px;color:var(--muted)}.miniBtnRow{display:grid;grid-template-columns:1fr 1fr;gap:10px}
 
+
 .ocrCanvas{width:100%;border:1px solid #46506a;border-radius:12px;background:#080c14;display:none;touch-action:none}.cropControls{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px}.cropControls .field{margin-bottom:0}.ocrButtonsThree{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px}.subtle strong{color:#fff}.progressText{font-size:12px;color:#cfe0ff;text-align:center;margin-top:6px}
 
 .ocrCanvas{touch-action:none;user-select:none}.ocrCanvas.dragging{cursor:grabbing}.cornerHint{font-size:12px;color:#cfe0ff;text-align:center}.quadNote{font-size:12px;color:#cfe0ff}
@@ -1302,6 +1303,7 @@ button:disabled{cursor:not-allowed;filter:saturate(.35);opacity:.62}
 .shareCodeLine b{color:#ffe6a0}
 @media(max-width:620px){.savedBoardName,.shareCodeLine{font-size:17px}.savedTitleLine{gap:6px}.savedBoardName{max-width:52%}}
 </style>
+<meta name="matt-v80-fix" content="auto-complete-save-new-board-fix-2026-09-07">
 </head>
 
 <style id="v79-14-share-code-style">
@@ -1388,7 +1390,27 @@ function saveSnapshot(){if(activeBoardLocked)return;const snap=JSON.stringify({b
 function shuffle(a){for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a}
 function isClaimedCell(s){return !!(s.player||s.img)}
 function boardFull(){return board.every(isClaimedCell)}
-function ensureNumbers(){if(boardFull() && (topNums.length!==10 || leftNums.length!==10)){topNums=shuffle([0,1,2,3,4,5,6,7,8,9]);leftNums=shuffle([0,1,2,3,4,5,6,7,8,9]);return true}return false}
+let completionSaveScheduled=false;
+function ensureNumbers(){
+  if(boardFull() && (topNums.length!==10 || leftNums.length!==10)){
+    topNums=shuffle([0,1,2,3,4,5,6,7,8,9]);
+    leftNums=shuffle([0,1,2,3,4,5,6,7,8,9]);
+    if(!completionSaveScheduled && !activeBoardLocked){
+      completionSaveScheduled=true;
+      setTimeout(()=>{
+        completionSaveScheduled=false;
+        const name=($('gameName')?.value||'').trim();
+        if(boardFull() && name && !activeBoardLocked){
+          persistManualSave(true);
+        }else{
+          autoSaveCurrent(false);
+        }
+      },80);
+    }
+    return true;
+  }
+  return false;
+}
 function clearNumbersIfNeeded(){if(!boardFull()){topNums=[];leftNums=[]}}
 function getActive(){return {name:$('playerName').value.trim(),color:$('playerColor').value||'#219a12'}}
 function updateActiveBadge(){const a=getActive();$('activeBadge').querySelector('i').style.background=a.color;$('activeBadge').querySelector('span').textContent='Active: '+(a.name||'No Name')}
@@ -1742,15 +1764,18 @@ function clearOcrState(clearFiles=true){
 }
 function resetCurrentBoard(preserveSettings=true, clearOcr=true){board=emptyBoard();topNums=[];leftNums=[];activeBoardId='';activeShareToken='';activeBoardLocked=false;selectionOn=false;subtractMode=false;dragging=false;lastSnapshot=null;undoStack=[];if(clearOcr)clearOcrState(true);if(!preserveSettings){$('gameName').value='';if($('gameDate'))$('gameDate').value='';$('cost').value='0';$('playerName').value='';$('playerColor').value='#219a12';if($('huePicker'))$('huePicker').value=rgbToHue($('playerColor')?.value||'#219a12')}render();$('status').textContent='New blank board ready.'}
 function startNewBoard(){
-  if(boardHasContent()){
-    const ok=persistManualSave(boardFull());
-    if(!ok){toast('Save did not complete. Board was not cleared.');return}
+  const currentSaved=activeBoardId && getSaved().some(x=>String(x.boardId||x.id||'')===String(activeBoardId));
+  if(activeBoardLocked && currentSaved){
     resetCurrentBoard(true,true);
     if($('gameName')) $('gameName').value='';
     activeBoardId='';activeShareToken='';activeBoardLocked=false;
     render();
-    toast('Current board saved. New blank board started. Enter a new Game Name.');
+    toast('New blank board started. Enter a new Game Name.');
     return;
+  }
+  if(boardHasContent()){
+    const ok=persistManualSave(boardFull());
+    if(!ok){toast('Save did not complete. Board was not cleared.');return}
   }
   resetCurrentBoard(true,true);
   if($('gameName')) $('gameName').value='';
