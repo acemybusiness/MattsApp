@@ -1781,6 +1781,155 @@ body.playerShareMode #publicPickHint{
 }
 </style>
 
+
+<style id="matt-v85-shared-area-tighten-final">
+/* Tighten the shared PLAYERS / FILL area without changing the rest of v85 */
+body.playerShareMode .publicPickPanel{
+  padding:12px 12px 8px!important;
+}
+body.playerShareMode #sharedFillShell{
+  gap:6px!important;
+}
+body.playerShareMode #sharedFillHeader{
+  gap:10px!important;
+  margin-bottom:0!important;
+}
+body.playerShareMode #sharedFillHeader h3{
+  margin:0!important;
+}
+body.playerShareMode #sharedFillHelper{
+  font-size:11px!important;
+  padding-top:2px!important;
+}
+body.playerShareMode #sharedFillTopRow{
+  grid-template-columns:minmax(260px,520px) 150px!important;
+  gap:12px!important;
+  align-items:start!important;
+  margin-bottom:0!important;
+}
+body.playerShareMode #sharedNameBox{
+  max-width:520px!important;
+}
+body.playerShareMode #sharedNameBox label,
+body.playerShareMode #sharedColorBox .participantColorLabel,
+body.playerShareMode #sharedRandomQtyBox label{
+  margin:0 0 3px!important;
+}
+body.playerShareMode #publicPlayerName{
+  min-height:40px!important;
+  font-size:16px!important;
+}
+body.playerShareMode #sharedColorBox{
+  width:150px!important;
+  margin-top:-2px!important;
+}
+body.playerShareMode #sharedColorBox .wheelMiniWrap{
+  width:96px!important;
+  height:96px!important;
+}
+body.playerShareMode #sharedColorBox .wheelCanvas{
+  width:96px!important;
+  height:96px!important;
+  max-width:96px!important;
+}
+body.playerShareMode #sharedFillBottomRow{
+  grid-template-columns:minmax(0,1fr) 105px 235px!important;
+  gap:10px!important;
+  align-items:end!important;
+  margin-top:-52px!important;
+}
+body.playerShareMode #sharedActiveCard{
+  min-height:48px!important;
+  padding:8px 12px!important;
+}
+body.playerShareMode #sharedActiveDot{
+  width:26px!important;
+  height:26px!important;
+}
+body.playerShareMode #sharedActiveText{
+  font-size:16px!important;
+}
+body.playerShareMode #publicRandomQty{
+  min-height:40px!important;
+  font-size:15px!important;
+}
+body.playerShareMode #publicRandomBtn{
+  min-height:48px!important;
+  font-size:15px!important;
+}
+body.playerShareMode #sharedManualRow{
+  grid-template-columns:185px 185px!important;
+  gap:10px!important;
+  justify-content:end!important;
+  margin-top:-2px!important;
+}
+body.playerShareMode #selectToggle,
+body.playerShareMode #publicSavePicks{
+  min-height:44px!important;
+  font-size:15px!important;
+}
+body.playerShareMode #publicPickHint{
+  margin-top:2px!important;
+  padding:6px 8px!important;
+}
+
+@media(max-width:760px){
+  body.playerShareMode #sharedFillTopRow{
+    grid-template-columns:1fr 118px!important;
+    gap:10px!important;
+  }
+  body.playerShareMode #sharedColorBox{
+    width:118px!important;
+  }
+  body.playerShareMode #sharedColorBox .wheelMiniWrap,
+  body.playerShareMode #sharedColorBox .wheelCanvas{
+    width:88px!important;
+    height:88px!important;
+    max-width:88px!important;
+  }
+  body.playerShareMode #sharedFillBottomRow{
+    grid-template-columns:minmax(0,1fr) 96px 1fr!important;
+    margin-top:-40px!important;
+    gap:8px!important;
+  }
+  body.playerShareMode #sharedManualRow{
+    grid-template-columns:1fr 1fr!important;
+    gap:8px!important;
+  }
+}
+
+@media(max-width:520px){
+  body.playerShareMode .publicPickPanel{
+    padding:10px 10px 7px!important;
+  }
+  body.playerShareMode #sharedFillTopRow{
+    grid-template-columns:1fr 96px!important;
+    gap:8px!important;
+  }
+  body.playerShareMode #sharedColorBox{
+    width:96px!important;
+  }
+  body.playerShareMode #sharedColorBox .wheelMiniWrap,
+  body.playerShareMode #sharedColorBox .wheelCanvas{
+    width:76px!important;
+    height:76px!important;
+    max-width:76px!important;
+  }
+  body.playerShareMode #sharedFillBottomRow{
+    grid-template-columns:1fr 88px!important;
+    gap:8px!important;
+    margin-top:4px!important;
+  }
+  body.playerShareMode #publicRandomBtn{
+    grid-column:1 / -1!important;
+    min-height:44px!important;
+  }
+  body.playerShareMode #sharedManualRow{
+    grid-template-columns:1fr 1fr!important;
+  }
+}
+</style>
+
 </head>
 
 <style id="v79-14-share-code-style">
