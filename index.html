@@ -395,7 +395,7 @@ body::before{
   box-shadow:0 24px 70px rgba(0,0,0,.78),0 0 42px rgba(255,211,107,.24),inset 0 1px 0 rgba(255,255,255,.24)!important;
 }
 .msaHero::before{
-  content:"♠  ♥  ♣  ♦";
+  content:none!important;
   position:absolute;
   right:24px;
   bottom:10px;
@@ -1371,7 +1371,8 @@ body.playerShareMode .publicPickPanel h3{
 
 body.playerShareMode #sharedPlayerControls{
   display:grid!important;
-  grid-template-columns:minmax(0,1fr) 98px 138px 150px!important;
+  grid-template-columns:minmax(260px,420px) 88px 132px 145px!important;
+  justify-content:start!important;
   gap:7px!important;
   align-items:end!important;
 }
@@ -1481,6 +1482,26 @@ body.playerShareMode .boardGrid{
     width:76px!important;
     height:76px!important;
     max-width:76px!important;
+  }
+}
+</style>
+
+
+<style id="matt-v80-title-name-tighten">
+body.playerShareMode #sharedNameBox{
+  max-width:420px!important;
+}
+body.playerShareMode #sharedNameBox label{
+  margin-bottom:3px!important;
+}
+body.playerShareMode #publicPlayerName{
+  min-height:40px!important;
+  padding-top:7px!important;
+  padding-bottom:7px!important;
+}
+@media(max-width:760px){
+  body.playerShareMode #sharedNameBox{
+    max-width:none!important;
   }
 }
 </style>
