@@ -1526,15 +1526,28 @@ function makeShareCode(list){
   }
   return ('MSA'+Date.now().toString(36).toUpperCase()).slice(-6);
 }
-function shareUrlFor(saved){return ''}
+function shareUrlFor(saved){return saved&&saved.shareToken?'https://acemybusiness.github.io/MattsApp/?board='+encodeURIComponent(saved.shareToken):''}
 function showShareFor(saved){
   if(!saved)return;
   const card=$('shareCard'),id=$('shareBoardId'),url=$('shareBoardUrl');if(!card)return;
+  const live=shareUrlFor(saved);
   id.textContent='Share Code: '+(saved.shareCode||'—')+' • Board ID: '+(saved.boardId||saved.id);
-  url.textContent='Share this board file with its unique code. Anyone opening that file can pick open squares on this specific board.';
+  url.textContent=live||'Save this board first to create its live link.';
   card.style.display='block';
-  $('copyShareBtn').onclick=()=>exportSaved(saved.id,'share');
-  $('openShareBtn').onclick=()=>exportSaved(saved.id,'download');
+  $('copyShareBtn').onclick=async()=>{
+    if(!live){toast('Save the board first.');return}
+    try{
+      if(navigator.share) await navigator.share({title:saved.gameName||"Matt's Square App Board",url:live});
+      else if(navigator.clipboard) await navigator.clipboard.writeText(live);
+      toast('Live board link ready to share.');
+    }catch(e){
+      if(e&&e.name!=='AbortError'&&navigator.clipboard){
+        await navigator.clipboard.writeText(live);
+        toast('Live board link copied.');
+      }
+    }
+  };
+  $('openShareBtn').onclick=()=>{if(live) window.open(live,'_blank','noopener')};
   $('qrShareBtn').onclick=()=>{card.style.display='none'};
 }
 let pendingRenameSaveFinal=false;
@@ -1956,7 +1969,7 @@ boot();
 })();
 </script>
 
-\n<script id="v79-7-interactive-board-share">
+<script id="v79-7-interactive-board-share">
 (function(){
   const BUILD_VERSION='v80';
   function safeName(v){return String(v||'matts-square-board').replace(/[^a-z0-9]+/gi,'_').replace(/^_+|_+$/g,'').toLowerCase()||'matts-square-board'}
@@ -2076,8 +2089,9 @@ $('name').addEventListener('input',()=>{const existing=pc($('name').value);if(ex
     if(el) el.textContent=t;
   }
   function shareUrl(saved){
-    const b=base();
-    return b && saved && saved.shareToken ? b+'?board='+encodeURIComponent(saved.shareToken) : '';
+    return saved && saved.shareToken
+      ? 'https://acemybusiness.github.io/MattsApp/?board='+encodeURIComponent(saved.shareToken)
+      : '';
   }
 
   async function cloudSave(saved){
