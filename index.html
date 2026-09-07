@@ -1411,7 +1411,7 @@ body.playerShareMode #sharedColorBox .wheelCanvas{
   max-width:82px!important;
 }
 
-body.playerShareMode #sharedSelectBtn,
+body.playerShareMode #selectToggle,
 body.playerShareMode #publicSavePicks{
   display:block!important;
   width:100%!important;
@@ -1450,7 +1450,7 @@ body.playerShareMode .boardGrid{
   body.playerShareMode #sharedPlayerControls{
     grid-template-columns:minmax(0,1fr) 88px!important;
   }
-  body.playerShareMode #sharedSelectBtn,
+  body.playerShareMode #selectToggle,
   body.playerShareMode #publicSavePicks{
     grid-column:auto!important;
   }
@@ -1472,7 +1472,7 @@ body.playerShareMode .boardGrid{
     grid-template-columns:1fr 84px!important;
     gap:8px!important;
   }
-  body.playerShareMode #sharedSelectBtn,
+  body.playerShareMode #selectToggle,
   body.playerShareMode #publicSavePicks{
     min-height:46px!important;
     font-size:15px!important;
@@ -1564,7 +1564,7 @@ body.playerShareMode #sharedColorBox{
   align-self:start!important;
   margin-top:-2px!important;
 }
-body.playerShareMode #sharedSelectBtn,
+body.playerShareMode #selectToggle,
 body.playerShareMode #publicSavePicks{
   align-self:start!important;
   margin-top:22px!important;
@@ -1581,12 +1581,202 @@ body.playerShareMode #publicRandomBtn{
   min-height:38px!important;
 }
 @media(max-width:520px){
-  body.playerShareMode #sharedSelectBtn,
+  body.playerShareMode #selectToggle,
   body.playerShareMode #publicSavePicks{
     margin-top:6px!important;
   }
   body.playerShareMode #sharedRandomRow{
     margin-top:2px!important;
+  }
+}
+</style>
+
+
+<style id="matt-v85-shared-fill-look-fix">
+body.playerShareMode .publicPickPanel{
+  padding:14px 14px 10px!important;
+}
+body.playerShareMode #sharedFillShell{
+  display:grid!important;
+  grid-template-columns:1fr!important;
+  gap:10px!important;
+}
+body.playerShareMode #sharedFillHeader{
+  display:grid!important;
+  grid-template-columns:minmax(0,1fr) auto!important;
+  gap:12px!important;
+  align-items:start!important;
+}
+body.playerShareMode #sharedFillHeader h3{
+  margin:0!important;
+  line-height:1!important;
+  letter-spacing:.5px!important;
+}
+body.playerShareMode #sharedFillHelper{
+  align-self:start!important;
+  text-align:right!important;
+  color:#ffdf88!important;
+  font-size:12px!important;
+  font-weight:700!important;
+  padding-top:4px!important;
+  white-space:nowrap!important;
+}
+body.playerShareMode #sharedFillTopRow{
+  display:grid!important;
+  grid-template-columns:minmax(0,1fr) 170px!important;
+  gap:14px!important;
+  align-items:start!important;
+}
+body.playerShareMode #sharedNameBox,
+body.playerShareMode #sharedColorBox,
+body.playerShareMode #sharedActiveCard,
+body.playerShareMode #sharedRandomQtyBox{
+  margin:0!important;
+}
+body.playerShareMode #sharedNameBox label,
+body.playerShareMode #sharedColorBox .participantColorLabel,
+body.playerShareMode #sharedRandomQtyBox label{
+  display:block!important;
+  margin:0 0 5px!important;
+  color:#ffdf88!important;
+  font-size:12px!important;
+  font-weight:900!important;
+}
+body.playerShareMode #sharedColorBox{
+  justify-self:end!important;
+  width:170px!important;
+  text-align:center!important;
+}
+body.playerShareMode #sharedColorBox .wheelMiniWrap{
+  display:block!important;
+  width:120px!important;
+  height:120px!important;
+  margin:0 auto!important;
+}
+body.playerShareMode #sharedColorBox .wheelCanvas{
+  width:120px!important;
+  height:120px!important;
+  max-width:120px!important;
+}
+body.playerShareMode #publicPlayerName{
+  min-height:42px!important;
+  font-size:17px!important;
+}
+body.playerShareMode #sharedFillBottomRow{
+  display:grid!important;
+  grid-template-columns:minmax(0,1fr) 136px 250px!important;
+  gap:12px!important;
+  align-items:end!important;
+}
+body.playerShareMode #sharedActiveCard{
+  min-height:52px!important;
+  border:1px solid var(--gold)!important;
+  border-radius:18px!important;
+  display:flex!important;
+  align-items:center!important;
+  gap:12px!important;
+  padding:10px 14px!important;
+  background:rgba(0,0,0,.34)!important;
+}
+body.playerShareMode #sharedActiveDot{
+  width:30px!important;
+  height:30px!important;
+  border-radius:10px!important;
+  border:3px solid rgba(255,255,255,.88)!important;
+  background:#a8ec8f!important;
+  box-shadow:0 0 0 2px rgba(0,0,0,.18) inset!important;
+  flex:0 0 auto!important;
+}
+body.playerShareMode #sharedActiveText{
+  font-size:17px!important;
+  font-weight:800!important;
+  color:#fff!important;
+  overflow:hidden!important;
+  text-overflow:ellipsis!important;
+  white-space:nowrap!important;
+}
+body.playerShareMode #publicRandomQty{
+  min-height:44px!important;
+  font-size:16px!important;
+}
+body.playerShareMode #publicRandomBtn{
+  min-height:52px!important;
+  font-size:16px!important;
+  font-weight:900!important;
+}
+body.playerShareMode #sharedManualRow{
+  display:grid!important;
+  grid-template-columns:220px 220px!important;
+  gap:12px!important;
+  justify-content:end!important;
+  margin-top:-2px!important;
+}
+body.playerShareMode #selectToggle,
+body.playerShareMode #publicSavePicks{
+  min-height:46px!important;
+  font-size:15px!important;
+  font-weight:900!important;
+  width:100%!important;
+  margin-top:0!important;
+}
+body.playerShareMode #publicPickHint{
+  margin-top:0!important;
+  padding:7px 10px!important;
+  font-size:12px!important;
+  min-height:0!important;
+}
+@media(max-width:760px){
+  body.playerShareMode #sharedFillHeader{
+    grid-template-columns:1fr!important;
+  }
+  body.playerShareMode #sharedFillHelper{
+    text-align:left!important;
+    white-space:normal!important;
+    padding-top:0!important;
+  }
+  body.playerShareMode #sharedFillTopRow{
+    grid-template-columns:1fr 126px!important;
+    gap:10px!important;
+  }
+  body.playerShareMode #sharedColorBox{width:126px!important}
+  body.playerShareMode #sharedColorBox .wheelMiniWrap,
+  body.playerShareMode #sharedColorBox .wheelCanvas{
+    width:102px!important;
+    height:102px!important;
+    max-width:102px!important;
+  }
+  body.playerShareMode #sharedFillBottomRow{
+    grid-template-columns:minmax(0,1fr) 110px 1fr!important;
+    gap:10px!important;
+  }
+  body.playerShareMode #sharedManualRow{
+    grid-template-columns:1fr 1fr!important;
+    justify-content:stretch!important;
+  }
+}
+@media(max-width:520px){
+  body.playerShareMode .publicPickPanel{padding:10px 10px 8px!important}
+  body.playerShareMode #sharedFillTopRow{
+    grid-template-columns:1fr 108px!important;
+    gap:8px!important;
+  }
+  body.playerShareMode #sharedColorBox{width:108px!important}
+  body.playerShareMode #sharedColorBox .wheelMiniWrap,
+  body.playerShareMode #sharedColorBox .wheelCanvas{
+    width:88px!important;
+    height:88px!important;
+    max-width:88px!important;
+  }
+  body.playerShareMode #sharedFillBottomRow{
+    grid-template-columns:1fr 92px!important;
+    gap:8px!important;
+  }
+  body.playerShareMode #publicRandomBtn{
+    grid-column:1 / -1!important;
+  }
+  body.playerShareMode #sharedManualRow{
+    grid-template-columns:1fr 1fr!important;
+    gap:8px!important;
   }
 }
 </style>
@@ -2529,7 +2719,7 @@ $('name').addEventListener('input',()=>{const existing=pc($('name').value);if(ex
     }
 
     if(typeof selectionOn!=='undefined') selectionOn=false;
-    const selectBtn=document.getElementById('sharedSelectBtn');
+    const selectBtn=document.getElementById('selectToggle');
     if(selectBtn) selectBtn.textContent='Select Squares';
     if(btn) btn.disabled=false;
     if(randomBtn) randomBtn.disabled=false;
@@ -2566,7 +2756,7 @@ $('name').addEventListener('input',()=>{const existing=pc($('name').value);if(ex
       if(cell) cell.classList.add('publicPending');
     });
 
-    const selectBtn=document.getElementById('sharedSelectBtn');
+    const selectBtn=document.getElementById('selectToggle');
     if(selectBtn) selectBtn.textContent='Select: ON';
     hint(`${qty} random square${qty===1?'':'s'} selected. Tap Confirm Picks to save.`);
     return qty;
@@ -2742,7 +2932,7 @@ $('name').addEventListener('input',()=>{const existing=pc($('name').value);if(ex
 
       let sharedSelect=select;
       if(sharedSelect){
-        sharedSelect.id='sharedSelectBtn';
+        sharedSelect.id='selectToggle'; sharedSelect.classList.add('sharedSelectBtn');
         sharedSelect.textContent='Select Squares';
       }
 
@@ -2797,7 +2987,7 @@ $('name').addEventListener('input',()=>{const existing=pc($('name').value);if(ex
       syncName();
     }
 
-    const sharedSelect=document.getElementById('sharedSelectBtn');
+    const sharedSelect=document.getElementById('selectToggle');
     if(sharedSelect){
       const updateSelectText=()=>{
         sharedSelect.textContent=(typeof selectionOn!=='undefined' && selectionOn)
@@ -2842,6 +3032,138 @@ $('name').addEventListener('input',()=>{const existing=pc($('name').value);if(ex
   if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',lockV85);
   else lockV85();
   setTimeout(lockV85,500);
+})();
+</script>
+
+
+<script id="matt-v85-shared-fill-layout-final">
+(function(){
+  function applySharedFillLook(){
+    const token=new URLSearchParams(location.search).get('board');
+    if(!token) return;
+    const panel=document.querySelector('.publicPickPanel');
+    const title=panel && panel.querySelector('h3');
+    const publicName=document.getElementById('publicPlayerName');
+    const hint=document.getElementById('publicPickHint');
+    const confirm=document.getElementById('publicSavePicks');
+    const select=document.getElementById('selectToggle') || document.getElementById('sharedSelectBtn');
+    const randomQty=document.getElementById('publicRandomQty');
+    const randomBtn=document.getElementById('publicRandomBtn');
+    const wheel=document.querySelector('.combinedPlayerPanel .wheelMiniWrap') || document.querySelector('#sharedColorBox .wheelMiniWrap');
+    if(!panel || !title || !publicName || !hint || !confirm || !select || !randomQty || !randomBtn) return;
+
+    document.body.classList.add('playerShareMode');
+    select.id='selectToggle';
+
+    title.textContent='PLAYERS / FILL';
+
+    let shell=document.getElementById('sharedFillShell');
+    if(shell) shell.remove();
+
+    shell=document.createElement('div');
+    shell.id='sharedFillShell';
+
+    const header=document.createElement('div');
+    header.id='sharedFillHeader';
+    header.appendChild(title);
+    const helper=document.createElement('div');
+    helper.id='sharedFillHelper';
+    helper.textContent='Enter or tap a name below to make it active';
+    header.appendChild(helper);
+
+    const topRow=document.createElement('div');
+    topRow.id='sharedFillTopRow';
+
+    const nameBox=document.createElement('div');
+    nameBox.id='sharedNameBox';
+    const nameLabel=document.createElement('label');
+    nameLabel.textContent='Name';
+    nameBox.appendChild(nameLabel);
+    nameBox.appendChild(publicName);
+
+    const colorBox=document.createElement('div');
+    colorBox.id='sharedColorBox';
+    const colorLabel=document.createElement('div');
+    colorLabel.className='participantColorLabel';
+    colorLabel.textContent='Your Color';
+    colorBox.appendChild(colorLabel);
+    if(wheel) colorBox.appendChild(wheel);
+
+    topRow.appendChild(nameBox);
+    topRow.appendChild(colorBox);
+
+    const bottomRow=document.createElement('div');
+    bottomRow.id='sharedFillBottomRow';
+
+    const activeCard=document.createElement('div');
+    activeCard.id='sharedActiveCard';
+    const dot=document.createElement('div');
+    dot.id='sharedActiveDot';
+    const text=document.createElement('div');
+    text.id='sharedActiveText';
+    text.textContent='Active: —';
+    activeCard.appendChild(dot);
+    activeCard.appendChild(text);
+
+    const qtyBox=document.createElement('div');
+    qtyBox.id='sharedRandomQtyBox';
+    const qtyLabel=document.createElement('label');
+    qtyLabel.textContent='Random Qty';
+    qtyBox.appendChild(qtyLabel);
+    qtyBox.appendChild(randomQty);
+
+    randomBtn.textContent='Random Select';
+
+    bottomRow.appendChild(activeCard);
+    bottomRow.appendChild(qtyBox);
+    bottomRow.appendChild(randomBtn);
+
+    const manualRow=document.createElement('div');
+    manualRow.id='sharedManualRow';
+    manualRow.appendChild(select);
+    manualRow.appendChild(confirm);
+
+    shell.appendChild(header);
+    shell.appendChild(topRow);
+    shell.appendChild(bottomRow);
+    shell.appendChild(manualRow);
+    shell.appendChild(hint);
+
+    panel.innerHTML='';
+    panel.appendChild(shell);
+
+    function syncActive(){
+      const val=(publicName.value||'').trim();
+      text.textContent='Active: '+(val || '—');
+      const wheelInput=document.getElementById('playerColor');
+      dot.style.background=(wheelInput && wheelInput.value) ? wheelInput.value : '#a8ec8f';
+    }
+
+    publicName.addEventListener('input', syncActive);
+    publicName.addEventListener('change', syncActive);
+
+    const wheelInput=document.getElementById('playerColor');
+    if(wheelInput){
+      wheelInput.addEventListener('input', syncActive);
+      wheelInput.addEventListener('change', syncActive);
+    }
+
+    const originalHint=hint.textContent;
+    const updateSelectText=()=>{
+      select.textContent=(typeof selectionOn!=='undefined' && selectionOn) ? 'Select: ON' : 'Select Squares';
+      if(!(hint.textContent||'').trim()) hint.textContent=originalHint;
+    };
+
+    select.addEventListener('click', ()=>setTimeout(updateSelectText, 0), true);
+    syncActive();
+    updateSelectText();
+  }
+
+  if(document.readyState==='loading'){
+    document.addEventListener('DOMContentLoaded', ()=>setTimeout(applySharedFillLook, 180));
+  }else{
+    setTimeout(applySharedFillLook, 180);
+  }
 })();
 </script>
 
