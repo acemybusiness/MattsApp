@@ -309,7 +309,7 @@ button.danger{
 #loadBtn::after{content:"Load";}
 #saveBtn,#loadBtn{font-size:0!important;}
 #saveBtn::before,#loadBtn::before{
-  font-size:16px!important;
+  font-size:15px!important;
 }
 #saveBtn::after,#loadBtn::after{
   font-size:15px!important;
@@ -617,7 +617,7 @@ body:before{
 .boardControlRow.controlFour{
   display:grid!important;
   grid-template-columns:repeat(4,minmax(0,1fr))!important;
-  gap:10px!important;
+  gap:7px!important;
   align-items:stretch!important;
 }
 .boardControlRow.controlFour button{
@@ -645,7 +645,7 @@ button.blueAction{background:linear-gradient(135deg,#061528 0%,#0d3b78 35%,#1f8d
 /* v40 readability + tighter premium layout + blue-fade board + visible SRL signature */
 .app{padding:10px 10px 56px!important;}
 .layout{gap:9px!important;padding:10px!important;}
-.panel,.combinedPlayerPanel,.boardControlPanel{padding:12px!important;border-radius:18px!important;}
+.panel,.combinedPlayerPanel,.boardControlPanel{padding:6px 8px!important;border-radius:18px!important;}
 .panelHead{margin-bottom:8px!important;}
 .hero{margin-bottom:6px!important;}
 .msaHero{padding:10px 14px!important;min-height:auto!important;}
@@ -653,7 +653,7 @@ button.blueAction{background:linear-gradient(135deg,#061528 0%,#0d3b78 35%,#1f8d
 .msaLogo{width:76px!important;height:76px!important;}
 
 /* Make the count boxes fill their space better and read bigger */
-.miniStats{gap:10px!important;}
+.miniStats{gap:7px!important;}
 .miniStat{padding:14px 12px!important;min-height:84px!important;display:flex!important;flex-direction:column!important;justify-content:center!important;align-items:center!important;}
 .miniStat .lab{font-size:clamp(14px,1.7vw,18px)!important;line-height:1.05!important;margin-bottom:10px!important;letter-spacing:.2px!important;}
 .miniStat b{font-size:clamp(22px,3vw,34px)!important;line-height:1!important;color:#fff6c8!important;text-shadow:0 2px 0 #000,0 0 14px rgba(255,218,105,.40)!important;}
@@ -664,7 +664,7 @@ button.blueAction{background:linear-gradient(135deg,#061528 0%,#0d3b78 35%,#1f8d
 .field input{font-size:clamp(18px,2.4vw,26px)!important;padding:11px 14px!important;}
 .panel h3,.panelHead h3{font-size:clamp(22px,3vw,32px)!important;line-height:1.05!important;}
 button{font-size:clamp(15px,1.8vw,19px)!important;}
-.boardControlRow.controlFour button{font-size:clamp(14px,1.65vw,18px)!important;min-height:50px!important;}
+.boardControlRow.controlFour button{font-size:clamp(14px,1.65vw,18px)!important;min-height:44px!important;}
 
 /* Blue-faded grid squares while staying light enough for names/colors */
 .boardShell{padding:3px!important;border-radius:24px!important;}
@@ -767,7 +767,7 @@ button{font-size:clamp(15px,1.8vw,19px)!important;}
 }
 @media(max-width:620px){
   .ocrPanel .panelHead h3{font-size:clamp(17px,6vw,25px)!important;letter-spacing:.7px!important;}
-  .ocrPanel .miniTopBtn{min-width:58px!important;padding:8px 10px!important;}
+  .ocrPanel .miniTopBtn{min-width:58px!important;padding:6px 8px!important;}
   .boardMeta{grid-template-columns:minmax(0,1.7fr) minmax(112px,.9fr) minmax(70px,.55fr)!important;gap:7px!important;}
   .boardMeta #gameName{font-size:clamp(18px,5.5vw,24px)!important;}
   .boardMeta #cost{font-size:clamp(18px,5.5vw,24px)!important;}
@@ -955,7 +955,7 @@ pre, code, .debugLeak, .scriptLeak {
 .boardMeta .field label{
   display:block!important;
   font-size:clamp(18px,3.6vw,24px)!important;
-  margin:0 0 8px!important;
+  margin:0 0 5px!important;
   line-height:1.02!important;
 }
 .boardMeta .field:nth-child(2) label{
@@ -1004,7 +1004,7 @@ pre,code,.debugLeak,.scriptLeak{display:none!important}
 .boardControlPanel{padding:10px 12px!important}
 .boardControlRow{gap:10px!important}
 .savedInlinePanel{display:block!important;visibility:visible!important;padding:12px 14px!important;min-height:auto!important;margin-top:10px!important}
-.savedInlinePanel h3{display:block!important;margin:0 0 8px!important;font-family:Georgia,'Times New Roman',serif!important;color:#f4df9d!important;font-weight:900!important;letter-spacing:.01em!important;text-shadow:0 1px 0 #000,0 2px 6px rgba(0,0,0,.45)!important}
+.savedInlinePanel h3{display:block!important;margin:0 0 5px!important;font-family:Georgia,'Times New Roman',serif!important;color:#f4df9d!important;font-weight:900!important;letter-spacing:.01em!important;text-shadow:0 1px 0 #000,0 2px 6px rgba(0,0,0,.45)!important}
 .savedInlineList,#savedList{display:grid!important;visibility:visible!important;gap:8px!important;max-height:240px!important;overflow:auto!important;min-height:44px!important}
 .savedCard{display:grid!important;gap:6px!important;border:1px solid rgba(222,184,83,.58)!important;border-radius:12px!important;background:#080c14!important;padding:10px!important}
 .savedActions{display:flex!important;gap:7px!important;flex-wrap:wrap!important}
@@ -1032,9 +1032,9 @@ pre,code,.debugLeak,.scriptLeak{display:none!important}
 }
 #importTopAction button,
 #ocrImportImagesTopBtn{
-  min-height:48px!important;
+  min-height:44px!important;
   border-radius:15px!important;
-  font-size:16px!important;
+  font-size:15px!important;
   font-weight:900!important;
   background:linear-gradient(180deg,#62ef69,#20ad35 58%,#127021)!important;
   color:#061407!important;
@@ -1051,7 +1051,7 @@ pre,code,.debugLeak,.scriptLeak{display:none!important}
   margin-top:6px!important;
 }
 .ocrPanel .progressText{
-  margin-top:8px!important;
+  margin-top:5px!important;
 }
 @media(max-width:620px){
   .ocrPanel{
@@ -1339,7 +1339,7 @@ body.playerShareMode .boardWrap{
   width:100%!important;
   max-width:880px!important;
   margin:0 auto!important;
-  gap:10px!important;
+  gap:7px!important;
 }
 
 body.playerShareMode .boardMetaPanel,
@@ -1357,22 +1357,22 @@ body.playerShareMode .boardMetaPanel{
 body.playerShareMode .boardMeta{
   display:grid!important;
   grid-template-columns:minmax(0,1fr) 105px!important;
-  gap:10px!important;
+  gap:7px!important;
 }
 
 body.playerShareMode .publicPickPanel{
   display:block!important;
-  padding:12px!important;
+  padding:6px 8px!important;
   min-height:0!important;
 }
 body.playerShareMode .publicPickPanel h3{
-  margin:0 0 8px!important;
+  margin:0 0 5px!important;
 }
 
 body.playerShareMode #sharedPlayerControls{
   display:grid!important;
-  grid-template-columns:minmax(0,1fr) 118px 150px 165px!important;
-  gap:10px!important;
+  grid-template-columns:minmax(0,1fr) 98px 138px 150px!important;
+  gap:7px!important;
   align-items:end!important;
 }
 
@@ -1389,7 +1389,7 @@ body.playerShareMode #sharedColorBox .participantColorLabel{
 }
 body.playerShareMode #publicPlayerName{
   width:100%!important;
-  min-height:48px!important;
+  min-height:44px!important;
   font-size:18px!important;
 }
 
@@ -1400,28 +1400,28 @@ body.playerShareMode #sharedColorBox{
 }
 body.playerShareMode #sharedColorBox .wheelMiniWrap{
   display:block!important;
-  width:96px!important;
-  height:96px!important;
+  width:82px!important;
+  height:82px!important;
 }
 body.playerShareMode #sharedColorBox .wheelCanvas{
   display:block!important;
-  width:96px!important;
-  height:96px!important;
-  max-width:96px!important;
+  width:82px!important;
+  height:82px!important;
+  max-width:82px!important;
 }
 
 body.playerShareMode #sharedSelectBtn,
 body.playerShareMode #publicSavePicks{
   display:block!important;
   width:100%!important;
-  min-height:50px!important;
-  font-size:16px!important;
+  min-height:44px!important;
+  font-size:15px!important;
   font-weight:900!important;
 }
 
 body.playerShareMode #publicPickHint{
-  margin-top:8px!important;
-  padding:8px 10px!important;
+  margin-top:5px!important;
+  padding:6px 8px!important;
   min-height:0!important;
   text-align:center!important;
 }
@@ -1447,7 +1447,7 @@ body.playerShareMode .boardGrid{
 
 @media(max-width:760px){
   body.playerShareMode #sharedPlayerControls{
-    grid-template-columns:minmax(0,1fr) 104px!important;
+    grid-template-columns:minmax(0,1fr) 88px!important;
   }
   body.playerShareMode #sharedSelectBtn,
   body.playerShareMode #publicSavePicks{
@@ -1455,9 +1455,9 @@ body.playerShareMode .boardGrid{
   }
   body.playerShareMode #sharedColorBox .wheelMiniWrap,
   body.playerShareMode #sharedColorBox .wheelCanvas{
-    width:88px!important;
-    height:88px!important;
-    max-width:88px!important;
+    width:76px!important;
+    height:76px!important;
+    max-width:76px!important;
   }
 }
 
