@@ -2226,6 +2226,93 @@ body.playerShareMode #publicPickHint{
 }
 </style>
 
+<meta name="matt-v85-fix" content="shared-color-survives-live-refresh">
+
+<style id="matt-v85-shared-always-select-undo">
+/* Shared boards: selection is always active. Keep original select control hidden
+   for the app's internal updateControls() logic, but do not show it to players. */
+body.playerShareMode #selectToggle{
+  display:none!important;
+}
+
+/* Compact shared controls: Active | Qty | Random | Undo | Confirm */
+body.playerShareMode #sharedFillBottomRow{
+  grid-template-columns:minmax(145px,1fr) 68px 132px 105px 145px!important;
+  gap:6px!important;
+  align-items:end!important;
+}
+
+body.playerShareMode #publicRandomQty,
+body.playerShareMode #publicRandomBtn,
+body.playerShareMode #publicUndoBtn,
+body.playerShareMode #publicSavePicks{
+  min-height:36px!important;
+  height:36px!important;
+  padding:4px 7px!important;
+  margin:0!important;
+  font-size:12px!important;
+  font-weight:900!important;
+  line-height:1.05!important;
+}
+
+body.playerShareMode #publicUndoBtn{
+  display:flex!important;
+  align-items:center!important;
+  justify-content:center!important;
+  gap:5px!important;
+  white-space:nowrap!important;
+}
+
+body.playerShareMode #publicUndoBtn .undoIcon{
+  font-size:18px!important;
+  line-height:1!important;
+}
+
+body.playerShareMode #sharedActiveCard{
+  min-height:36px!important;
+  padding:4px 8px!important;
+}
+
+body.playerShareMode #publicPickHint{
+  padding:4px 7px!important;
+  min-height:0!important;
+}
+
+/* Keep the name/color area tight as well. */
+body.playerShareMode #sharedFillShell{gap:5px!important;}
+body.playerShareMode #sharedFillTopRow{
+  grid-template-columns:minmax(0,1fr) 88px!important;
+  gap:8px!important;
+}
+body.playerShareMode #sharedColorBox{width:88px!important;}
+body.playerShareMode #sharedColorBox .wheelMiniWrap,
+body.playerShareMode #sharedColorBox .wheelCanvas{
+  width:60px!important;
+  height:60px!important;
+  max-width:60px!important;
+}
+
+@media(max-width:900px){
+  body.playerShareMode #sharedFillBottomRow{
+    grid-template-columns:minmax(125px,1fr) 62px 116px 92px 126px!important;
+    gap:5px!important;
+  }
+}
+
+@media(max-width:620px){
+  body.playerShareMode #sharedFillBottomRow{
+    grid-template-columns:minmax(0,1fr) 58px 1fr!important;
+    gap:5px!important;
+  }
+  body.playerShareMode #publicUndoBtn{
+    grid-column:1 / 2!important;
+  }
+  body.playerShareMode #publicSavePicks{
+    grid-column:2 / 4!important;
+  }
+}
+</style>
+
 </head>
 
 <style id="v79-14-share-code-style">
@@ -3066,7 +3153,37 @@ $('name').addEventListener('input',()=>{const existing=pc($('name').value);if(ex
     try{
       const j=await get({action:'getBoard',token:TOKEN,_:Date.now()});
       if(!j.board || !Array.isArray(j.board.board)) throw new Error('Board data was incomplete.');
+
+      // Preserve the shared participant's in-progress identity/color across live refreshes.
+      // setState() is owner-oriented and otherwise resets playerColor to the board default.
+      const publicNameEl=document.getElementById('publicPlayerName');
+      const currentPublicName=(publicNameEl?.value||'').trim();
+      const currentColor=(document.getElementById('playerColor')?.value||'#219a12');
+
       if(typeof setState==='function') setState(j.board);
+
+      if(currentPublicName){
+        if(publicNameEl) publicNameEl.value=currentPublicName;
+
+        const key=currentPublicName.toLowerCase();
+        const returning=(Array.isArray(j.board.board)?j.board.board:[]).find(
+          x=>x&&x.player&&String(x.player).trim().toLowerCase()===key
+        );
+
+        const keepColor=(returning&&returning.color) ? returning.color : currentColor;
+
+        const hiddenName=document.getElementById('playerName');
+        if(hiddenName) hiddenName.value=currentPublicName;
+
+        const colorInput=document.getElementById('playerColor');
+        if(colorInput) colorInput.value=keepColor;
+
+        if(typeof renderColorWheel==='function') renderColorWheel();
+
+        const activeDot=document.getElementById('sharedActiveDot');
+        if(activeDot) activeDot.style.background=keepColor;
+      }
+
       document.body.classList.add('playerShareMode');
       pending.clear();
       document.querySelectorAll('#board .publicPending').forEach(x=>x.classList.remove('publicPending'));
@@ -3779,44 +3896,106 @@ $('name').addEventListener('input',()=>{const existing=pc($('name').value);if(ex
 })();
 </script>
 
-
-<script id="matt-v85-returning-player-color-helper">
+<script id="matt-v85-shared-always-select-undo">
 (function(){
-  function restoreReturningPlayerColor(){
-    if(!new URLSearchParams(location.search).get('board')) return;
-    const publicName=document.getElementById('publicPlayerName');
-    if(!publicName) return;
+  function isShared(){
+    return !!new URLSearchParams(location.search).get('board');
+  }
 
-    const name=(publicName.value||'').trim().toLowerCase();
-    if(!name) return;
+  function forceSharedSelectOn(){
+    if(!isShared()) return;
+    try{
+      if(typeof selectionOn!=='undefined') selectionOn=true;
+      const boardEl=document.getElementById('board');
+      if(boardEl) boardEl.classList.add('selectionOn');
+    }catch(e){}
+  }
 
-    const cells=(typeof board!=='undefined' && Array.isArray(board)) ? board : [];
-    const returning=cells.find(
-      x=>x&&x.player&&String(x.player).trim().toLowerCase()===name
-    );
+  function undoLastPending(){
+    if(!isShared()) return;
+    if(typeof pending==='undefined' || !pending || !pending.size){
+      const h=document.getElementById('publicPickHint');
+      if(h) h.textContent='Nothing selected to undo.';
+      return;
+    }
 
-    if(returning && returning.color){
-      const colorInput=document.getElementById('playerColor');
-      if(colorInput) colorInput.value=returning.color;
-      if(typeof renderColorWheel==='function') renderColorWheel();
+    const picks=[...pending];
+    const index=picks[picks.length-1];
+    pending.delete(index);
 
-      const activeDot=document.getElementById('sharedActiveDot');
-      if(activeDot) activeDot.style.background=returning.color;
+    const cell=document.querySelector(`#board .cell[data-index="${index}"]`);
+    if(cell) cell.classList.remove('publicPending');
+
+    const h=document.getElementById('publicPickHint');
+    if(h){
+      h.textContent=pending.size
+        ? `${pending.size} square${pending.size===1?'':'s'} selected. Tap Confirm Picks to save.`
+        : 'Selection cleared. Tap any open square to choose again.';
+    }
+
+    forceSharedSelectOn();
+  }
+
+  function install(){
+    if(!isShared()) return;
+
+    forceSharedSelectOn();
+
+    const bottom=document.getElementById('sharedFillBottomRow');
+    const select=document.getElementById('selectToggle');
+    const confirm=document.getElementById('publicSavePicks');
+    if(!bottom || !confirm) return;
+
+    // Keep the original Select element in the DOM for internal app logic,
+    // but it is hidden by CSS and never required by the shared player.
+    if(select) select.style.display='none';
+
+    let undo=document.getElementById('publicUndoBtn');
+    if(!undo){
+      undo=document.createElement('button');
+      undo.id='publicUndoBtn';
+      undo.type='button';
+      undo.className='secondary';
+      undo.innerHTML='<span class="undoIcon" aria-hidden="true">↶</span><span>Undo</span>';
+      undo.setAttribute('aria-label','Undo last selected square');
+      undo.addEventListener('click',function(e){
+        e.preventDefault();
+        e.stopPropagation();
+        undoLastPending();
+      });
+    }
+
+    // Order: Active | Random Qty | Random Select | Undo | Confirm
+    if(confirm.parentNode===bottom){
+      bottom.insertBefore(undo,confirm);
+    }else{
+      bottom.appendChild(undo);
+      bottom.appendChild(confirm);
+    }
+
+    const hint=document.getElementById('publicPickHint');
+    if(hint && !pending.size){
+      hint.textContent='Tap any open squares you want, then Confirm Picks.';
+    }
+
+    // The shared board is always selection-enabled, including after Confirm.
+    confirm.addEventListener('click',()=>setTimeout(forceSharedSelectOn,0),true);
+
+    const grid=document.getElementById('board');
+    if(grid){
+      grid.addEventListener('pointerdown',forceSharedSelectOn,true);
+      grid.addEventListener('click',forceSharedSelectOn,true);
     }
   }
 
-  function wire(){
-    const publicName=document.getElementById('publicPlayerName');
-    if(!publicName) return;
-    publicName.addEventListener('change',restoreReturningPlayerColor);
-    publicName.addEventListener('blur',restoreReturningPlayerColor);
+  if(document.readyState==='loading'){
+    document.addEventListener('DOMContentLoaded',()=>setTimeout(install,420));
+  }else{
+    setTimeout(install,420);
   }
 
-  if(document.readyState==='loading'){
-    document.addEventListener('DOMContentLoaded',()=>setTimeout(wire,250));
-  }else{
-    setTimeout(wire,250);
-  }
+  // Reassert after late render/setup passes without changing any board data.
+  setTimeout(install,900);
 })();
 </script>
 
