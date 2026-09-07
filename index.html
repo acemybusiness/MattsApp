@@ -1305,123 +1305,182 @@ button:disabled{cursor:not-allowed;filter:saturate(.35);opacity:.62}
 </style>
 <meta name="matt-v80-fix" content="auto-complete-save-new-board-fix-2026-09-07">
 
-<style id="matt-v80-shared-board-v2-fix">
+<style id="matt-v80-shared-compact-final">
+/* FINAL shared-board participant layout */
 body.playerShareMode .topbar,
 body.playerShareMode .left,
 body.playerShareMode .right,
 body.playerShareMode .savedInlinePanel,
 body.playerShareMode #shareCard,
-body.playerShareMode .combinedPlayerPanel{
+body.playerShareMode .combinedPlayerPanel,
+body.playerShareMode .boardControlPanel{
   display:none!important;
 }
+
 body.playerShareMode .app{
-  width:min(100%,980px)!important;
-  max-width:980px!important;
+  width:min(100%,920px)!important;
+  max-width:920px!important;
   margin:0 auto!important;
-  padding:8px 8px 80px!important;
+  padding:8px 8px 84px!important;
 }
+
 body.playerShareMode .layout{
   display:block!important;
   width:100%!important;
-  max-width:940px!important;
+  max-width:900px!important;
   margin:0 auto!important;
   padding:8px!important;
   overflow:visible!important;
 }
+
 body.playerShareMode .boardWrap{
   display:grid!important;
+  grid-template-columns:1fr!important;
   width:100%!important;
-  max-width:920px!important;
+  max-width:880px!important;
   margin:0 auto!important;
-  gap:9px!important;
+  gap:10px!important;
 }
+
 body.playerShareMode .boardMetaPanel,
 body.playerShareMode .publicPickPanel,
 body.playerShareMode .boardInfoStack,
-body.playerShareMode .boardControlPanel,
 body.playerShareMode .boardShell{
   width:100%!important;
   max-width:100%!important;
+  margin:0!important;
 }
+
+body.playerShareMode .boardMetaPanel{
+  padding:10px 12px!important;
+}
+body.playerShareMode .boardMeta{
+  display:grid!important;
+  grid-template-columns:minmax(0,1fr) 105px!important;
+  gap:10px!important;
+}
+
 body.playerShareMode .publicPickPanel{
   display:block!important;
+  padding:12px!important;
+  min-height:0!important;
 }
-body.playerShareMode .publicPickPanel .pickRow{
+body.playerShareMode .publicPickPanel h3{
+  margin:0 0 8px!important;
+}
+
+body.playerShareMode #sharedPlayerControls{
   display:grid!important;
-  grid-template-columns:minmax(180px,1fr) minmax(130px,auto)!important;
+  grid-template-columns:minmax(0,1fr) 118px 150px 165px!important;
   gap:10px!important;
   align-items:end!important;
 }
-body.playerShareMode #participantColorWrap{
-  display:grid!important;
-  grid-template-columns:auto minmax(130px,180px)!important;
-  align-items:center!important;
-  gap:10px!important;
-  margin-top:8px!important;
+
+body.playerShareMode #sharedNameBox{
+  min-width:0!important;
 }
-body.playerShareMode #participantColorWrap .participantColorLabel{
+body.playerShareMode #sharedNameBox label,
+body.playerShareMode #sharedColorBox .participantColorLabel{
+  display:block!important;
+  margin-bottom:5px!important;
   font-weight:900!important;
   color:#ffdf88!important;
-  font-size:15px!important;
+  font-size:14px!important;
 }
-body.playerShareMode #participantColorWrap .wheelMiniWrap{
-  display:block!important;
-  justify-self:start!important;
-}
-body.playerShareMode #participantColorWrap .wheelCanvas{
-  width:118px!important;
-  height:118px!important;
-  max-width:118px!important;
-  display:block!important;
-}
-body.playerShareMode .boardControlPanel{
-  display:block!important;
-  padding:8px!important;
-}
-body.playerShareMode .boardControlRow{
-  display:grid!important;
-  grid-template-columns:1fr!important;
-  gap:0!important;
-}
-body.playerShareMode #selectToggle{
-  display:block!important;
+body.playerShareMode #publicPlayerName{
   width:100%!important;
   min-height:48px!important;
   font-size:18px!important;
 }
-body.playerShareMode #actionToggle,
-body.playerShareMode #undoBtn,
-body.playerShareMode #doneBtn{
-  display:none!important;
+
+body.playerShareMode #sharedColorBox{
+  display:grid!important;
+  justify-items:center!important;
+  align-items:end!important;
 }
-body.playerShareMode .boardShell{
-  margin:0 auto!important;
+body.playerShareMode #sharedColorBox .wheelMiniWrap{
+  display:block!important;
+  width:96px!important;
+  height:96px!important;
 }
-body.playerShareMode .boardGrid{
+body.playerShareMode #sharedColorBox .wheelCanvas{
+  display:block!important;
+  width:96px!important;
+  height:96px!important;
+  max-width:96px!important;
+}
+
+body.playerShareMode #sharedSelectBtn,
+body.playerShareMode #publicSavePicks{
+  display:block!important;
   width:100%!important;
-  aspect-ratio:1/1!important;
+  min-height:50px!important;
+  font-size:16px!important;
+  font-weight:900!important;
 }
+
+body.playerShareMode #publicPickHint{
+  margin-top:8px!important;
+  padding:8px 10px!important;
+  min-height:0!important;
+  text-align:center!important;
+}
+
 body.playerShareMode .miniStats{
   display:grid!important;
   grid-template-columns:repeat(3,minmax(0,1fr))!important;
-  overflow:visible!important;
+  gap:8px!important;
 }
 body.playerShareMode .miniStats .miniStat:nth-child(4){
   display:none!important;
 }
-@media(max-width:620px){
-  body.playerShareMode .publicPickPanel .pickRow{
-    grid-template-columns:1fr!important;
+
+body.playerShareMode .boardShell{
+  padding:8px!important;
+  margin:0 auto!important;
+}
+body.playerShareMode .boardGrid{
+  width:100%!important;
+  max-width:100%!important;
+  aspect-ratio:1/1!important;
+}
+
+@media(max-width:760px){
+  body.playerShareMode #sharedPlayerControls{
+    grid-template-columns:minmax(0,1fr) 104px!important;
   }
+  body.playerShareMode #sharedSelectBtn,
   body.playerShareMode #publicSavePicks{
-    width:100%!important;
+    grid-column:auto!important;
   }
-  body.playerShareMode #participantColorWrap{
-    grid-template-columns:auto 1fr!important;
+  body.playerShareMode #sharedColorBox .wheelMiniWrap,
+  body.playerShareMode #sharedColorBox .wheelCanvas{
+    width:88px!important;
+    height:88px!important;
+    max-width:88px!important;
   }
-  body.playerShareMode #participantColorWrap .wheelCanvas{
-    width:104px!important;
-    height:104px!important;
+}
+
+@media(max-width:520px){
+  body.playerShareMode .app{padding:5px 5px 80px!important}
+  body.playerShareMode .layout{padding:5px!important}
+  body.playerShareMode .boardMeta{
+    grid-template-columns:minmax(0,1fr) 82px!important;
+  }
+  body.playerShareMode #sharedPlayerControls{
+    grid-template-columns:1fr 84px!important;
+    gap:8px!important;
+  }
+  body.playerShareMode #sharedSelectBtn,
+  body.playerShareMode #publicSavePicks{
+    min-height:46px!important;
+    font-size:15px!important;
+  }
+  body.playerShareMode #sharedColorBox .wheelMiniWrap,
+  body.playerShareMode #sharedColorBox .wheelCanvas{
+    width:76px!important;
+    height:76px!important;
+    max-width:76px!important;
   }
 }
 </style>
@@ -2449,71 +2508,100 @@ $('name').addEventListener('input',()=>{const existing=pc($('name').value);if(ex
 })();
 </script>
 
-
-<script id="matt-v80-shared-controls-fix">
+<script id="matt-v80-shared-compact-controls-final">
 (function(){
-  function setupSharedControls(){
+  function configureShared(){
     const token=new URLSearchParams(location.search).get('board');
     if(!token)return;
 
     document.body.classList.add('playerShareMode');
 
-    const publicPanel=document.querySelector('.publicPickPanel');
-    const wheel=document.querySelector('.combinedPlayerPanel .wheelMiniWrap');
-    if(publicPanel && wheel && !document.getElementById('participantColorWrap')){
-      const wrap=document.createElement('div');
-      wrap.id='participantColorWrap';
-      wrap.innerHTML='<div class="participantColorLabel">Choose Your Color</div>';
-      wrap.appendChild(wheel);
-      const hint=document.getElementById('publicPickHint');
-      publicPanel.insertBefore(wrap,hint||null);
-    }
-
+    const panel=document.querySelector('.publicPickPanel');
+    const oldPickRow=panel && panel.querySelector('.pickRow');
     const publicName=document.getElementById('publicPlayerName');
-    const playerName=document.getElementById('playerName');
-    if(publicName && playerName){
-      const sync=()=>{ playerName.value=publicName.value; };
-      publicName.addEventListener('input',sync);
-      publicName.addEventListener('change',sync);
-      sync();
-    }
-
+    const confirm=document.getElementById('publicSavePicks');
     const select=document.getElementById('selectToggle');
-    if(select){
-      select.textContent=(typeof selectionOn!=='undefined' && selectionOn)
-        ? 'Select: ON — Tap Your Squares'
-        : 'Press Select to Choose Squares';
+    const wheel=document.querySelector('.combinedPlayerPanel .wheelMiniWrap');
+
+    if(!panel || !publicName || !confirm)return;
+
+    let controls=document.getElementById('sharedPlayerControls');
+    if(!controls){
+      controls=document.createElement('div');
+      controls.id='sharedPlayerControls';
+
+      const nameBox=document.createElement('div');
+      nameBox.id='sharedNameBox';
+      const nameLabel=document.createElement('label');
+      nameLabel.textContent='Your Name';
+      nameBox.appendChild(nameLabel);
+      nameBox.appendChild(publicName);
+
+      const colorBox=document.createElement('div');
+      colorBox.id='sharedColorBox';
+      const colorLabel=document.createElement('div');
+      colorLabel.className='participantColorLabel';
+      colorLabel.textContent='Your Color';
+      colorBox.appendChild(colorLabel);
+      if(wheel) colorBox.appendChild(wheel);
+
+      let sharedSelect=select;
+      if(sharedSelect){
+        sharedSelect.id='sharedSelectBtn';
+        sharedSelect.textContent='Select Squares';
+      }
+
+      controls.appendChild(nameBox);
+      controls.appendChild(colorBox);
+      if(sharedSelect) controls.appendChild(sharedSelect);
+      controls.appendChild(confirm);
+
+      const title=panel.querySelector('h3');
+      if(title) title.insertAdjacentElement('afterend',controls);
+      else panel.prepend(controls);
     }
 
-    // Keep button text clear whenever app render() changes it.
-    const observer=new MutationObserver(()=>{
-      if(!select)return;
-      select.textContent=(typeof selectionOn!=='undefined' && selectionOn)
-        ? 'Select: ON — Tap Your Squares'
-        : 'Press Select to Choose Squares';
-    });
-    if(select) observer.observe(select,{childList:true,subtree:true,attributes:true});
+    if(oldPickRow) oldPickRow.remove();
 
-    const originalClick=select && select.onclick;
-    if(select){
-      select.addEventListener('click',()=>{
+    const hiddenPlayerName=document.getElementById('playerName');
+    if(hiddenPlayerName){
+      const syncName=()=>{hiddenPlayerName.value=publicName.value};
+      publicName.addEventListener('input',syncName);
+      publicName.addEventListener('change',syncName);
+      syncName();
+    }
+
+    const sharedSelect=document.getElementById('sharedSelectBtn');
+    if(sharedSelect){
+      const updateSelectText=()=>{
+        sharedSelect.textContent=(typeof selectionOn!=='undefined' && selectionOn)
+          ? 'Select: ON'
+          : 'Select Squares';
+      };
+      sharedSelect.addEventListener('click',()=>{
         setTimeout(()=>{
-          select.textContent=(typeof selectionOn!=='undefined' && selectionOn)
-            ? 'Select: ON — Tap Your Squares'
-            : 'Press Select to Choose Squares';
+          updateSelectText();
           const h=document.getElementById('publicPickHint');
-          if(h) h.textContent=(typeof selectionOn!=='undefined' && selectionOn)
-            ? 'Select is ON. Tap your open squares, then Confirm Picks.'
-            : 'Press Select first, then choose your squares.';
+          if(h){
+            h.textContent=(typeof selectionOn!=='undefined' && selectionOn)
+              ? 'Select is ON. Tap your open squares, then Confirm Picks.'
+              : 'Press Select Squares first.';
+          }
         },0);
-      });
+      },true);
+      updateSelectText();
+    }
+
+    const hint=document.getElementById('publicPickHint');
+    if(hint && typeof selectionOn!=='undefined' && !selectionOn){
+      hint.textContent='Enter your name, choose a color, press Select Squares, then tap the squares you want.';
     }
   }
 
   if(document.readyState==='loading'){
-    document.addEventListener('DOMContentLoaded',()=>setTimeout(setupSharedControls,50));
+    document.addEventListener('DOMContentLoaded',()=>setTimeout(configureShared,120));
   }else{
-    setTimeout(setupSharedControls,50);
+    setTimeout(configureShared,120);
   }
 })();
 </script>
