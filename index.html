@@ -2315,7 +2315,9 @@ body.playerShareMode #sharedColorBox .wheelCanvas{
 
 <meta name="matt-v85-fix" content="fast-batch-square-save">
 <meta name="matt-v85-fix" content="owner-additive-cloud-merge-no-revert">
-<meta name="matt-v85-fix" content="owner-select-preserves-color">\n<meta name="matt-v85-fix" content="owner-refresh-no-setstate-no-revert">
+<meta name="matt-v85-fix" content="owner-select-preserves-color">
+<meta name="matt-v85-fix" content="owner-refresh-no-setstate-no-revert">
+<meta name="matt-v85-fix" content="random-select-script-repair">
 </head>
 
 <style id="v79-14-share-code-style">
@@ -3345,10 +3347,7 @@ $('name').addEventListener('input',()=>{const existing=pc($('name').value);if(ex
     if(btn) btn.disabled=false;
     if(randomBtn) randomBtn.disabled=false;
     if(undoBtn) undoBtn.disabled=false;
-    const selectBtn=document.getElementById('selectToggle');
-    if(selectBtn) selectBtn.textContent='Select Squares';
-    if(btn) btn.disabled=false;
-    if(randomBtn) randomBtn.disabled=false;
+    if(selectBtn) selectBtn.style.display='none';
   }
 
   function randomParticipantSelect(qty){
@@ -3374,7 +3373,8 @@ $('name').addEventListener('input',()=>{const existing=pc($('name').value);if(ex
 
     pending.clear();
     if(typeof selectionOn!=='undefined') selectionOn=true;
-    if(typeof render==='function') render();
+    const boardEl=document.getElementById('board');
+    if(boardEl) boardEl.classList.add('selectionOn');
 
     open.slice(0,qty).forEach(index=>{
       pending.add(index);
@@ -3383,7 +3383,7 @@ $('name').addEventListener('input',()=>{const existing=pc($('name').value);if(ex
     });
 
     const selectBtn=document.getElementById('selectToggle');
-    if(selectBtn) selectBtn.textContent='Select: ON';
+    if(selectBtn) selectBtn.style.display='none';
     hint(`${qty} random square${qty===1?'':'s'} selected. Tap Confirm Picks to save.`);
     return qty;
   }
