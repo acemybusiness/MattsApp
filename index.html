@@ -2226,6 +2226,45 @@ body.playerShareMode #publicPickHint{
 }
 </style>
 
+
+<style id="matt-v85-final-tighten-pass">
+body.playerShareMode .publicPickPanel{padding:10px 12px 8px!important;}
+body.playerShareMode #sharedFillShell{gap:6px!important;}
+body.playerShareMode #sharedFillHeader{gap:8px!important;margin:0!important;}
+body.playerShareMode #sharedFillHeader h3{margin:0!important;line-height:1!important;}
+body.playerShareMode #sharedFillHelper{font-size:11px!important;padding-top:2px!important;}
+body.playerShareMode #sharedFillTopRow{grid-template-columns:minmax(0,1fr) 112px!important;gap:10px!important;align-items:end!important;}
+body.playerShareMode #sharedNameBox label,
+body.playerShareMode #sharedColorBox .participantColorLabel,
+body.playerShareMode #sharedRandomQtyBox label{margin:0 0 2px!important;font-size:11px!important;}
+body.playerShareMode #publicPlayerName{min-height:38px!important;font-size:15px!important;}
+body.playerShareMode #sharedColorBox{width:112px!important;}
+body.playerShareMode #sharedColorBox .wheelMiniWrap,
+body.playerShareMode #sharedColorBox .wheelCanvas{width:78px!important;height:78px!important;max-width:78px!important;}
+body.playerShareMode #sharedFillBottomRow{grid-template-columns:minmax(165px,1fr) 82px 155px 135px 165px!important;gap:7px!important;align-items:end!important;}
+body.playerShareMode #sharedActiveCard{min-height:42px!important;padding:6px 10px!important;}
+body.playerShareMode #sharedActiveDot{width:22px!important;height:22px!important;}
+body.playerShareMode #sharedActiveText{font-size:14px!important;}
+body.playerShareMode #publicRandomQty,
+body.playerShareMode #publicRandomBtn,
+body.playerShareMode #selectToggle,
+body.playerShareMode #publicSavePicks{min-height:42px!important;font-size:13px!important;}
+body.playerShareMode #publicPickHint{margin:0!important;padding:5px 8px!important;min-height:0!important;font-size:11px!important;}
+@media(max-width:900px){
+  body.playerShareMode #sharedFillBottomRow{grid-template-columns:minmax(145px,1fr) 76px 138px 118px 138px!important;gap:6px!important;}
+}
+@media(max-width:620px){
+  body.playerShareMode #sharedFillTopRow{grid-template-columns:minmax(0,1fr) 92px!important;gap:8px!important;}
+  body.playerShareMode #sharedColorBox{width:92px!important;}
+  body.playerShareMode #sharedColorBox .wheelMiniWrap,
+  body.playerShareMode #sharedColorBox .wheelCanvas{width:68px!important;height:68px!important;max-width:68px!important;}
+  body.playerShareMode #sharedFillBottomRow{grid-template-columns:minmax(0,1fr) 72px 1fr!important;gap:7px!important;}
+  body.playerShareMode #publicRandomBtn{grid-column:auto!important;}
+  body.playerShareMode #selectToggle{grid-column:1 / 2!important;}
+  body.playerShareMode #publicSavePicks{grid-column:2 / 4!important;}
+}
+</style>
+
 </head>
 
 <style id="v79-14-share-code-style">
