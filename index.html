@@ -1930,6 +1930,163 @@ body.playerShareMode #publicPickHint{
 }
 </style>
 
+
+<style id="matt-v85-shared-no-overlap-final">
+/* Stable shared PLAYERS / FILL layout — no overlap, no negative margins */
+body.playerShareMode #sharedFillShell{
+  display:grid!important;
+  gap:10px!important;
+}
+
+body.playerShareMode #sharedFillHeader{
+  display:grid!important;
+  grid-template-columns:minmax(0,1fr) auto!important;
+  gap:12px!important;
+  align-items:start!important;
+}
+
+body.playerShareMode #sharedFillTopRow{
+  display:grid!important;
+  grid-template-columns:minmax(0,1fr) 150px!important;
+  gap:14px!important;
+  align-items:start!important;
+  margin:0!important;
+}
+
+body.playerShareMode #sharedNameBox{
+  max-width:none!important;
+  margin:0!important;
+}
+
+body.playerShareMode #sharedColorBox{
+  width:150px!important;
+  margin:0!important;
+  justify-self:end!important;
+  text-align:center!important;
+}
+
+body.playerShareMode #sharedColorBox .wheelMiniWrap,
+body.playerShareMode #sharedColorBox .wheelCanvas{
+  width:104px!important;
+  height:104px!important;
+  max-width:104px!important;
+}
+
+body.playerShareMode #sharedFillBottomRow{
+  display:grid!important;
+  grid-template-columns:minmax(0,1fr) 120px 260px!important;
+  gap:12px!important;
+  align-items:end!important;
+  margin:0!important;
+}
+
+body.playerShareMode #sharedActiveCard{
+  min-height:52px!important;
+  margin:0!important;
+}
+
+body.playerShareMode #sharedRandomQtyBox{
+  margin:0!important;
+}
+
+body.playerShareMode #publicRandomQty{
+  min-height:44px!important;
+}
+
+body.playerShareMode #publicRandomBtn{
+  min-height:52px!important;
+}
+
+body.playerShareMode #sharedManualRow{
+  display:grid!important;
+  grid-template-columns:220px 220px!important;
+  gap:12px!important;
+  justify-content:end!important;
+  margin:0!important;
+}
+
+body.playerShareMode #selectToggle,
+body.playerShareMode #publicSavePicks{
+  min-height:46px!important;
+  margin:0!important;
+}
+
+body.playerShareMode #publicPickHint{
+  margin-top:0!important;
+}
+
+/* Tablet */
+@media(max-width:760px){
+  body.playerShareMode #sharedFillHeader{
+    grid-template-columns:1fr!important;
+  }
+
+  body.playerShareMode #sharedFillHelper{
+    text-align:left!important;
+    white-space:normal!important;
+  }
+
+  body.playerShareMode #sharedFillTopRow{
+    grid-template-columns:minmax(0,1fr) 120px!important;
+    gap:10px!important;
+  }
+
+  body.playerShareMode #sharedColorBox{
+    width:120px!important;
+  }
+
+  body.playerShareMode #sharedColorBox .wheelMiniWrap,
+  body.playerShareMode #sharedColorBox .wheelCanvas{
+    width:90px!important;
+    height:90px!important;
+    max-width:90px!important;
+  }
+
+  body.playerShareMode #sharedFillBottomRow{
+    grid-template-columns:minmax(0,1fr) 100px 1fr!important;
+    gap:10px!important;
+  }
+
+  body.playerShareMode #sharedManualRow{
+    grid-template-columns:1fr 1fr!important;
+    gap:10px!important;
+  }
+}
+
+/* Phone */
+@media(max-width:520px){
+  body.playerShareMode #sharedFillTopRow{
+    grid-template-columns:minmax(0,1fr) 98px!important;
+    gap:8px!important;
+  }
+
+  body.playerShareMode #sharedColorBox{
+    width:98px!important;
+  }
+
+  body.playerShareMode #sharedColorBox .wheelMiniWrap,
+  body.playerShareMode #sharedColorBox .wheelCanvas{
+    width:78px!important;
+    height:78px!important;
+    max-width:78px!important;
+  }
+
+  body.playerShareMode #sharedFillBottomRow{
+    grid-template-columns:1fr 92px!important;
+    gap:8px!important;
+  }
+
+  body.playerShareMode #publicRandomBtn{
+    grid-column:1 / -1!important;
+  }
+
+  body.playerShareMode #sharedManualRow{
+    grid-template-columns:1fr 1fr!important;
+    gap:8px!important;
+  }
+}
+</style>
+
 </head>
 
 <style id="v79-14-share-code-style">
