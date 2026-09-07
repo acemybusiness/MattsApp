@@ -1304,6 +1304,128 @@ button:disabled{cursor:not-allowed;filter:saturate(.35);opacity:.62}
 @media(max-width:620px){.savedBoardName,.shareCodeLine{font-size:17px}.savedTitleLine{gap:6px}.savedBoardName{max-width:52%}}
 </style>
 <meta name="matt-v80-fix" content="auto-complete-save-new-board-fix-2026-09-07">
+
+<style id="matt-v80-shared-board-v2-fix">
+body.playerShareMode .topbar,
+body.playerShareMode .left,
+body.playerShareMode .right,
+body.playerShareMode .savedInlinePanel,
+body.playerShareMode #shareCard,
+body.playerShareMode .combinedPlayerPanel{
+  display:none!important;
+}
+body.playerShareMode .app{
+  width:min(100%,980px)!important;
+  max-width:980px!important;
+  margin:0 auto!important;
+  padding:8px 8px 80px!important;
+}
+body.playerShareMode .layout{
+  display:block!important;
+  width:100%!important;
+  max-width:940px!important;
+  margin:0 auto!important;
+  padding:8px!important;
+  overflow:visible!important;
+}
+body.playerShareMode .boardWrap{
+  display:grid!important;
+  width:100%!important;
+  max-width:920px!important;
+  margin:0 auto!important;
+  gap:9px!important;
+}
+body.playerShareMode .boardMetaPanel,
+body.playerShareMode .publicPickPanel,
+body.playerShareMode .boardInfoStack,
+body.playerShareMode .boardControlPanel,
+body.playerShareMode .boardShell{
+  width:100%!important;
+  max-width:100%!important;
+}
+body.playerShareMode .publicPickPanel{
+  display:block!important;
+}
+body.playerShareMode .publicPickPanel .pickRow{
+  display:grid!important;
+  grid-template-columns:minmax(180px,1fr) minmax(130px,auto)!important;
+  gap:10px!important;
+  align-items:end!important;
+}
+body.playerShareMode #participantColorWrap{
+  display:grid!important;
+  grid-template-columns:auto minmax(130px,180px)!important;
+  align-items:center!important;
+  gap:10px!important;
+  margin-top:8px!important;
+}
+body.playerShareMode #participantColorWrap .participantColorLabel{
+  font-weight:900!important;
+  color:#ffdf88!important;
+  font-size:15px!important;
+}
+body.playerShareMode #participantColorWrap .wheelMiniWrap{
+  display:block!important;
+  justify-self:start!important;
+}
+body.playerShareMode #participantColorWrap .wheelCanvas{
+  width:118px!important;
+  height:118px!important;
+  max-width:118px!important;
+  display:block!important;
+}
+body.playerShareMode .boardControlPanel{
+  display:block!important;
+  padding:8px!important;
+}
+body.playerShareMode .boardControlRow{
+  display:grid!important;
+  grid-template-columns:1fr!important;
+  gap:0!important;
+}
+body.playerShareMode #selectToggle{
+  display:block!important;
+  width:100%!important;
+  min-height:48px!important;
+  font-size:18px!important;
+}
+body.playerShareMode #actionToggle,
+body.playerShareMode #undoBtn,
+body.playerShareMode #doneBtn{
+  display:none!important;
+}
+body.playerShareMode .boardShell{
+  margin:0 auto!important;
+}
+body.playerShareMode .boardGrid{
+  width:100%!important;
+  aspect-ratio:1/1!important;
+}
+body.playerShareMode .miniStats{
+  display:grid!important;
+  grid-template-columns:repeat(3,minmax(0,1fr))!important;
+  overflow:visible!important;
+}
+body.playerShareMode .miniStats .miniStat:nth-child(4){
+  display:none!important;
+}
+@media(max-width:620px){
+  body.playerShareMode .publicPickPanel .pickRow{
+    grid-template-columns:1fr!important;
+  }
+  body.playerShareMode #publicSavePicks{
+    width:100%!important;
+  }
+  body.playerShareMode #participantColorWrap{
+    grid-template-columns:auto 1fr!important;
+  }
+  body.playerShareMode #participantColorWrap .wheelCanvas{
+    width:104px!important;
+    height:104px!important;
+  }
+}
+</style>
+
 </head>
 
 <style id="v79-14-share-code-style">
@@ -1990,79 +2112,6 @@ boot();
 <style>
 *{box-sizing:border-box}html,body{margin:0;background:#02060b;color:#fff;font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif}body{padding:12px 12px 88px;background:radial-gradient(circle at top,#0a233c,#02060b 55%,#000)}.wrap{max-width:760px;margin:auto}.hero{border:2px solid #c99d43;border-radius:22px;padding:14px;text-align:center;background:linear-gradient(135deg,#07192c,#02050a 58%,#5a3508)}h1{margin:0;color:#ffe19a;font-family:Georgia,serif;font-size:clamp(24px,7vw,40px)}.sub{color:#f5cf70;font-weight:800;margin-top:4px}.panel{margin-top:12px;border:1px solid #a77c2f;border-radius:18px;padding:12px;background:linear-gradient(#0b2138,#05080d)}.meta{display:grid;grid-template-columns:1fr auto;gap:10px;align-items:end}.field{display:grid;gap:5px}label{font-weight:800;color:#ffe39a}input{width:100%;border:1px solid #a77c2f;border-radius:12px;padding:12px;background:#020407;color:#fff;font-size:18px}.tools{display:grid;grid-template-columns:1fr auto;gap:8px;align-items:end}.tools input[type=color]{width:58px;height:48px;padding:3px}.grid{display:grid;grid-template-columns:.52fr repeat(10,1fr);grid-template-rows:.52fr repeat(10,1fr);aspect-ratio:1/1;width:100%;margin-top:12px;border:4px solid #d9b65d;background:#fff;overflow:hidden}.corner,.num,.cell{border:1px solid #69798a;display:flex;align-items:center;justify-content:center;min-width:0;overflow:hidden}.corner,.num{background:linear-gradient(#133458,#020407);color:#fff;font-weight:900;font-size:clamp(8px,2.2vw,15px)}.corner{color:#f7d16d}.cell{position:relative;background:linear-gradient(135deg,#fff,#dff0ff 60%,#fff4c9);color:#111;user-select:none}.cell .slot{position:absolute;top:2px;left:3px;font-size:clamp(6px,1.7vw,10px);font-weight:800;opacity:.65}.cell .nm{font-size:clamp(7px,2vw,12px);font-weight:900;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:92%}.cell.claimed{color:var(--fg,#fff);background:var(--bg,#185b9e)}.cell.open{cursor:pointer}.cell.selected{outline:3px solid #ffe36e;outline-offset:-3px;background:#fff0a9}.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:10px}.stat{border:1px solid #735b2c;border-radius:12px;padding:8px;text-align:center;background:#05080d}.stat b{display:block;font-size:20px;color:#ffe094}.actions{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px}button{border:1px solid #c99d43;border-radius:14px;padding:13px;font-weight:900;font-size:16px;background:linear-gradient(#ffe27b,#b97905);color:#080501}button.secondary{background:linear-gradient(#12365b,#02070d);color:#ffe29a}.msg{min-height:22px;margin-top:8px;color:#bfffb9;font-weight:800;text-align:center}.foot{position:fixed;left:0;right:0;bottom:0;padding:10px 8px calc(10px + env(safe-area-inset-bottom));background:linear-gradient(90deg,#02070d,#142b43,#53330a);border-top:1px solid #c99d43;text-align:center;color:#ffe5a0;font-weight:800}.note{font-size:12px;color:#b8c8da;margin-top:8px;line-height:1.35}
 </style>
-<style id="matt-v80-participant-layout-fix">
-/* Shared-board participant mode: one clean centered board, no owner controls. */
-body.playerShareMode .app{
-  width:min(100%,980px)!important;
-  max-width:980px!important;
-  margin:0 auto!important;
-  padding:10px 10px 78px!important;
-}
-body.playerShareMode .topbar,
-body.playerShareMode .left,
-body.playerShareMode .right,
-body.playerShareMode .savedInlinePanel,
-body.playerShareMode .boardControlPanel,
-body.playerShareMode .combinedPlayerPanel,
-body.playerShareMode #shareCard{
-  display:none!important;
-}
-body.playerShareMode .layout{
-  display:block!important;
-  width:100%!important;
-  max-width:920px!important;
-  margin:0 auto!important;
-  padding:10px!important;
-  border-radius:20px!important;
-  overflow:visible!important;
-}
-body.playerShareMode .boardWrap{
-  display:grid!important;
-  grid-template-columns:1fr!important;
-  width:100%!important;
-  max-width:900px!important;
-  margin:0 auto!important;
-  gap:10px!important;
-}
-body.playerShareMode .boardMetaPanel,
-body.playerShareMode .publicPickPanel,
-body.playerShareMode .boardInfoStack,
-body.playerShareMode .boardShell{
-  width:100%!important;
-  max-width:100%!important;
-}
-body.playerShareMode .boardShell{
-  margin:0 auto!important;
-}
-body.playerShareMode .boardGrid{
-  width:100%!important;
-  aspect-ratio:1/1!important;
-}
-body.playerShareMode .boardMeta{
-  grid-template-columns:minmax(0,1fr) 150px!important;
-}
-body.playerShareMode .publicPickPanel .pickRow{
-  grid-template-columns:minmax(0,1fr) auto!important;
-}
-body.playerShareMode .miniStats{
-  grid-template-columns:repeat(3,minmax(0,1fr))!important;
-  overflow:visible!important;
-}
-body.playerShareMode .miniStats .miniStat:nth-child(4){
-  display:none!important;
-}
-body.playerShareMode #status{
-  min-height:0!important;
-  padding:2px 6px!important;
-}
-@media (max-width:620px){
-  body.playerShareMode .app{padding:6px 6px 74px!important}
-  body.playerShareMode .layout{padding:6px!important}
-  body.playerShareMode .boardMeta{grid-template-columns:minmax(0,1fr) 92px!important}
-  body.playerShareMode .publicPickPanel .pickRow{grid-template-columns:1fr!important}
-  body.playerShareMode #publicSavePicks{width:100%!important}
-}
-</style>
 
 </head><body><div class="wrap"><div class="hero"><h1>MATT'S SQUARE APP</h1><div class="sub">${title}</div><div class="sub" style="color:#fff">Share Code: <b style="color:#ffe28a;letter-spacing:2px">${code}</b></div></div><div class="panel"><div class="meta"><div><b>Pick your open squares</b><div class="note">This file is for board <b>${code}</b>. Enter your name, tap any open squares you want, then confirm. Claimed squares cannot be changed.</div></div><div><b>$${escHtml(saved.cost||0)}</b><div class="note">per square</div></div></div><div class="tools"><div class="field"><label>Your Name</label><input id="name" placeholder="Enter your name"></div><div class="field"><label>Color</label><input id="color" type="color" value="#1d74d8"></div></div><div id="grid" class="grid"></div><div class="stats"><div class="stat">Claimed<b id="claimed">0</b></div><div class="stat">Open<b id="open">100</b></div><div class="stat">Selected<b id="selected">0</b></div></div><div class="actions"><button id="confirm">Confirm Picks</button><button id="share" class="secondary">Share Updated Board</button></div><div id="msg" class="msg"></div></div></div><div class="foot">♠ ♥ ♣ ♦ &nbsp; © 2026 SRL — S.R. Langlois. All Rights Reserved. &nbsp; ${BUILD_VERSION}</div>
 <scr`+`ipt>
@@ -2397,6 +2446,75 @@ $('name').addEventListener('input',()=>{const existing=pc($('name').value);if(ex
     const saved=(typeof getSaved==='function'?getSaved():[]).find(x=>String(x.id)===String(id)||String(x.boardId)===String(id));
     if(saved)copyLive(saved);
   },true);
+})();
+</script>
+
+
+<script id="matt-v80-shared-controls-fix">
+(function(){
+  function setupSharedControls(){
+    const token=new URLSearchParams(location.search).get('board');
+    if(!token)return;
+
+    document.body.classList.add('playerShareMode');
+
+    const publicPanel=document.querySelector('.publicPickPanel');
+    const wheel=document.querySelector('.combinedPlayerPanel .wheelMiniWrap');
+    if(publicPanel && wheel && !document.getElementById('participantColorWrap')){
+      const wrap=document.createElement('div');
+      wrap.id='participantColorWrap';
+      wrap.innerHTML='<div class="participantColorLabel">Choose Your Color</div>';
+      wrap.appendChild(wheel);
+      const hint=document.getElementById('publicPickHint');
+      publicPanel.insertBefore(wrap,hint||null);
+    }
+
+    const publicName=document.getElementById('publicPlayerName');
+    const playerName=document.getElementById('playerName');
+    if(publicName && playerName){
+      const sync=()=>{ playerName.value=publicName.value; };
+      publicName.addEventListener('input',sync);
+      publicName.addEventListener('change',sync);
+      sync();
+    }
+
+    const select=document.getElementById('selectToggle');
+    if(select){
+      select.textContent=(typeof selectionOn!=='undefined' && selectionOn)
+        ? 'Select: ON — Tap Your Squares'
+        : 'Press Select to Choose Squares';
+    }
+
+    // Keep button text clear whenever app render() changes it.
+    const observer=new MutationObserver(()=>{
+      if(!select)return;
+      select.textContent=(typeof selectionOn!=='undefined' && selectionOn)
+        ? 'Select: ON — Tap Your Squares'
+        : 'Press Select to Choose Squares';
+    });
+    if(select) observer.observe(select,{childList:true,subtree:true,attributes:true});
+
+    const originalClick=select && select.onclick;
+    if(select){
+      select.addEventListener('click',()=>{
+        setTimeout(()=>{
+          select.textContent=(typeof selectionOn!=='undefined' && selectionOn)
+            ? 'Select: ON — Tap Your Squares'
+            : 'Press Select to Choose Squares';
+          const h=document.getElementById('publicPickHint');
+          if(h) h.textContent=(typeof selectionOn!=='undefined' && selectionOn)
+            ? 'Select is ON. Tap your open squares, then Confirm Picks.'
+            : 'Press Select first, then choose your squares.';
+        },0);
+      });
+    }
+  }
+
+  if(document.readyState==='loading'){
+    document.addEventListener('DOMContentLoaded',()=>setTimeout(setupSharedControls,50));
+  }else{
+    setTimeout(setupSharedControls,50);
+  }
 })();
 </script>
 
