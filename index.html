@@ -1,102 +1,6 @@
 <!doctype html>
 <html lang="en">
 <head>
-
-<script id="matt-v26-participant-jsonp-router">
-(function(){
-  'use strict';
-  const TOKEN=new URLSearchParams(location.search).get('board')||'';
-  if(!TOKEN) return;
-
-  /* Capture the already-loaded Matt icon before replacing the old page. */
-  const ICON=(document.querySelector('link[rel="icon"]')||{}).href||'';
-  const BACKEND='https://script.google.com/macros/s/AKfycbxaB2NC-8eKWBrUqplCGtSQ2tJmOQKlUyh03YjfmaL_KPQIAg-cpryEr13hcDaM7R4-/exec';
-  const API=(new URLSearchParams(location.search).get('api')||(()=>{try{return localStorage.getItem('matt_v80_api_url')||BACKEND}catch(e){return BACKEND}})());
-
-  /* IMPORTANT: Replace the document while it is still parsing.
-     This prevents every legacy owner/share script below this guard from loading. */
-  document.open();
-  document.write(`<!doctype html><html><head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-    <title>Matt's Square App — Shared Board</title>
-    <style>
-      *{box-sizing:border-box}
-      html,body{margin:0;min-height:100%;background:radial-gradient(circle at top,#172945 0,#060b14 48%,#000 100%);color:#fff;font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;overflow-x:hidden}
-      button,input{font:inherit}
-      .app{width:min(100%,1040px);margin:0 auto;padding:10px 10px 24px}
-      .hero{display:grid;grid-template-columns:92px minmax(0,1fr);gap:14px;align-items:center;padding:11px 16px;border:2px solid #d2aa54;border-radius:24px;background:radial-gradient(circle at 46% 50%,rgba(78,137,207,.26),transparent 30%),linear-gradient(100deg,#121a24,#2b373e 46%,#4a2b08);box-shadow:0 14px 30px rgba(0,0,0,.38)}
-      .logo{width:86px;height:86px;object-fit:contain;display:block}
-      h1{margin:0;text-align:center;font-family:Georgia,serif;font-size:clamp(30px,6vw,66px);line-height:1;color:#f4dda0;letter-spacing:.5px;text-shadow:0 3px 0 #2d1a05,0 0 14px rgba(255,221,144,.28)}
-      .card{margin-top:10px;border:1px solid #8d7135;border-radius:18px;background:linear-gradient(180deg,rgba(15,29,50,.98),rgba(5,10,18,.99));padding:12px}
-      .meta{display:grid;grid-template-columns:minmax(0,1fr) 118px;gap:10px}
-      .field{display:grid;gap:5px}.field label,.mini{color:#f7dda0;font-weight:900;font-size:14px}
-      .read,.inp{min-height:48px;border:1px solid #ae8b3f;border-radius:13px;background:#02050a;color:#fff;padding:10px 12px;font-size:17px}
-      .read{display:flex;align-items:center;font-weight:800}.inp{width:100%;outline:none}.inp:focus{box-shadow:0 0 0 3px rgba(215,175,85,.15)}
-      .head{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:8px}.head h2{margin:0;font-family:Georgia,serif;color:#f7dda0;font-size:30px}.head small{color:#ffe38d;font-weight:800}
-      .pickGrid{display:grid;grid-template-columns:minmax(0,1fr) 132px;gap:12px;align-items:end}
-      .wheelWrap{display:grid;justify-items:center;gap:5px}
-      #wheel{width:122px;height:122px;border-radius:50%;display:block;touch-action:none;cursor:crosshair;border:2px solid #101010;box-shadow:0 0 0 2px #8b7138,0 8px 18px rgba(0,0,0,.35)}
-      .colorLine{display:flex;align-items:center;gap:6px;font-size:12px;font-weight:800}.dot{width:20px;height:20px;border-radius:6px;border:1px solid #fff;background:#1d74d8}
-      .actions{display:grid;grid-template-columns:minmax(150px,.75fr) 100px minmax(160px,.9fr) minmax(180px,1fr);gap:8px;align-items:end;margin-top:10px}
-      .active{min-height:48px;border:1px solid #8b7138;border-radius:13px;background:#07101d;display:flex;align-items:center;gap:9px;padding:8px 11px;font-weight:900}
-      .btn{min-height:48px;border:1px solid #ad8a3e;border-radius:13px;padding:10px 12px;font-weight:1000;color:#fff;background:linear-gradient(180deg,#17243a,#07101e);cursor:pointer}
-      .btn.gold{color:#180f00;background:linear-gradient(180deg,#ffe38c,#a86f10)}.btn.green{color:#061505;background:linear-gradient(180deg,#9ff58a,#2d812c)}.btn:disabled{opacity:.45;cursor:not-allowed}
-      #hint{margin-top:8px;min-height:34px;border:1px solid #6f633f;border-radius:11px;background:#11151c;color:#dce3ef;padding:7px 10px;text-align:center;font-size:13px;font-weight:800}
-      .stats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}.stat{text-align:center;border:1px solid #8b7138;border-radius:14px;background:#07101d;padding:10px 6px}.stat span{display:block;color:#f7dda0;font-family:Georgia,serif;font-size:19px;font-weight:900}.stat b{display:block;margin-top:3px;color:#fff8de;font-size:36px}
-      .boardShell{margin-top:10px;padding:6px;border:2px solid #d2aa54;border-radius:20px;background:#05070b;box-shadow:0 14px 30px rgba(0,0,0,.38)}
-      #board{display:grid;grid-template-columns:.52fr repeat(10,1fr);grid-template-rows:.52fr repeat(10,1fr);width:100%;aspect-ratio:1/1;background:#111;overflow:hidden;border-radius:10px}
-      .corner,.num,.cell{border:1px solid #68717a;min-width:0;overflow:hidden}.corner,.num{display:flex;align-items:center;justify-content:center;background:linear-gradient(180deg,#14233a,#030810);color:#fff;font-weight:900}.corner img{width:78%;height:78%;object-fit:contain}
-      .cell{position:relative;display:flex;align-items:center;justify-content:center;background:linear-gradient(135deg,#eef8ff,#fff 56%,#fffbd7);color:#10131a;font-weight:1000;user-select:none;cursor:pointer}.cell.claimed{cursor:not-allowed}.cell.pending{outline:4px solid #ffd44f;outline-offset:-4px;box-shadow:inset 0 0 0 2px #111}.slot{position:absolute;left:3px;top:2px;font-size:clamp(7px,1vw,11px);opacity:.68}.nm{max-width:94%;padding:0 2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-size:clamp(8px,1.15vw,14px)}
-      footer{text-align:center;color:#f7dda0;font-weight:900;padding:14px 8px 2px}
-      @media(max-width:650px){
-        .app{padding:6px 6px 20px}.hero{grid-template-columns:68px minmax(0,1fr);padding:8px 10px;border-radius:18px}.logo{width:64px;height:64px}h1{font-size:clamp(24px,9vw,42px)}
-        .card{padding:8px;border-radius:15px}.meta{grid-template-columns:minmax(0,1fr) 86px}.head{display:grid;gap:2px}.head h2{font-size:24px}.pickGrid{grid-template-columns:minmax(0,1fr) 96px;gap:8px}#wheel{width:90px;height:90px}
-        .actions{grid-template-columns:1fr 82px;gap:7px}.btn{font-size:14px;padding:8px;min-height:44px}.active,.read,.inp{min-height:44px;font-size:15px}.stat b{font-size:28px}.stat span{font-size:16px}.boardShell{padding:4px;border-radius:15px}
-      }
-    </style></head><body>
-      <main class="app">
-        <section class="hero">${ICON?`<img class="logo" src="${ICON}" alt="Matt's Square App logo">`:'<div></div>'}<h1>MATT'S SQUARE APP</h1></section>
-        <section class="card meta"><div class="field"><label>Game Name</label><div id="game" class="read">Loading…</div></div><div class="field"><label>Sq ($)</label><div id="cost" class="read">$0</div></div></section>
-        <section class="card">
-          <div class="head"><h2>PLAYERS / FILL</h2><small>Enter your name, tap open squares, or use Random Select.</small></div>
-          <div class="pickGrid"><div class="field"><label>Name</label><input id="name" class="inp" placeholder="Enter your name" autocomplete="name"></div><div class="wheelWrap"><span class="mini">Your Color</span><canvas id="wheel" width="244" height="244"></canvas><div class="colorLine"><i id="colorDot" class="dot"></i><span id="colorHex">#1D74D8</span></div></div></div>
-          <div class="actions"><div class="active"><i id="activeDot" class="dot"></i><span id="activeText">Active: —</span></div><div class="field"><label>Random Qty</label><input id="qty" class="inp" type="number" min="1" max="100" value="10"></div><button id="random" class="btn gold" type="button">Random Select</button><button id="confirm" class="btn green" type="button">Confirm Picks</button></div>
-          <div id="hint">Loading live board…</div>
-        </section>
-        <section class="card stats"><div class="stat"><span>Claimed</span><b id="claimed">0</b></div><div class="stat"><span>Open</span><b id="open">100</b></div><div class="stat"><span>Pot</span><b id="pot">$0</b></div></section>
-        <section class="boardShell"><div id="board"></div></section>
-        <footer>© 2026 SRL - AMB</footer>
-      </main>
-    </body></html>`);
-  document.close();
-
-  const selected=new Set(); let liveBoard=[]; let meta={}; let color='#1D74D8'; let busy=false;
-  const $=id=>document.getElementById(id);
-  const esc=s=>String(s??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
-  function tc(hex){let h=String(hex||'#000').replace('#','');if(h.length===3)h=h.split('').map(x=>x+x).join('');const r=parseInt(h.slice(0,2),16)||0,g=parseInt(h.slice(2,4),16)||0,b=parseInt(h.slice(4,6),16)||0;return(r*299+g*587+b*114)/1000>150?'#111':'#fff'}
-  function hint(s){$('hint').textContent=s}
-  function url(params){const u=new URL(API);Object.entries(params||{}).forEach(([k,v])=>u.searchParams.set(k,String(v)));return u.toString()}
-  function jsonp(params){return new Promise((resolve,reject)=>{const cb='mattcb_'+Date.now()+'_'+Math.random().toString(36).slice(2);const s=document.createElement('script');const timer=setTimeout(()=>{cleanup();reject(new Error('Google backend timed out'))},12000);function cleanup(){clearTimeout(timer);try{delete window[cb]}catch(e){};s.remove()}window[cb]=data=>{cleanup();if(!data||data.ok===false)reject(new Error((data&&data.error)||'Backend request failed'));else resolve(data)};s.onerror=()=>{cleanup();reject(new Error('Could not reach Google backend'))};s.src=url({...params,callback:cb,_:Date.now()});document.head.appendChild(s)})}
-  async function getBoard(){const j=await jsonp({action:'board',token:TOKEN});return j.board}
-  function submitClaimForm(data){return new Promise((resolve)=>{const iframe=document.createElement('iframe');iframe.name='mattClaimFrame_'+Date.now();iframe.style.display='none';document.body.appendChild(iframe);const form=document.createElement('form');form.method='POST';form.action=API;form.target=iframe.name;form.style.display='none';Object.entries(data).forEach(([k,v])=>{const input=document.createElement('input');input.type='hidden';input.name=k;input.value=Array.isArray(v)?v.join(','):String(v);form.appendChild(input)});document.body.appendChild(form);let done=false;const finish=()=>{if(done)return;done=true;setTimeout(()=>{form.remove();iframe.remove()},500);resolve()};iframe.addEventListener('load',finish,{once:true});form.submit();setTimeout(finish,2500)})}
-  function hsv(h,s,v){const c=v*s,x=c*(1-Math.abs((h/60)%2-1)),m=v-c;let r=0,g=0,b=0;if(h<60){r=c;g=x}else if(h<120){r=x;g=c}else if(h<180){g=c;b=x}else if(h<240){g=x;b=c}else if(h<300){r=x;b=c}else{r=c;b=x}return[Math.round((r+m)*255),Math.round((g+m)*255),Math.round((b+m)*255)]}
-  const toHex=(r,g,b)=>'#'+[r,g,b].map(v=>v.toString(16).padStart(2,'0')).join('').toUpperCase();
-  function setColor(c){color=String(c||'#1D74D8').toUpperCase();$('colorDot').style.background=color;$('activeDot').style.background=color;$('colorHex').textContent=color}
-  function existingColor(name){const n=String(name||'').trim().toLowerCase();const s=liveBoard.find(x=>x&&x.player&&String(x.player).trim().toLowerCase()===n&&x.color);return s?String(s.color):''}
-  function ownerOf(c,name){const cc=String(c||'').toLowerCase(),n=String(name||'').trim().toLowerCase();const s=liveBoard.find(x=>x&&x.player&&String(x.color||'').toLowerCase()===cc&&String(x.player).trim().toLowerCase()!==n);return s?String(s.player):''}
-  function drawWheel(){const c=$('wheel'),ctx=c.getContext('2d'),w=c.width,h=c.height,cx=w/2,cy=h/2,R=Math.min(w,h)/2-3,img=ctx.createImageData(w,h);for(let y=0;y<h;y++)for(let x=0;x<w;x++){const dx=x-cx,dy=y-cy,d=Math.hypot(dx,dy),i=(y*w+x)*4;if(d>R){img.data[i+3]=0;continue}const hue=(Math.atan2(dy,dx)*180/Math.PI+360)%360,sat=Math.min(1,d/R),rgb=hsv(hue,sat,1);img.data[i]=rgb[0];img.data[i+1]=rgb[1];img.data[i+2]=rgb[2];img.data[i+3]=255}ctx.putImageData(img,0,0)}
-  function pickWheel(e){const c=$('wheel'),r=c.getBoundingClientRect(),cx=c.width/2,cy=c.height/2,R=Math.min(c.width,c.height)/2-3;let x=(e.clientX-r.left)/r.width*c.width,y=(e.clientY-r.top)/r.height*c.height,dx=x-cx,dy=y-cy,d=Math.hypot(dx,dy);if(d>R){dx*=R/d;dy*=R/d;d=R}const name=$('name').value.trim(),ex=existingColor(name);if(ex){setColor(ex);hint('Existing players keep their original color.');return}const hue=(Math.atan2(dy,dx)*180/Math.PI+360)%360,sat=Math.min(1,d/R),rgb=hsv(hue,sat,1),hex=toHex(...rgb),owner=ownerOf(hex,name);if(owner){hint('That exact color is already used by '+owner+'. Pick another spot.');return}setColor(hex)}
-  function render(){let h=`<div class="corner">${ICON?`<img src="${ICON}" alt="">`:''}</div>`;for(let i=0;i<10;i++)h+='<div class="num"></div>';for(let r=0;r<10;r++){h+='<div class="num"></div>';for(let c=0;c<10;c++){const i=r*10+c,s=liveBoard[i]||{slot:i+1},claimed=!!(s.player||s.img),pending=selected.has(i),bg=s.color||'#eef8ff';h+=`<div class="cell${claimed?' claimed':''}${pending?' pending':''}" data-i="${i}" style="${claimed?`background:${esc(bg)};color:${tc(bg)}`:''}"><span class="slot">${esc(s.slot||i+1)}</span><span class="nm">${esc(s.player||'')}</span></div>`}}$('board').innerHTML=h;$('board').querySelectorAll('.cell').forEach(el=>el.onclick=()=>{const i=+el.dataset.i,s=liveBoard[i]||{};if(s.player||s.img){hint('That square is already taken.');return}selected.has(i)?selected.delete(i):selected.add(i);render();hint(selected.size?`${selected.size} square${selected.size===1?'':'s'} selected. Tap Confirm Picks to save.`:'Tap open squares or use Random Select.')})}
-  function stats(){const n=liveBoard.filter(s=>s&&(s.player||s.img)).length,cost=Number(meta.cost||0);$('game').textContent=meta.gameName||"Matt's Square App Board";$('cost').textContent='$'+cost;$('claimed').textContent=n;$('open').textContent=100-n;$('pot').textContent='$'+(n*cost).toLocaleString();$('confirm').disabled=!!meta.final}
-  async function refresh(quiet=false){if(busy)return;busy=true;try{meta=await getBoard();liveBoard=Array.isArray(meta.board)?meta.board.map((s,i)=>s||{slot:i+1}):Array.from({length:100},(_,i)=>({slot:i+1}));[...selected].forEach(i=>{const s=liveBoard[i]||{};if(s.player||s.img)selected.delete(i)});stats();render();if(!quiet)hint(meta.final?'This board is complete and locked.':'Tap open squares or use Random Select.')}catch(e){hint('Unable to load board: '+e.message)}finally{busy=false}}
-  function syncName(){const n=$('name').value.trim();$('activeText').textContent='Active: '+(n||'—');const ex=existingColor(n);if(ex)setColor(ex)}
-  function randomize(){const name=$('name').value.trim();if(!name){hint('Enter your name first.');return}let q=Math.max(1,Math.min(100,Number($('qty').value||1))),open=[];liveBoard.forEach((s,i)=>{if(!(s&&(s.player||s.img)))open.push(i)});if(!open.length){hint('There are no open squares left.');return}q=Math.min(q,open.length);for(let i=open.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[open[i],open[j]]=[open[j],open[i]]}selected.clear();open.slice(0,q).forEach(i=>selected.add(i));render();hint(`${q} random open square${q===1?'':'s'} selected. Tap Confirm Picks to save.`)}
-  async function confirm(){const name=$('name').value.trim();if(!name){hint('Enter your name first.');return}if(!selected.size){hint('Select at least one open square.');return}const ex=existingColor(name),use=ex||color,owner=ownerOf(use,name);if(owner){hint('That color is already used by '+owner+'. Pick another color.');return}const wanted=[...selected];$('confirm').disabled=true;hint('Saving picks…');try{await submitClaimForm({action:'claimSquares',token:TOKEN,squareIndexes:wanted,playerName:name,playerColor:use,requestId:(crypto.randomUUID?crypto.randomUUID():String(Date.now()))});let verified=false;for(let tries=0;tries<8;tries++){await new Promise(r=>setTimeout(r,700));try{meta=await getBoard();liveBoard=Array.isArray(meta.board)?meta.board.map((s,i)=>s||{slot:i+1}):[];verified=wanted.every(i=>liveBoard[i]&&String(liveBoard[i].player||'').trim().toLowerCase()===name.toLowerCase());if(verified)break}catch(e){}}selected.clear();stats();render();hint(verified?'Picks saved to the live board.':'Google received the request but the board has not refreshed yet. Try again in a moment.')}catch(e){selected.clear();await refresh(true);hint('Could not save picks: '+e.message)}finally{$('confirm').disabled=!!meta.final}}
-  drawWheel();setColor('#1D74D8');let down=false;$('wheel').addEventListener('pointerdown',e=>{down=true;$('wheel').setPointerCapture?.(e.pointerId);pickWheel(e);e.preventDefault()});$('wheel').addEventListener('pointermove',e=>{if(down){pickWheel(e);e.preventDefault()}});$('wheel').addEventListener('pointerup',e=>{down=false;$('wheel').releasePointerCapture?.(e.pointerId);e.preventDefault()});$('wheel').addEventListener('pointercancel',()=>down=false);$('name').addEventListener('input',syncName);$('random').addEventListener('click',randomize);$('confirm').addEventListener('click',confirm);refresh(false);setInterval(()=>{if(!document.hidden&&!selected.size)refresh(true)},5000);
-})();
-</script>
-
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
 <title>Matt's Square App v79.16 Rename Saved Board Choice</title>
@@ -2167,7 +2071,215 @@ boot();
 })();
 </script>
 
-<!-- Removed legacy self-contained share-file generator in V2.3; hosted ?board= view is authoritative. -->
+<script id="v79-7-interactive-board-share">
+(function(){
+  const BUILD_VERSION='MAv.1.4';
+  function safeName(v){return String(v||'matts-square-board').replace(/[^a-z0-9]+/gi,'_').replace(/^_+|_+$/g,'').toLowerCase()||'matts-square-board'}
+  function escHtml(v){return String(v??'').replace(/[&<>"']/g,m=>m==='&'?'&amp;':m==='<'?'&lt;':m==='>'?'&gt;':m==='"'?'&quot;':'&#39;')}
+  function participantHtml(saved){
+    const data={...saved,version:BUILD_VERSION};
+    const json=JSON.stringify(data).replace(/</g,'\\u003c');
+    const title=escHtml(saved.gameName||saved.title||"Matt's Square App Board");
+    const code=escHtml(saved.shareCode||'—');
+    return `<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>${title} — Matt's Square App Shared Board</title>
+<style>
+*{box-sizing:border-box}html,body{margin:0;background:#02060b;color:#fff;font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif}body{padding:12px 12px 88px;background:radial-gradient(circle at top,#0a233c,#02060b 55%,#000)}.wrap{max-width:760px;margin:auto}.hero{border:2px solid #c99d43;border-radius:22px;padding:14px;text-align:center;background:linear-gradient(135deg,#07192c,#02050a 58%,#5a3508)}h1{margin:0;color:#ffe19a;font-family:Georgia,serif;font-size:clamp(24px,7vw,40px)}.sub{color:#f5cf70;font-weight:800;margin-top:4px}.panel{margin-top:12px;border:1px solid #a77c2f;border-radius:18px;padding:12px;background:linear-gradient(#0b2138,#05080d)}.meta{display:grid;grid-template-columns:1fr auto;gap:10px;align-items:end}.field{display:grid;gap:5px}label{font-weight:800;color:#ffe39a}input{width:100%;border:1px solid #a77c2f;border-radius:12px;padding:12px;background:#020407;color:#fff;font-size:18px}.tools{display:grid;grid-template-columns:1fr auto;gap:8px;align-items:end}.tools input[type=color]{width:58px;height:48px;padding:3px}.grid{display:grid;grid-template-columns:.52fr repeat(10,1fr);grid-template-rows:.52fr repeat(10,1fr);aspect-ratio:1/1;width:100%;margin-top:12px;border:4px solid #d9b65d;background:#fff;overflow:hidden}.corner,.num,.cell{border:1px solid #69798a;display:flex;align-items:center;justify-content:center;min-width:0;overflow:hidden}.corner,.num{background:linear-gradient(#133458,#020407);color:#fff;font-weight:900;font-size:clamp(8px,2.2vw,15px)}.corner{color:#f7d16d}.cell{position:relative;background:linear-gradient(135deg,#fff,#dff0ff 60%,#fff4c9);color:#111;user-select:none}.cell .slot{position:absolute;top:2px;left:3px;font-size:clamp(6px,1.7vw,10px);font-weight:800;opacity:.65}.cell .nm{font-size:clamp(7px,2vw,12px);font-weight:900;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:92%}.cell.claimed{color:var(--fg,#fff);background:var(--bg,#185b9e)}.cell.open{cursor:pointer}.cell.selected{outline:3px solid #ffe36e;outline-offset:-3px;background:#fff0a9}.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:10px}.stat{border:1px solid #735b2c;border-radius:12px;padding:8px;text-align:center;background:#05080d}.stat b{display:block;font-size:20px;color:#ffe094}.actions{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px}button{border:1px solid #c99d43;border-radius:14px;padding:13px;font-weight:900;font-size:16px;background:linear-gradient(#ffe27b,#b97905);color:#080501}button.secondary{background:linear-gradient(#12365b,#02070d);color:#ffe29a}.msg{min-height:22px;margin-top:8px;color:#bfffb9;font-weight:800;text-align:center}.foot{position:fixed;left:0;right:0;bottom:0;padding:10px 8px calc(10px + env(safe-area-inset-bottom));background:linear-gradient(90deg,#02070d,#142b43,#53330a);border-top:1px solid #c99d43;text-align:center;color:#ffe5a0;font-weight:800}.note{font-size:12px;color:#b8c8da;margin-top:8px;line-height:1.35}
+</style>
+<style id="matt-v80-participant-layout-fix">
+/* Shared-board participant mode: one clean centered board, no owner controls. */
+body.playerShareMode .app{
+  width:min(100%,980px)!important;
+  max-width:980px!important;
+  margin:0 auto!important;
+  padding:10px 10px 78px!important;
+}
+body.playerShareMode .topbar,
+body.playerShareMode .left,
+body.playerShareMode .right,
+body.playerShareMode .savedInlinePanel,
+body.playerShareMode .boardControlPanel,
+body.playerShareMode .combinedPlayerPanel,
+body.playerShareMode #shareCard{
+  display:none!important;
+}
+body.playerShareMode .layout{
+  display:block!important;
+  width:100%!important;
+  max-width:920px!important;
+  margin:0 auto!important;
+  padding:10px!important;
+  border-radius:20px!important;
+  overflow:visible!important;
+}
+body.playerShareMode .boardWrap{
+  display:grid!important;
+  grid-template-columns:1fr!important;
+  width:100%!important;
+  max-width:900px!important;
+  margin:0 auto!important;
+  gap:10px!important;
+}
+body.playerShareMode .boardMetaPanel,
+body.playerShareMode .publicPickPanel,
+body.playerShareMode .boardInfoStack,
+body.playerShareMode .boardShell{
+  width:100%!important;
+  max-width:100%!important;
+}
+body.playerShareMode .boardShell{
+  margin:0 auto!important;
+}
+body.playerShareMode .boardGrid{
+  width:100%!important;
+  aspect-ratio:1/1!important;
+}
+body.playerShareMode .boardMeta{
+  grid-template-columns:minmax(0,1fr) 150px!important;
+}
+body.playerShareMode .publicPickPanel .pickRow{
+  grid-template-columns:minmax(0,1fr) auto!important;
+}
+body.playerShareMode .miniStats{
+  grid-template-columns:repeat(3,minmax(0,1fr))!important;
+  overflow:visible!important;
+}
+body.playerShareMode .miniStats .miniStat:nth-child(4){
+  display:none!important;
+}
+body.playerShareMode #status{
+  min-height:0!important;
+  padding:2px 6px!important;
+}
+@media (max-width:620px){
+  body.playerShareMode .app{padding:6px 6px 74px!important}
+  body.playerShareMode .layout{padding:6px!important}
+  body.playerShareMode .boardMeta{grid-template-columns:minmax(0,1fr) 92px!important}
+  body.playerShareMode .publicPickPanel .pickRow{grid-template-columns:1fr!important}
+  body.playerShareMode #publicSavePicks{width:100%!important}
+}
+</style>
+
+
+<style id="v17-even-tighter-hosted-frontend">
+/* V1.7: pull the desktop sides in tighter while preserving the current Matt layout and shared-board cleanup. */
+.footerSuits,.appVersionTag{display:none!important}
+.msaHero::before,.msaHero::after{content:none!important;display:none!important}
+.app{max-width:980px!important;padding-left:3px!important;padding-right:3px!important}
+.layout{grid-template-columns:205px minmax(0,1fr)205px!important;gap:6px!important;padding:6px!important}
+.left,.right{gap:6px!important}
+@media(max-width:980px){
+  .app{max-width:100%!important;padding-left:3px!important;padding-right:3px!important}
+  .layout{grid-template-columns:1fr!important;gap:6px!important;padding:6px!important}
+}
+</style>
+</head><body><div class="wrap"><div class="hero"><h1>MATT'S SQUARE APP</h1><div class="sub">${title}</div><div class="sub" style="color:#fff">Share Code: <b style="color:#ffe28a;letter-spacing:2px">${code}</b></div></div><div class="panel"><div class="meta"><div><b>Pick your open squares</b><div class="note">This file is for board <b>${code}</b>. Enter your name, tap any open squares you want, then confirm. Claimed squares cannot be changed.</div></div><div><b>$${escHtml(saved.cost||0)}</b><div class="note">per square</div></div></div><div class="tools"><div class="field"><label>Your Name</label><input id="name" placeholder="Enter your name"></div><div class="field"><label>Color</label><input id="color" type="color" value="#1d74d8"></div></div><div id="grid" class="grid"></div><div class="stats"><div class="stat">Claimed<b id="claimed">0</b></div><div class="stat">Open<b id="open">100</b></div><div class="stat">Selected<b id="selected">0</b></div></div><div class="actions"><button id="confirm">Confirm Picks</button><button id="share" class="secondary">Share Updated Board</button></div><div id="msg" class="msg"></div></div></div><div class="foot">© 2026 SRL - AMB</div>
+<scr`+`ipt>
+const state=${json};
+let board=Array.isArray(state.board)?state.board.map((x,i)=>({slot:x.slot||i+1,player:x.player||null,color:x.color||null,img:x.img||null,time:x.time||null})):Array.from({length:100},(_,i)=>({slot:i+1,player:null,color:null,img:null,time:null}));
+function nc(c){return String(c||'').trim().toLowerCase()}function pc(name){const k=String(name||'').trim().toLowerCase(),h=board.find(s=>s.player&&String(s.player).trim().toLowerCase()===k&&s.color);return h?nc(h.color):''}function co(color,name){const c=nc(color),k=String(name||'').trim().toLowerCase(),h=board.find(s=>s.player&&nc(s.color)===c&&String(s.player).trim().toLowerCase()!==k);return h?String(h.player):''}
+let selected=new Set();
+const $=id=>document.getElementById(id);
+const tc=h=>{try{h=String(h||'#000').replace('#','');if(h.length===3)h=h.split('').map(x=>x+x).join('');const r=parseInt(h.slice(0,2),16),g=parseInt(h.slice(2,4),16),b=parseInt(h.slice(4,6),16);return((r*299+g*587+b*114)/1000)>150?'#111':'#fff'}catch(e){return'#fff'}};
+function render(){let h='<div class="corner">MSA</div>';const full=(state.topNums||[]).length===10&&(state.leftNums||[]).length===10;for(let c=0;c<10;c++)h+='<div class="num">'+(full?state.topNums[c]:'')+'</div>';for(let r=0;r<10;r++){h+='<div class="num">'+(full?state.leftNums[r]:'')+'</div>';for(let c=0;c<10;c++){const i=r*10+c,s=board[i],claimed=!!(s.player||s.img),sel=selected.has(i),bg=s.color||'#185b9e';h+='<div class="cell '+(claimed?'claimed':'open')+(sel?' selected':'')+'" data-i="'+i+'" style="--bg:'+bg+';--fg:'+tc(bg)+'"><span class="slot">'+(s.slot||i+1)+'</span><span class="nm">'+(s.player?String(s.player).replace(/[&<>]/g,''):'')+'</span></div>'}}$('grid').innerHTML=h;const n=board.filter(x=>x.player||x.img).length;$('claimed').textContent=n;$('open').textContent=100-n;$('selected').textContent=selected.size;document.querySelectorAll('.cell.open').forEach(el=>el.onclick=()=>{const i=+el.dataset.i;selected.has(i)?selected.delete(i):selected.add(i);render()})}
+$('confirm').onclick=()=>{const name=$('name').value.trim();if(!name){$('msg').textContent='Enter your name first.';return}if(!selected.size){$('msg').textContent='Tap at least one open square.';return}let color=$('color').value||'#1d74d8';const existing=pc(name);if(existing){color=existing;$('color').value=existing}else{const owner=co(color,name);if(owner){$('msg').textContent='That color is already used by '+owner+'. Choose a different color.';return}}selected.forEach(i=>{if(!board[i].player&&!board[i].img){board[i].player=name;board[i].color=color;board[i].time=new Date().toISOString()}});selected.clear();state.board=board;state.updated=new Date().toISOString();$('msg').textContent='Picks confirmed. Use Share Updated Board to send the updated board.';render()};
+function build(){state.board=board;state.updated=new Date().toISOString();let html=document.documentElement.outerHTML;const marker='const state=';const a=html.indexOf(marker);if(a>=0){const b=html.indexOf(';\nlet board=',a);if(b>a){const repl='const state='+JSON.stringify(state).replace(/</g,'\\\\u003c');html=html.slice(0,a)+repl+html.slice(b)}}return '<!doctype html>'+html}
+async function shareUpdated(){const blob=new Blob([build()],{type:'text/html'}),fn=((state.gameName||'matts-square-board').replace(/[^a-z0-9]+/gi,'_').toLowerCase())+'_picks.html',file=new File([blob],fn,{type:'text/html'});if(navigator.share&&navigator.canShare&&navigator.canShare({files:[file]})){try{await navigator.share({title:state.gameName||"Matt's Square App Board",text:'Updated Matt\'s Square App board picks',files:[file]});$('msg').textContent='Updated board shared.';return}catch(e){if(e&&e.name==='AbortError')return}}const u=URL.createObjectURL(blob),a=document.createElement('a');a.href=u;a.download=fn;a.click();setTimeout(()=>URL.revokeObjectURL(u),2500);$('msg').textContent='Updated board saved. Share the HTML file from Downloads/Files.'}
+$('name').addEventListener('input',()=>{const existing=pc($('name').value);if(existing)$('color').value=existing});$('color').addEventListener('input',()=>{const name=$('name').value.trim(),existing=pc(name);if(existing&&nc($('color').value)!==existing){$('color').value=existing;$('msg').textContent='Each player keeps one color.';return}const owner=co($('color').value,name);if(owner)$('msg').textContent='That color is already used by '+owner+'. Choose a different color.';else $('msg').textContent=''});$('share').onclick=shareUpdated;render();
+</scr`+`ipt><!-- v79.16 Rename Saved Board Choice -->
+\n<script id="matts-v13-hosted-shared-wheel">
+(function(){
+  'use strict';
+  function hsvToRgb(h,s,v){
+    s/=100;v/=100;const c=v*s,x=c*(1-Math.abs((h/60)%2-1)),m=v-c;let r=0,g=0,b=0;
+    if(h<60){r=c;g=x}else if(h<120){r=x;g=c}else if(h<180){g=c;b=x}else if(h<240){g=x;b=c}else if(h<300){r=x;b=c}else{r=c;b=x}
+    return [r,g,b].map(q=>Math.round((q+m)*255));
+  }
+  function rgbHex(rgb){return '#'+rgb.map(v=>v.toString(16).padStart(2,'0')).join('')}
+  function drawWheel(canvas){
+    const ctx=canvas.getContext('2d'),w=canvas.width,h=canvas.height,cx=w/2,cy=h/2,r=Math.min(w,h)/2-2,img=ctx.createImageData(w,h);
+    for(let y=0;y<h;y++)for(let x=0;x<w;x++){const dx=x-cx,dy=y-cy,d=Math.hypot(dx,dy),i=(y*w+x)*4;if(d<=r){const hue=(Math.atan2(dy,dx)*180/Math.PI+360)%360,s=Math.min(100,d/r*100),rgb=hsvToRgb(hue,s,100);img.data[i]=rgb[0];img.data[i+1]=rgb[1];img.data[i+2]=rgb[2];img.data[i+3]=255}else img.data[i+3]=0}
+    ctx.putImageData(img,0,0);
+  }
+  function pick(evt){
+    const canvas=evt.currentTarget,input=document.getElementById('publicPlayerColor'),preview=document.querySelector('#publicColorPreview i'),label=document.querySelector('#publicColorPreview span');
+    if(!canvas||!input)return;const rect=canvas.getBoundingClientRect(),cx=rect.left+rect.width/2,cy=rect.top+rect.height/2,dx=evt.clientX-cx,dy=evt.clientY-cy,rad=Math.min(rect.width,rect.height)/2,dist=Math.hypot(dx,dy);if(dist>rad)return;
+    const hue=(Math.atan2(dy,dx)*180/Math.PI+360)%360,s=Math.min(100,dist/rad*100),hex=rgbHex(hsvToRgb(hue,s,100));input.value=hex;if(preview)preview.style.background=hex;if(label)label.textContent=hex.toUpperCase();
+    evt.preventDefault();evt.stopPropagation();
+  }
+  function init(){
+    const canvas=document.getElementById('publicColorWheelCanvas');if(!canvas)return;drawWheel(canvas);canvas.addEventListener('pointerdown',pick,{passive:false});canvas.addEventListener('pointermove',function(e){if(e.buttons||e.pressure>0)pick(e)},{passive:false});
+  }
+  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init);else init();
+})();
+<\/script>
+</body></html>`;
+  }
+  async function shareParticipantFile(saved){
+    const html=participantHtml(saved),blob=new Blob([html],{type:'text/html'}),fn=safeName(saved.gameName||saved.title)+'_shared_board.html';
+    const file=new File([blob],fn,{type:'text/html'});
+    try{
+      if(navigator.share&&navigator.canShare&&navigator.canShare({files:[file]})){
+        await navigator.share({title:saved.gameName||"Matt's Square App Board",text:'Matt\'s Square App board',files:[file]});
+        if(typeof toast==='function')toast('Board file shared.');
+        return true;
+      }
+    }catch(e){if(e&&e.name==='AbortError')return false}
+    const u=URL.createObjectURL(blob),a=document.createElement('a');a.href=u;a.download=fn;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(u),2500);
+    if(typeof toast==='function')toast('Board file saved to Downloads for sharing.');
+    return true;
+  }
+  async function shareInteractive(saved){
+    if(!saved)return;
+    let cloudOk=true;
+    if(typeof window.mattCloudSave==='function'){
+      try{cloudOk=await window.mattCloudSave(saved)}catch(e){cloudOk=false}
+    }
+    const live=(typeof window.mattLiveShareUrl==='function'?window.mattLiveShareUrl(saved):(saved.shareToken?'https://acemybusiness.github.io/MattsApp/?board='+encodeURIComponent(saved.shareToken):''));
+    const urlEl=document.getElementById('shareBoardUrl');if(urlEl)urlEl.textContent=live||'Save this board to create its live link.';
+    if(!cloudOk){if(typeof toast==='function')toast('Google board sync is unavailable. The hosted link was not copied.');return;}
+    if(!live){if(typeof toast==='function')toast('Save the board first.');return;}
+    let copied=false;
+    try{if(navigator.clipboard&&navigator.clipboard.writeText){await navigator.clipboard.writeText(live);copied=true;}}catch(e){}
+    if(!copied){
+      const ta=document.createElement('textarea');ta.value=live;ta.setAttribute('readonly','');ta.style.position='fixed';ta.style.opacity='0';document.body.appendChild(ta);ta.focus();ta.select();
+      try{copied=document.execCommand('copy')}catch(e){}
+      ta.remove();
+    }
+    if(typeof toast==='function')toast(copied?'Live board link copied.':'Live board link is shown below — press and hold to copy.');
+  }
+  window.shareSaved=function(id){
+    const f=(typeof getSaved==='function'?getSaved():[]).find(x=>x.id===id);
+    if(f){
+      if(typeof cloudSave==='function'){
+        cloudSave(f).then(()=>showShareFor(f));
+      }else{
+        showShareFor(f);
+      }
+    }
+  };
+  window.showShareFor=function(saved){
+    if(!saved)return;
+    const card=document.getElementById('shareCard'),id=document.getElementById('shareBoardId'),url=document.getElementById('shareBoardUrl');if(!card)return;
+    if(id)id.textContent='Share Code: '+(saved.shareCode||'—')+' • Board ID: '+(saved.boardId||saved.id);
+    if(url)url.textContent=(typeof window.mattLiveShareUrl==='function'?window.mattLiveShareUrl(saved):'')||'Save this board to create its live link.';
+    card.style.display='block';
+    const b1=document.getElementById('copyShareBtn'),b2=document.getElementById('openShareBtn'),b3=document.getElementById('qrShareBtn');
+    if(b1){b1.textContent='Copy Share Link';b1.onclick=()=>shareInteractive(saved)}
+    if(b2){b2.textContent='Save PNG';b2.onclick=()=>{if(typeof exportSaved==='function')exportSaved(saved.id,'download')}}
+    if(b3){b3.textContent='Hide';b3.onclick=()=>{card.style.display='none'}}
+  };
+  document.addEventListener('DOMContentLoaded',()=>{
+    const tag=document.querySelector('.appVersionTag');if(tag)tag.textContent=BUILD_VERSION;
+    document.title="Matt's Square App "+BUILD_VERSION+" Interactive Board Share";
+    if(typeof lockSavedListToThree==='function')requestAnimationFrame(lockSavedListToThree);
+  });
+  window.addEventListener('resize',()=>{if(typeof lockSavedListToThree==='function')requestAnimationFrame(lockSavedListToThree)});
+})();
+</script>
+
+
 <script id="matt-v80-live-google-board-sync">
 (function(){
   'use strict';
@@ -2248,7 +2360,7 @@ boot();
     if(!TOKEN || busy) return;
     busy=true;
     try{
-      const j=await get({action:'board',token:TOKEN,_:Date.now()});
+      const j=await get({action:'getBoard',token:TOKEN,_:Date.now()});
       if(!j.board || !Array.isArray(j.board.board)) throw new Error('Board data was incomplete.');
       if(typeof setState==='function') setState(j.board);
       document.body.classList.add('playerShareMode');
@@ -2257,7 +2369,7 @@ boot();
       hint(j.board.locked||j.board.final
         ? 'This board is complete and locked.'
         : 'Enter your name, tap open squares, then Confirm Picks.');
-      if(!quiet) status('Live board loaded. '+Number(j.board.claimedCount||0)+'/100 claimed.');
+      if(!quiet) status('Live board loaded. '+(j.claimed||0)+'/100 claimed.');
     }catch(err){
       console.error(err);
       hint('Unable to load the live board: '+err.message);
@@ -2281,9 +2393,9 @@ boot();
     for(const index of [...pending]){
       try{
         await post({
-          action:'claimSquares',
+          action:'claimSquare',
           token:TOKEN,
-          squareIndexes:[index],
+          squareIndex:index,
           playerName:name,
           playerColor:color,
           requestId:(crypto.randomUUID?crypto.randomUUID():Date.now()+'-'+index)
@@ -2917,582 +3029,92 @@ body:not(.playerShareMode) .randomPairRow{grid-template-columns:92px minmax(0,1f
 })();
 </script>
 
-<style id="matts-v21-shared-backend-fix-style">
-body.playerShareMode .footerSuits,
-body.playerShareMode .appVersionTag{display:none!important}
-body.playerShareMode .footer.appSignature{display:block!important;text-align:center!important;font-size:13px!important;padding:8px!important}
-body.playerShareMode .footer.appSignature::before{content:"© 2026 SRL - AMB"!important}
-body.playerShareMode .footer.appSignature>*{display:none!important}
-body.playerShareMode .msaHero::before,
-body.playerShareMode .msaHero::after{content:none!important;display:none!important}
-</style>
-<script id="matts-v21-exact-shared-wheel">
+<script id="matts-share-only-fix">
 (function(){
   'use strict';
-  function isShared(){return new URLSearchParams(location.search).has('board') || document.body.classList.contains('playerShareMode')}
-  function hsvToRgb(h,s,v){s/=100;v/=100;const c=v*s,x=c*(1-Math.abs((h/60)%2-1)),m=v-c;let r=0,g=0,b=0;if(h<60){r=c;g=x}else if(h<120){r=x;g=c}else if(h<180){g=c;b=x}else if(h<240){g=x;b=c}else if(h<300){r=x;b=c}else{r=c;b=x}return [Math.round((r+m)*255),Math.round((g+m)*255),Math.round((b+m)*255)]}
-  function hex(rgb){return '#'+rgb.map(v=>v.toString(16).padStart(2,'0')).join('')}
-  function draw(c){const ctx=c.getContext('2d'),w=c.width,h=c.height,cx=w/2,cy=h/2,r=Math.min(w,h)/2-2,img=ctx.createImageData(w,h);for(let y=0;y<h;y++)for(let x=0;x<w;x++){const dx=x-cx,dy=y-cy,d=Math.hypot(dx,dy),i=(y*w+x)*4;if(d<=r){const hue=(Math.atan2(dy,dx)*180/Math.PI+360)%360,s=Math.min(100,d/r*100),rgb=hsvToRgb(hue,s,100);img.data[i]=rgb[0];img.data[i+1]=rgb[1];img.data[i+2]=rgb[2];img.data[i+3]=255}else img.data[i+3]=0}ctx.putImageData(img,0,0)}
-  function install(){
-    if(!isShared())return;
-    document.body.classList.add('playerShareMode');
-    const old=document.getElementById('publicColorWheelCanvas');
-    if(!old||old.dataset.v21==='1')return;
-    const c=old.cloneNode(true); old.replaceWith(c); c.dataset.v21='1'; c.style.touchAction='none'; draw(c);
-    let active=false;
-    function choose(e){
-      const r=c.getBoundingClientRect(),cx=r.left+r.width/2,cy=r.top+r.height/2,dx=e.clientX-cx,dy=e.clientY-cy,rad=Math.min(r.width,r.height)/2,dist=Math.hypot(dx,dy);if(dist>rad)return;
-      const hue=(Math.atan2(dy,dx)*180/Math.PI+360)%360,s=Math.min(100,dist/rad*100),val=hex(hsvToRgb(hue,s,100));
-      const input=document.getElementById('publicPlayerColor');if(input)input.value=val;
-      const dot=document.querySelector('#publicColorPreview i');if(dot)dot.style.background=val;
-      e.preventDefault();e.stopPropagation();
-    }
-    c.addEventListener('pointerdown',e=>{active=true;try{c.setPointerCapture(e.pointerId)}catch(_){}choose(e)},{passive:false});
-    c.addEventListener('pointermove',e=>{if(active)choose(e)},{passive:false});
-    c.addEventListener('pointerup',e=>{choose(e);active=false;try{c.releasePointerCapture(e.pointerId)}catch(_){}},{passive:false});
-    c.addEventListener('pointercancel',()=>{active=false},{passive:false});
-  }
-  function footer(){if(!isShared())return;const f=document.querySelector('.footer.appSignature');if(f)f.textContent='© 2026 SRL - AMB'}
-  function apply(){install();footer()}
-  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',()=>setTimeout(apply,0));else setTimeout(apply,0);
-  [100,400,1000,2000].forEach(t=>setTimeout(apply,t));
-})();
-</script>
+  const SHARED_PAGE='https://acemybusiness.github.io/MattsApp/shared.html';
 
+  function liveUrl(saved){
+    const token=saved && (saved.shareToken || saved.shareCode);
+    return token ? SHARED_PAGE+'?board='+encodeURIComponent(token) : '';
+  }
 
-<style id="matt-v23-prehide-old-shared-ui">
-body.playerShareMode .app,body.playerShareMode>.footer,body.playerShareMode .footer{display:none!important}
-</style>
-<style id="matt-v22-isolated-shared-board-style">
-/* V2.2 — isolated participant screen. This intentionally does not reuse the owner DOM. */
-#mattSharedStandalone{display:none}
-body.mattSharedStandaloneMode{
-  margin:0!important;
-  min-height:100vh!important;
-  background:radial-gradient(circle at top,#11223c 0,#050912 52%,#000 100%)!important;
-  color:#fff!important;
-  overflow-x:hidden!important;
-}
-body.mattSharedStandaloneMode #mattSharedStandalone{
-  display:block!important;
-  width:min(100%,980px);
-  margin:0 auto;
-  padding:10px 10px 26px;
-  font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;
-}
-.ms22Hero{
-  display:grid;
-  grid-template-columns:92px minmax(0,1fr);
-  align-items:center;
-  gap:14px;
-  padding:12px 16px;
-  border:2px solid #d4ad55;
-  border-radius:24px;
-  background:
-    radial-gradient(circle at 47% 50%,rgba(78,137,207,.25),transparent 28%),
-    linear-gradient(100deg,#111923,#27333a 45%,#4b2d08);
-  box-shadow:0 14px 30px rgba(0,0,0,.35),inset 0 1px 0 rgba(255,255,255,.08);
-}
-.ms22HeroLogo{
-  width:86px;height:86px;object-fit:contain;display:block;
-}
-.ms22HeroTitle{
-  margin:0;
-  text-align:center;
-  color:#f8df9d;
-  font-family:Georgia,serif;
-  font-weight:900;
-  font-size:clamp(30px,5.7vw,64px);
-  letter-spacing:.5px;
-  line-height:1;
-  text-shadow:0 3px 0 #301d05,0 0 14px rgba(255,219,133,.28);
-}
-.ms22Card{
-  margin-top:10px;
-  border:1px solid #8b7138;
-  border-radius:18px;
-  padding:12px;
-  background:linear-gradient(180deg,rgba(16,29,49,.97),rgba(5,11,20,.98));
-  box-shadow:inset 0 1px 0 rgba(255,255,255,.05);
-}
-.ms22Meta{
-  display:grid;
-  grid-template-columns:minmax(0,1fr) 120px;
-  gap:10px;
-}
-.ms22Field{display:grid;gap:5px}
-.ms22Field label,.ms22MiniLabel{
-  color:#f9dfa0;font-weight:900;font-size:14px
-}
-.ms22Readonly{
-  min-height:48px;
-  display:flex;align-items:center;
-  border:1px solid #b19045;border-radius:13px;
-  background:#02050a;color:#fff;padding:10px 12px;
-  font-size:17px;font-weight:800;
-}
-.ms22Stats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
-.ms22Stat{
-  text-align:center;border:1px solid #8b7138;border-radius:14px;
-  padding:10px 6px;background:#07101d
-}
-.ms22Stat span{display:block;color:#f8dda0;font-family:Georgia,serif;font-size:18px;font-weight:900}
-.ms22Stat b{display:block;margin-top:3px;font-size:34px;color:#fff8de}
-.ms22PlayerHead{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:8px}
-.ms22PlayerHead h2{
-  margin:0;color:#f9dfa0;font-family:Georgia,serif;font-size:28px;letter-spacing:.4px
-}
-.ms22PlayerHead small{color:#ffe38d;font-weight:800}
-.ms22PlayerGrid{
-  display:grid;grid-template-columns:minmax(0,1fr) 132px;gap:12px;align-items:end
-}
-.ms22Input{
-  width:100%;min-height:48px;border:1px solid #b19045;border-radius:13px;
-  background:#02050a;color:#fff;padding:10px 12px;font-size:17px;outline:none
-}
-.ms22Input:focus{box-shadow:0 0 0 3px rgba(215,175,85,.16)}
-.ms22WheelWrap{display:grid;justify-items:center;gap:5px}
-#ms22Wheel{
-  width:122px;height:122px;border-radius:50%;
-  display:block;touch-action:none;cursor:crosshair;
-  border:2px solid #111;box-shadow:0 0 0 2px #8b7138,0 8px 18px rgba(0,0,0,.35)
-}
-.ms22ColorLine{display:flex;align-items:center;gap:7px;font-size:12px;font-weight:800}
-#ms22ColorDot{width:20px;height:20px;border-radius:6px;border:1px solid #fff;background:#1d74d8}
-.ms22ActionRow{
-  display:grid;grid-template-columns:minmax(140px,.7fr) 105px minmax(150px,.9fr) minmax(170px,1fr);
-  gap:8px;align-items:end;margin-top:10px
-}
-.ms22Active{
-  min-height:48px;border:1px solid #8b7138;border-radius:13px;background:#07101d;
-  display:flex;align-items:center;gap:9px;padding:8px 11px;font-weight:900;overflow:hidden
-}
-#ms22ActiveDot{width:24px;height:24px;border-radius:7px;border:2px solid #fff;flex:none;background:#1d74d8}
-.ms22Qty input{text-align:center;font-weight:900}
-.ms22Btn{
-  min-height:48px;border:1px solid #b19045;border-radius:13px;
-  padding:10px 12px;font-size:16px;font-weight:1000;color:#fff;cursor:pointer;
-  background:linear-gradient(180deg,#17243a,#07101e)
-}
-.ms22Btn.gold{color:#170f00;background:linear-gradient(180deg,#ffe38c,#a86f10)}
-.ms22Btn.green{color:#061505;background:linear-gradient(180deg,#9ff58a,#2c812c)}
-.ms22Btn:disabled{opacity:.45;cursor:not-allowed}
-#ms22Hint{
-  margin-top:8px;min-height:34px;display:flex;align-items:center;justify-content:center;
-  border:1px solid #6f633f;border-radius:11px;background:#11151c;color:#dce3ef;
-  padding:7px 10px;text-align:center;font-size:13px;font-weight:800
-}
-.ms22BoardShell{
-  margin-top:10px;padding:7px;border:2px solid #d4ad55;border-radius:20px;background:#05070b;
-  box-shadow:0 14px 30px rgba(0,0,0,.38)
-}
-#ms22Board{
-  display:grid;
-  grid-template-columns:.52fr repeat(10,1fr);
-  grid-template-rows:.52fr repeat(10,1fr);
-  width:100%;aspect-ratio:1/1;
-  background:#111;overflow:hidden;border-radius:10px
-}
-.ms22Corner,.ms22Num,.ms22Cell{
-  border:1px solid #66707a;min-width:0;overflow:hidden
-}
-.ms22Corner,.ms22Num{
-  display:flex;align-items:center;justify-content:center;
-  background:linear-gradient(180deg,#14233a,#030810);color:#fff;font-weight:900
-}
-.ms22Corner img{width:78%;height:78%;object-fit:contain}
-.ms22Cell{
-  position:relative;display:flex;align-items:center;justify-content:center;
-  background:linear-gradient(135deg,#eef8ff,#fff 56%,#fffbd7);
-  color:#10131a;font-weight:1000;user-select:none;cursor:pointer
-}
-.ms22Cell.claimed{cursor:not-allowed}
-.ms22Cell.pending{outline:4px solid #ffd44f;outline-offset:-4px;box-shadow:inset 0 0 0 2px #111}
-.ms22Cell .slot{position:absolute;left:3px;top:2px;font-size:clamp(7px,1vw,11px);opacity:.68}
-.ms22Cell .nm{
-  max-width:94%;padding:0 2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
-  font-size:clamp(8px,1.15vw,14px);font-weight:1000
-}
-.ms22Footer{text-align:center;color:#f7dfa1;font-weight:900;padding:14px 8px 2px}
-@media(max-width:650px){
-  body.mattSharedStandaloneMode #mattSharedStandalone{padding:6px 6px 22px}
-  .ms22Hero{grid-template-columns:70px minmax(0,1fr);padding:8px 10px;border-radius:18px}
-  .ms22HeroLogo{width:66px;height:66px}
-  .ms22HeroTitle{font-size:clamp(25px,9vw,42px)}
-  .ms22Card{padding:8px;border-radius:15px}
-  .ms22Meta{grid-template-columns:minmax(0,1fr) 86px}
-  .ms22PlayerHead{display:grid;gap:2px}
-  .ms22PlayerHead h2{font-size:24px}
-  .ms22PlayerGrid{grid-template-columns:minmax(0,1fr) 96px;gap:8px}
-  #ms22Wheel{width:90px;height:90px}
-  .ms22ActionRow{grid-template-columns:1fr 82px;gap:7px}
-  .ms22ActionRow .ms22RandomBtn,.ms22ActionRow .ms22ConfirmBtn{grid-column:auto}
-  .ms22Btn{font-size:14px;padding:8px;min-height:44px}
-  .ms22Active{min-height:44px;font-size:14px}
-  .ms22Input,.ms22Readonly{min-height:44px;font-size:15px}
-  .ms22Stat b{font-size:28px}
-  .ms22Stat span{font-size:16px}
-  .ms22BoardShell{padding:4px;border-radius:15px}
-}
-</style>
-
-<script id="matt-v22-isolated-shared-board">
-(function(){
-  'use strict';
-  const token=new URLSearchParams(location.search).get('board')||'';
-  if(!token) return;
-
-  const BACKEND='https://script.google.com/macros/s/AKfycbxaB2NC-8eKWBrUqplCGtSQ2tJmOQKlUyh03YjfmaL_KPQIAg-cpryEr13hcDaM7R4-/exec';
-  const selected=new Set();
-  let liveBoard=[];
-  let boardMeta=null;
-  let wheelColor='#1d74d8';
-  let logoSrc='';
-  let refreshing=false;
-
-  function backendBase(){
-    const q=new URLSearchParams(location.search).get('api');
-    if(q){try{localStorage.setItem('matt_v80_api_url',q)}catch(e){}; return q}
-    try{return localStorage.getItem('matt_v80_api_url')||BACKEND}catch(e){return BACKEND}
-  }
-  function makeUrl(params){
-    const u=new URL(backendBase());
-    Object.entries(params||{}).forEach(([k,v])=>u.searchParams.set(k,String(v)));
-    return u.toString();
-  }
-  async function apiGet(params){
-    const r=await fetch(makeUrl(params),{cache:'no-store',redirect:'follow'});
-    const j=await r.json();
-    if(!j.ok) throw new Error(j.error||'Backend request failed');
-    return j;
-  }
-  async function apiPost(data){
-    const r=await fetch(backendBase(),{
-      method:'POST',
-      headers:{'Content-Type':'text/plain;charset=utf-8'},
-      body:JSON.stringify(data),
-      redirect:'follow'
-    });
-    const j=await r.json();
-    if(!j.ok) {
-      const err=new Error(j.error||'Backend request failed');
-      err.payload=j;
-      throw err;
-    }
-    return j;
-  }
-  function esc(s){return String(s??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]))}
-  function textColor(hex){
-    let h=String(hex||'#000').replace('#','');
-    if(h.length===3)h=h.split('').map(x=>x+x).join('');
-    const r=parseInt(h.slice(0,2),16)||0,g=parseInt(h.slice(2,4),16)||0,b=parseInt(h.slice(4,6),16)||0;
-    return (r*299+g*587+b*114)/1000>150?'#111':'#fff';
-  }
-  function hint(t){const e=document.getElementById('ms22Hint');if(e)e.textContent=t}
-  function hideOldUI(root){
-    document.body.classList.add('mattSharedStandaloneMode');
-    [...document.body.children].forEach(el=>{
-      if(el===root || el.tagName==='SCRIPT' || el.tagName==='STYLE') return;
-      el.style.setProperty('display','none','important');
-    });
-  }
-  function detectLogo(){
-    const el=document.querySelector('.msaLogo,img[alt*="Matt"],img[alt*="logo" i]');
-    return el && el.src ? el.src : '';
-  }
-  function buildRoot(){
-    logoSrc=detectLogo();
-    const root=document.createElement('main');
-    root.id='mattSharedStandalone';
-    root.innerHTML=`
-      <section class="ms22Hero">
-        ${logoSrc?`<img class="ms22HeroLogo" src="${logoSrc}" alt="Matt's Square App logo">`:'<div></div>'}
-        <h1 class="ms22HeroTitle">MATT'S SQUARE APP</h1>
-      </section>
-      <section class="ms22Card ms22Meta">
-        <div class="ms22Field"><label>Game Name</label><div id="ms22Game" class="ms22Readonly">Loading…</div></div>
-        <div class="ms22Field"><label>Sq ($)</label><div id="ms22Cost" class="ms22Readonly">$0</div></div>
-      </section>
-      <section class="ms22Card">
-        <div class="ms22PlayerHead"><h2>PLAYERS / FILL</h2><small>Enter your name, then tap open squares or use Random Select.</small></div>
-        <div class="ms22PlayerGrid">
-          <div class="ms22Field"><label>Name</label><input id="ms22Name" class="ms22Input" placeholder="Enter your name" autocomplete="name"></div>
-          <div class="ms22WheelWrap">
-            <span class="ms22MiniLabel">Your Color</span>
-            <canvas id="ms22Wheel" width="244" height="244"></canvas>
-            <div class="ms22ColorLine"><i id="ms22ColorDot"></i><span id="ms22ColorHex">#1D74D8</span></div>
-          </div>
-        </div>
-        <div class="ms22ActionRow">
-          <div class="ms22Active"><i id="ms22ActiveDot"></i><span id="ms22ActiveText">Active: —</span></div>
-          <div class="ms22Field ms22Qty"><label>Random Qty</label><input id="ms22Qty" class="ms22Input" type="number" min="1" max="100" value="10"></div>
-          <button id="ms22Random" class="ms22Btn gold ms22RandomBtn" type="button">Random Select</button>
-          <button id="ms22Confirm" class="ms22Btn green ms22ConfirmBtn" type="button">Confirm Picks</button>
-        </div>
-        <div id="ms22Hint">Loading live board…</div>
-      </section>
-      <section class="ms22Card ms22Stats">
-        <div class="ms22Stat"><span>Claimed</span><b id="ms22Claimed">0</b></div>
-        <div class="ms22Stat"><span>Open</span><b id="ms22Open">100</b></div>
-        <div class="ms22Stat"><span>Pot</span><b id="ms22Pot">$0</b></div>
-      </section>
-      <section class="ms22BoardShell"><div id="ms22Board"></div></section>
-      <footer class="ms22Footer">© 2026 SRL - AMB</footer>`;
-    document.body.appendChild(root);
-    hideOldUI(root);
-    return root;
-  }
-  function playerColorFor(name){
-    const k=String(name||'').trim().toLowerCase();
-    if(!k) return '';
-    const hit=liveBoard.find(s=>s&&s.player&&String(s.player).trim().toLowerCase()===k&&s.color);
-    return hit?String(hit.color):'';
-  }
-  function colorOwner(color,name){
-    const c=String(color||'').toLowerCase(), n=String(name||'').trim().toLowerCase();
-    const hit=liveBoard.find(s=>s&&s.player&&String(s.color||'').toLowerCase()===c&&String(s.player).trim().toLowerCase()!==n);
-    return hit?String(hit.player):'';
-  }
-  function setColor(hex){
-    wheelColor=String(hex||'#1d74d8').toUpperCase();
-    const dot=document.getElementById('ms22ColorDot');
-    const hexEl=document.getElementById('ms22ColorHex');
-    const active=document.getElementById('ms22ActiveDot');
-    if(dot)dot.style.background=wheelColor;
-    if(hexEl)hexEl.textContent=wheelColor;
-    if(active)active.style.background=wheelColor;
-  }
-  function hsvToRgb(h,s,v){
-    const c=v*s,x=c*(1-Math.abs((h/60)%2-1)),m=v-c;
-    let r=0,g=0,b=0;
-    if(h<60){r=c;g=x}else if(h<120){r=x;g=c}else if(h<180){g=c;b=x}else if(h<240){g=x;b=c}else if(h<300){r=x;b=c}else{r=c;b=x}
-    return [Math.round((r+m)*255),Math.round((g+m)*255),Math.round((b+m)*255)];
-  }
-  function rgbHex(r,g,b){return '#'+[r,g,b].map(v=>v.toString(16).padStart(2,'0')).join('').toUpperCase()}
-  function drawWheel(){
-    const c=document.getElementById('ms22Wheel'); if(!c)return;
-    const ctx=c.getContext('2d'),w=c.width,h=c.height,cx=w/2,cy=h/2,R=Math.min(w,h)/2-3;
-    const img=ctx.createImageData(w,h);
-    for(let y=0;y<h;y++)for(let x=0;x<w;x++){
-      const dx=x-cx,dy=y-cy,d=Math.hypot(dx,dy),i=(y*w+x)*4;
-      if(d>R){img.data[i+3]=0;continue}
-      let hue=(Math.atan2(dy,dx)*180/Math.PI+360)%360;
-      const sat=Math.min(1,d/R);
-      const [r,g,b]=hsvToRgb(hue,sat,1);
-      img.data[i]=r;img.data[i+1]=g;img.data[i+2]=b;img.data[i+3]=255;
-    }
-    ctx.putImageData(img,0,0);
-  }
-  function wheelPick(ev){
-    const c=document.getElementById('ms22Wheel'); if(!c)return;
-    const rect=c.getBoundingClientRect();
-    const x=(ev.clientX-rect.left)/rect.width*c.width;
-    const y=(ev.clientY-rect.top)/rect.height*c.height;
-    const cx=c.width/2,cy=c.height/2,R=Math.min(c.width,c.height)/2-3;
-    let dx=x-cx,dy=y-cy,d=Math.hypot(dx,dy);
-    if(d>R){dx*=R/d;dy*=R/d;d=R}
-    const hue=(Math.atan2(dy,dx)*180/Math.PI+360)%360;
-    const sat=Math.min(1,d/R);
-    const [r,g,b]=hsvToRgb(hue,sat,1);
-    const name=(document.getElementById('ms22Name')?.value||'').trim();
-    const existing=playerColorFor(name);
-    if(existing){setColor(existing);hint('Existing players keep their original color.');return}
-    const hex=rgbHex(r,g,b);
-    const owner=colorOwner(hex,name);
-    if(owner){hint('That exact color is already used by '+owner+'. Pick another spot on the wheel.');return}
-    setColor(hex);
-  }
-  function wireWheel(){
-    drawWheel();
-    const c=document.getElementById('ms22Wheel'); if(!c)return;
-    let down=false;
-    c.addEventListener('pointerdown',e=>{down=true;c.setPointerCapture?.(e.pointerId);wheelPick(e);e.preventDefault()});
-    c.addEventListener('pointermove',e=>{if(down){wheelPick(e);e.preventDefault()}});
-    c.addEventListener('pointerup',e=>{down=false;c.releasePointerCapture?.(e.pointerId);e.preventDefault()});
-    c.addEventListener('pointercancel',()=>down=false);
-  }
-  function renderBoard(){
-    const grid=document.getElementById('ms22Board'); if(!grid)return;
-    let html=`<div class="ms22Corner">${logoSrc?`<img src="${logoSrc}" alt="">`:''}</div>`;
-    for(let i=0;i<10;i++) html+='<div class="ms22Num"></div>';
-    for(let r=0;r<10;r++){
-      html+='<div class="ms22Num"></div>';
-      for(let c=0;c<10;c++){
-        const i=r*10+c,s=liveBoard[i]||{slot:i+1},claimed=!!(s.player||s.img),pending=selected.has(i);
-        const bg=s.color||'#eff8ff',fg=textColor(bg);
-        html+=`<div class="ms22Cell${claimed?' claimed':''}${pending?' pending':''}" data-i="${i}" style="${claimed?`background:${esc(bg)};color:${fg};`:''}">
-          <span class="slot">${esc(s.slot||i+1)}</span><span class="nm">${esc(s.player||'')}</span></div>`;
+  async function copyText(text){
+    if(!text) return false;
+    try{
+      const ta=document.createElement('textarea');
+      ta.value=text; ta.setAttribute('readonly','');
+      ta.style.position='fixed'; ta.style.left='-9999px'; ta.style.opacity='0';
+      document.body.appendChild(ta); ta.select(); ta.setSelectionRange(0,ta.value.length);
+      const ok=document.execCommand('copy'); ta.remove();
+      if(ok) return true;
+    }catch(e){}
+    try{
+      if(navigator.clipboard && window.isSecureContext){
+        await navigator.clipboard.writeText(text); return true;
       }
+    }catch(e){}
+    return false;
+  }
+
+  async function ensureSaved(saved){
+    if(!saved) return saved;
+    try{
+      if(typeof window.mattCloudSave==='function'){
+        const result=await window.mattCloudSave(saved);
+        if(result && result.shareToken && !saved.shareToken) saved.shareToken=result.shareToken;
+      }
+    }catch(e){}
+    return saved;
+  }
+
+  async function shareHosted(saved){
+    if(!saved) return false;
+    await ensureSaved(saved);
+    const url=liveUrl(saved);
+    const urlEl=document.getElementById('shareBoardUrl');
+    if(urlEl) urlEl.textContent=url || 'Save this board first to create its hosted link.';
+    if(!url){
+      if(typeof toast==='function') toast('Save this board first.');
+      return false;
     }
-    grid.innerHTML=html;
-    grid.querySelectorAll('.ms22Cell').forEach(cell=>{
-      cell.addEventListener('click',()=>{
-        const i=Number(cell.dataset.i),s=liveBoard[i]||{};
-        if(s.player||s.img){hint('That square is already taken.');return}
-        selected.has(i)?selected.delete(i):selected.add(i);
-        renderBoard();
-        hint(selected.size?`${selected.size} square${selected.size===1?'':'s'} selected. Tap Confirm Picks to save.`:'Tap open squares or use Random Select.');
-      });
-    });
-  }
-  function renderMeta(){
-    const claimed=liveBoard.filter(s=>s&&(s.player||s.img)).length;
-    const cost=Number(boardMeta?.cost||0);
-    document.getElementById('ms22Game').textContent=boardMeta?.gameName||"Matt's Square App Board";
-    document.getElementById('ms22Cost').textContent='$'+cost;
-    document.getElementById('ms22Claimed').textContent=claimed;
-    document.getElementById('ms22Open').textContent=100-claimed;
-    document.getElementById('ms22Pot').textContent='$'+(claimed*cost).toLocaleString();
-  }
-  async function loadBoard(quiet=false){
-    if(refreshing)return;
-    refreshing=true;
-    try{
-      const j=await apiGet({action:'board',token,_:Date.now()});
-      boardMeta=j.board||{};
-      liveBoard=Array.isArray(boardMeta.board)?boardMeta.board.map((s,i)=>s||{slot:i+1}):Array.from({length:100},(_,i)=>({slot:i+1}));
-      selected.forEach(i=>{const s=liveBoard[i]||{};if(s.player||s.img)selected.delete(i)});
-      renderMeta();renderBoard();
-      if(!quiet)hint(boardMeta.final?'This board is complete and locked.':'Tap open squares or use Random Select.');
-      const btn=document.getElementById('ms22Confirm');
-      if(btn)btn.disabled=!!boardMeta.final;
-    }catch(e){
-      console.error(e);hint('Unable to load the shared board: '+e.message);
-    }finally{refreshing=false}
-  }
-  function syncName(){
-    const name=(document.getElementById('ms22Name')?.value||'').trim();
-    document.getElementById('ms22ActiveText').textContent='Active: '+(name||'—');
-    const existing=playerColorFor(name);
-    if(existing)setColor(existing);
-  }
-  function randomSelect(){
-    const name=(document.getElementById('ms22Name')?.value||'').trim();
-    if(!name){hint('Enter your name first.');return}
-    if(boardMeta?.final){hint('This board is complete and locked.');return}
-    let qty=Math.max(1,Math.min(100,Number(document.getElementById('ms22Qty')?.value||1)));
-    const open=[];
-    liveBoard.forEach((s,i)=>{if(!(s&&(s.player||s.img)))open.push(i)});
-    if(!open.length){hint('There are no open squares left.');return}
-    qty=Math.min(qty,open.length);
-    for(let i=open.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[open[i],open[j]]=[open[j],open[i]]}
-    selected.clear();open.slice(0,qty).forEach(i=>selected.add(i));
-    renderBoard();hint(`${qty} random open square${qty===1?'':'s'} selected. Tap Confirm Picks to save.`);
-  }
-  async function confirm(){
-    const name=(document.getElementById('ms22Name')?.value||'').trim();
-    if(!name){hint('Enter your name first.');return}
-    if(!selected.size){hint('Select at least one open square first.');return}
-    const existing=playerColorFor(name);
-    const color=existing||wheelColor;
-    const owner=colorOwner(color,name);
-    if(owner){hint('That color is already used by '+owner+'. Pick another color.');return}
-    const btn=document.getElementById('ms22Confirm');btn.disabled=true;
-    hint('Saving your picks…');
-    try{
-      await apiPost({
-        action:'claimSquares',token,
-        squareIndexes:[...selected],
-        playerName:name,playerColor:color,
-        requestId:(crypto.randomUUID?crypto.randomUUID():String(Date.now()))
-      });
-      selected.clear();
-      await loadBoard(true);
-      hint('Picks saved to the live board.');
-    }catch(e){
-      console.error(e);
-      selected.clear();
-      await loadBoard(true);
-      hint(e.message==='SQUARE_ALREADY_CLAIMED'?'One of those squares was just taken. The board refreshed—please select again.':'Could not save picks: '+e.message);
-    }finally{btn.disabled=!!boardMeta?.final}
+    const copied=await copyText(url);
+    if(typeof toast==='function') toast(copied?'Share link copied.':'Share link is shown above.');
+    return copied;
   }
 
-  function start(){
-    const root=buildRoot();
-    wireWheel();setColor('#1D74D8');
-    document.getElementById('ms22Name').addEventListener('input',syncName);
-    document.getElementById('ms22Random').addEventListener('click',randomSelect);
-    document.getElementById('ms22Confirm').addEventListener('click',confirm);
-    loadBoard(false);
-    setInterval(()=>{if(!document.hidden&&!selected.size)loadBoard(true)},5000);
-  }
-  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',start,{once:true});else start();
-})();
-</script>
+  window.mattLiveShareUrl=liveUrl;
+  window.shareInteractive=shareHosted;
+  window.shareLinked=shareHosted;
 
-<style id="matt-v24-tight-main-owner">
-/* V2.4 — hard-lock the owner app to the compact centered footprint. Shared standalone view is unaffected. */
-body:not(.mattSharedStandaloneMode) .app{
-  width:min(100%,900px)!important;
-  max-width:900px!important;
-  margin:0 auto!important;
-  padding-left:4px!important;
-  padding-right:4px!important;
-}
-body:not(.mattSharedStandaloneMode) .msaHero,
-body:not(.mattSharedStandaloneMode) .topbar,
-body:not(.mattSharedStandaloneMode) .layout{
-  width:100%!important;
-  max-width:100%!important;
-  margin-left:auto!important;
-  margin-right:auto!important;
-}
-body:not(.mattSharedStandaloneMode) .layout{
-  display:block!important;
-  padding:7px!important;
-  overflow:visible!important;
-}
-body:not(.mattSharedStandaloneMode) .left,
-body:not(.mattSharedStandaloneMode) .right{display:none!important}
-body:not(.mattSharedStandaloneMode) .boardWrap{
-  width:100%!important;
-  max-width:840px!important;
-  margin:0 auto!important;
-  gap:9px!important;
-}
-body:not(.mattSharedStandaloneMode) .boardMetaPanel,
-body:not(.mattSharedStandaloneMode) .boardInfoStack,
-body:not(.mattSharedStandaloneMode) .combinedPlayerPanel,
-body:not(.mattSharedStandaloneMode) .boardControlPanel,
-body:not(.mattSharedStandaloneMode) .boardShell,
-body:not(.mattSharedStandaloneMode) .savedInlinePanel{
-  width:100%!important;
-  max-width:100%!important;
-}
-body:not(.mattSharedStandaloneMode) .combinedPlayerPanel{padding:10px!important}
-@media(max-width:620px){
-  body:not(.mattSharedStandaloneMode) .app{width:100%!important;max-width:100%!important;padding-left:3px!important;padding-right:3px!important}
-  body:not(.mattSharedStandaloneMode) .layout{padding:5px!important}
-  body:not(.mattSharedStandaloneMode) .boardWrap{max-width:100%!important}
-}
-</style>
-<script id="matt-v24-owner-wheel-hard-fix">
-(function(){
- 'use strict';
- if(new URLSearchParams(location.search).get('board')) return;
- function hsv(h,s,v){const c=v*s,x=c*(1-Math.abs((h/60)%2-1)),m=v-c;let r=0,g=0,b=0;if(h<60){r=c;g=x}else if(h<120){r=x;g=c}else if(h<180){g=c;b=x}else if(h<240){g=x;b=c}else if(h<300){r=x;b=c}else{r=c;b=x}return [Math.round((r+m)*255),Math.round((g+m)*255),Math.round((b+m)*255)]}
- function hex(r,g,b){return '#'+[r,g,b].map(n=>n.toString(16).padStart(2,'0')).join('')}
- function draw(c){
-   const ctx=c.getContext('2d'),w=c.width,h=c.height,cx=w/2,cy=h/2,R=Math.min(w,h)/2-2,img=ctx.createImageData(w,h);
-   for(let y=0;y<h;y++)for(let x=0;x<w;x++){const dx=x-cx,dy=y-cy,d=Math.hypot(dx,dy),i=(y*w+x)*4;if(d>R){img.data[i+3]=0;continue}const hue=(Math.atan2(dy,dx)*180/Math.PI+360)%360,s=Math.min(1,d/R),rgb=hsv(hue,s,1);img.data[i]=rgb[0];img.data[i+1]=rgb[1];img.data[i+2]=rgb[2];img.data[i+3]=255}ctx.clearRect(0,0,w,h);ctx.putImageData(img,0,0)
- }
- function install(){
-   const old=document.getElementById('colorWheelCanvas'); if(!old)return;
-   const c=old.cloneNode(true); old.replaceWith(c); c.dataset.v24='1'; c.style.touchAction='none'; draw(c);
-   let down=false;
-   function choose(e){
-     const rect=c.getBoundingClientRect(),cx=rect.left+rect.width/2,cy=rect.top+rect.height/2;
-     let dx=(e.clientX-cx)/(rect.width/2),dy=(e.clientY-cy)/(rect.height/2),d=Math.hypot(dx,dy);if(d>1){dx/=d;dy/=d;d=1}
-     const hue=(Math.atan2(dy,dx)*180/Math.PI+360)%360,s=Math.min(1,d),rgb=hsv(hue,s,1),value=hex(...rgb);
-     const input=document.getElementById('playerColor'); if(input){input.value=value;input.dispatchEvent(new Event('input',{bubbles:true}));input.dispatchEvent(new Event('change',{bubbles:true}))}
-   }
-   c.addEventListener('pointerdown',e=>{down=true;try{c.setPointerCapture(e.pointerId)}catch(_){}choose(e);e.preventDefault()},{passive:false});
-   c.addEventListener('pointermove',e=>{if(down){choose(e);e.preventDefault()}},{passive:false});
-   c.addEventListener('pointerup',e=>{down=false;try{c.releasePointerCapture(e.pointerId)}catch(_){}e.preventDefault()},{passive:false});
-   c.addEventListener('pointercancel',()=>down=false);
- }
- if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',()=>setTimeout(install,0),{once:true});else setTimeout(install,0);
- [150,600,1400].forEach(t=>setTimeout(install,t));
+  const oldShow=window.showShareFor;
+  window.showShareFor=function(saved){
+    try{ if(typeof oldShow==='function') oldShow(saved); }catch(e){}
+    const card=document.getElementById('shareCard');
+    const id=document.getElementById('shareBoardId');
+    const url=document.getElementById('shareBoardUrl');
+    if(card) card.style.display='block';
+    if(id) id.textContent='Share Code: '+(saved.shareCode||'—')+' • Board ID: '+(saved.boardId||saved.id||'—');
+    if(url) url.textContent=liveUrl(saved)||'Save this board first to create its hosted link.';
+    const b1=document.getElementById('copyShareBtn');
+    const b2=document.getElementById('openShareBtn');
+    const b3=document.getElementById('qrShareBtn');
+    if(b1){b1.textContent='Copy Share Link';b1.onclick=()=>shareHosted(saved);}
+    if(b2){b2.textContent='Save PNG';b2.onclick=()=>{if(typeof exportSaved==='function')exportSaved(saved.id,'download');};}
+    if(b3){b3.textContent='Hide';b3.onclick=()=>{if(card)card.style.display='none';};}
+  };
+
+  window.shareSaved=async function(id){
+    let saved=null;
+    try{
+      const list=typeof getSaved==='function'?getSaved():[];
+      saved=list.find(x=>String(x.id||x.boardId)===String(id));
+    }catch(e){}
+    if(saved){
+      if(typeof window.showShareFor==='function') window.showShareFor(saved);
+      return shareHosted(saved);
+    }
+  };
 })();
 </script>
 
