@@ -1,0 +1,140 @@
+/** Matt's Square App — Standalone Google Backend v1.1
+ * Adds JSONP reads + form POST support for the GitHub shared-board front end.
+ * Existing JSON POST behavior remains supported.
+ */
+const BACKEND_VERSION='1.1.0';
+const FALLBACK_SPREADSHEET_ID='1gnnKRBYsiDkznlCCHzfcYRfaUqj2bwbv6a2s8RGXT0g';
+const SHEETS={
+  Boards:['Board ID','Game Name','Status','Cost','Board JSON','Public Token','Public Path','Created At','Updated At','Owner','Final','Claimed Count'],
+  Picks:['Pick ID','Board ID','Square Index','Player Name','Player Color','Action','Claimed At','Source','Request ID','Active'],
+  Share_Links:['Board ID','Public Token','Public Path','Enabled','Expires At','Created At','Updated At','Views','Last Access','Notes']
+};
+
+function doGet(e){
+  try{
+    const p=(e&&e.parameter)||{};
+    const action=String(p.action||'health');
+    let payload;
+    if(action==='health') payload={ok:true,service:"Matt's Square App Standalone Backend",version:BACKEND_VERSION};
+    else if(action==='board') payload=getPublicBoardObject_(String(p.token||''));
+    else payload={ok:false,error:'UNKNOWN_ACTION'};
+    return respond_(payload,String(p.callback||''));
+  }catch(err){
+    return respond_({ok:false,error:String(err)},String((e&&e.parameter&&e.parameter.callback)||''));
+  }
+}
+
+function doPost(e){
+  try{
+    let b={};
+    const raw=(e&&e.postData&&e.postData.contents)||'';
+    if(raw){
+      try{ b=JSON.parse(raw); }catch(_){ b={}; }
+    }
+    if(!b.action && e && e.parameter){
+      const p=e.parameter;
+      b={
+        action:String(p.action||''),
+        token:String(p.token||''),
+        playerName:String(p.playerName||''),
+        playerColor:String(p.playerColor||''),
+        requestId:String(p.requestId||''),
+        squareIndexes:String(p.squareIndexes||'').split(',').filter(Boolean).map(Number),
+        owner:String(p.owner||'')
+      };
+    }
+    const action=String(b.action||'');
+    if(action==='saveBoard')return json_(saveBoardObject_(b.board||{}));
+    if(action==='claimSquares')return json_(claimSquaresObject_(b));
+    if(action==='listBoards')return json_(listBoardsObject_(b.owner||''));
+    return json_({ok:false,error:'UNKNOWN_ACTION'});
+  }catch(err){return json_({ok:false,error:String(err)});}
+}
+
+function setupMattSquareBackend(){
+  const ss=ss_();
+  Object.keys(SHEETS).forEach(name=>{
+    let sh=ss.getSheetByName(name);
+    if(!sh)sh=ss.insertSheet(name);
+    if(sh.getLastRow()===0){sh.getRange(1,1,1,SHEETS[name].length).setValues([SHEETS[name]]);sh.setFrozenRows(1);}
+  });
+  return {ok:true,spreadsheetId:ss.getId(),sheets:Object.keys(SHEETS)};
+}
+
+function saveBoard_(b){return json_(saveBoardObject_(b));}
+function saveBoardObject_(b){
+  if(!b.boardId)throw new Error('boardId required');
+  if(!b.shareToken)throw new Error('shareToken required');
+  const lock=LockService.getScriptLock();lock.waitLock(10000);
+  try{
+    setupMattSquareBackend();
+    const sh=ss_().getSheetByName('Boards');
+    const row=findRow_(sh,1,b.boardId);
+    const now=new Date();
+    const claimed=Array.isArray(b.board)?b.board.filter(x=>x&&(x.player||x.img)).length:Number(b.claimed||0);
+    const publicPath='?board='+encodeURIComponent(b.shareToken);
+    const values=[b.boardId,b.gameName||'',b.status||'OPEN',Number(b.cost||0),JSON.stringify(b.board||[]),b.shareToken,publicPath,b.createdAt||now,now,b.owner||'Matt',!!b.final,claimed];
+    if(row)sh.getRange(row,1,1,values.length).setValues([values]);else sh.appendRow(values);
+    upsertShare_(b.boardId,b.shareToken,publicPath,now);
+    return {ok:true,boardId:b.boardId,shareToken:b.shareToken,claimedCount:claimed,operation:row?'update':'create'};
+  }finally{lock.releaseLock();}
+}
+
+function getPublicBoard_(token){return json_(getPublicBoardObject_(token));}
+function getPublicBoardObject_(token){
+  if(!token)return {ok:false,error:'TOKEN_REQUIRED'};
+  setupMattSquareBackend();
+  const sh=ss_().getSheetByName('Boards');
+  const row=findRow_(sh,6,token);
+  if(!row)return {ok:false,error:'BOARD_NOT_FOUND'};
+  const v=sh.getRange(row,1,1,12).getValues()[0];
+  if(String(v[2]).toUpperCase()==='CLOSED')return {ok:false,error:'BOARD_CLOSED'};
+  touchShare_(token);
+  return {ok:true,board:{boardId:v[0],gameName:v[1],status:v[2],cost:v[3],board:safeParse_(v[4],[]),shareToken:v[5],final:!!v[10],claimedCount:Number(v[11]||0)}};
+}
+
+function claimSquares_(b){return json_(claimSquaresObject_(b));}
+function claimSquaresObject_(b){
+  const token=String(b.token||''),name=String(b.playerName||'').trim();
+  const indexes=Array.isArray(b.squareIndexes)?b.squareIndexes.map(Number):[];
+  if(!token)throw new Error('token required');
+  if(!name)throw new Error('playerName required');
+  if(!indexes.length)throw new Error('squareIndexes required');
+  const lock=LockService.getScriptLock();lock.waitLock(10000);
+  try{
+    setupMattSquareBackend();
+    const sh=ss_().getSheetByName('Boards');const row=findRow_(sh,6,token);if(!row)return {ok:false,error:'BOARD_NOT_FOUND'};
+    const v=sh.getRange(row,1,1,12).getValues()[0];if(String(v[2]).toUpperCase()!=='OPEN')return {ok:false,error:'BOARD_NOT_OPEN'};
+    const board=safeParse_(v[4],[]);if(!Array.isArray(board)||board.length!==100)return {ok:false,error:'INVALID_BOARD'};
+    const conflicts=[];indexes.forEach(i=>{if(i<0||i>99||board[i]&&(board[i].player||board[i].img))conflicts.push(i)});
+    if(conflicts.length)return {ok:false,error:'SQUARE_ALREADY_CLAIMED',conflicts};
+    const now=new Date(),color=String(b.playerColor||'#219a12');
+    indexes.forEach(i=>{board[i]={...(board[i]||{slot:i+1}),player:name,color,time:now.toISOString()};appendPick_(v[0],i,name,color,b.requestId||'',now)});
+    const claimed=board.filter(x=>x&&(x.player||x.img)).length;
+    sh.getRange(row,5).setValue(JSON.stringify(board));sh.getRange(row,9).setValue(now);sh.getRange(row,12).setValue(claimed);
+    return {ok:true,boardId:v[0],claimed:indexes,claimedCount:claimed,boardFull:claimed>=100};
+  }finally{lock.releaseLock();}
+}
+
+function listBoards_(owner){return json_(listBoardsObject_(owner));}
+function listBoardsObject_(owner){
+  setupMattSquareBackend();const sh=ss_().getSheetByName('Boards');if(sh.getLastRow()<2)return {ok:true,boards:[]};
+  const rows=sh.getRange(2,1,sh.getLastRow()-1,12).getValues();
+  const out=rows.filter(r=>!owner||String(r[9])===String(owner)).map(r=>({boardId:r[0],gameName:r[1],status:r[2],cost:r[3],shareToken:r[5],publicPath:r[6],updatedAt:r[8],final:!!r[10],claimedCount:Number(r[11]||0)}));
+  return {ok:true,boards:out};
+}
+
+function appendPick_(boardId,i,name,color,requestId,now){ss_().getSheetByName('Picks').appendRow(['PICK-'+Utilities.getUuid().slice(0,8).toUpperCase(),boardId,i,name,color,'CLAIM',now,'PUBLIC_LINK',requestId,'YES']);}
+function upsertShare_(boardId,token,path,now){const sh=ss_().getSheetByName('Share_Links');const row=findRow_(sh,2,token);const vals=[boardId,token,path,'YES','',now,now,0,'',''];if(row)sh.getRange(row,1,1,10).setValues([vals]);else sh.appendRow(vals);}
+function touchShare_(token){const sh=ss_().getSheetByName('Share_Links');const row=findRow_(sh,2,token);if(row){const views=Number(sh.getRange(row,8).getValue()||0)+1;sh.getRange(row,8).setValue(views);sh.getRange(row,9).setValue(new Date());}}
+function findRow_(sh,col,value){if(sh.getLastRow()<2)return 0;const vals=sh.getRange(2,col,sh.getLastRow()-1,1).getValues();for(let i=0;i<vals.length;i++)if(String(vals[i][0])===String(value))return i+2;return 0;}
+function safeParse_(s,fallback){try{return JSON.parse(String(s||''))}catch(e){return fallback}}
+function ss_(){const id=PropertiesService.getScriptProperties().getProperty('MASTER_SPREADSHEET_ID')||FALLBACK_SPREADSHEET_ID;return SpreadsheetApp.openById(id);}
+function json_(o){return ContentService.createTextOutput(JSON.stringify(o)).setMimeType(ContentService.MimeType.JSON);}
+function respond_(o,callback){
+  const cb=String(callback||'').trim();
+  if(cb && /^[A-Za-z_$][A-Za-z0-9_$\.]*$/.test(cb)){
+    return ContentService.createTextOutput(cb+'('+JSON.stringify(o)+');').setMimeType(ContentService.MimeType.JAVASCRIPT);
+  }
+  return json_(o);
+}
