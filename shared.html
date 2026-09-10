@@ -41,10 +41,14 @@
         body.playerShareMode .miniStats{grid-template-columns:repeat(3,minmax(0,1fr))!important;overflow:visible!important}
         body.playerShareMode .miniStats .miniStat:nth-child(4){display:none!important}
         body.playerShareMode #status{min-height:0!important;padding:2px 6px!important}
-        #mattRandomTools{display:grid!important;grid-template-columns:minmax(0,160px) minmax(180px,1fr)!important;gap:10px!important;grid-column:1/-1!important;align-items:end!important}
+        #mattRandomTools{display:grid!important;grid-template-columns:minmax(0,150px) minmax(150px,1fr) minmax(170px,1fr)!important;gap:10px!important;grid-column:1/-1!important;align-items:end!important}
         #mattRandomTools label{display:grid!important;gap:5px!important;color:#ffe19a!important;font-weight:900!important}
         #mattRandomCount{width:100%!important;min-height:48px!important;border:1px solid #a77c2f!important;border-radius:12px!important;padding:10px 12px!important;background:#020407!important;color:#fff!important;font-size:18px!important}
-        #mattRandomSelect{width:100%!important;min-height:48px!important}
+        #mattSelectSquares,#mattRandomSelect{width:100%!important;min-height:48px!important}
+        #mattPickActions{display:grid!important;grid-template-columns:minmax(120px,.35fr) minmax(180px,1fr)!important;gap:10px!important;grid-column:1/-1!important}
+        #mattUndo,#publicSavePicks{width:100%!important;min-height:48px!important}
+        #mattChosenColor{display:flex!important;align-items:center!important;justify-content:center!important;gap:6px!important;margin-top:6px!important;color:#ffe19a!important;font-size:12px!important;font-weight:900!important}
+        #mattChosenColor i{display:block!important;width:18px!important;height:18px!important;border:2px solid #fff!important;border-radius:6px!important;background:#1d74d8}
         @media(max-width:620px){
           body.playerShareMode .app{padding:6px 6px 74px!important}
           body.playerShareMode .layout{padding:6px!important}
@@ -52,7 +56,9 @@
           body.playerShareMode .publicPickPanel .pickRow{grid-template-columns:1fr 92px!important}
           body.playerShareMode #publicColorWheelCanvas{width:86px!important;height:86px!important}
           body.playerShareMode #publicSavePicks{width:100%!important;grid-column:1/-1!important}
-          #mattRandomTools{grid-template-columns:110px minmax(0,1fr)!important}
+          #mattRandomTools{grid-template-columns:100px minmax(0,1fr)!important}
+          #mattRandomSelect{grid-column:1/-1!important}
+          #mattPickActions{grid-template-columns:100px minmax(0,1fr)!important}
         }
       `;
 
@@ -82,6 +88,17 @@
           }else img.data[i+3]=0;
         }
         ctx.putImageData(img,0,0);
+        let chosen=doc.getElementById('mattChosenColor');
+        if(!chosen){
+          chosen=doc.createElement('div');
+          chosen.id='mattChosenColor';
+          chosen.innerHTML='<i></i><span>Selected: #1D74D8</span>';
+          canvas.insertAdjacentElement('afterend',chosen);
+        }
+        const chosenSwatch=chosen.querySelector('i');
+        const chosenText=chosen.querySelector('span');
+        if(chosenSwatch)chosenSwatch.style.background=input.value||'#1d74d8';
+        if(chosenText)chosenText.textContent='Selected: '+String(input.value||'#1d74d8').toUpperCase();
         if(canvas.dataset.mattWheelReady)return;
         canvas.dataset.mattWheelReady='1';
         function pick(e){
@@ -95,6 +112,8 @@
           const label=doc.querySelector('#publicColorPreview span');
           if(preview)preview.style.background=hex;
           if(label)label.textContent=hex.toUpperCase();
+          if(chosenSwatch)chosenSwatch.style.background=hex;
+          if(chosenText)chosenText.textContent='Selected: '+hex.toUpperCase();
           e.preventDefault();e.stopPropagation();
         }
         canvas.addEventListener('pointerdown',pick,{passive:false});
@@ -103,28 +122,53 @@
 
       function installRandomSave(doc){
         const row=doc.querySelector('.publicPickPanel .pickRow');
-        const confirm=doc.getElementById('publicSavePicks');
-        if(!row||!confirm||doc.getElementById('mattRandomTools'))return;
+        const save=doc.getElementById('publicSavePicks');
+        if(!row||!save||doc.getElementById('mattRandomTools'))return;
+
+        const hint=()=>doc.getElementById('publicPickHint');
+        const clickCell=cell=>cell.dispatchEvent(new MouseEvent('click',{bubbles:true,cancelable:true,view:frame.contentWindow}));
+
         const tools=doc.createElement('div');
         tools.id='mattRandomTools';
-        tools.innerHTML='<label>How Many Squares?<input id="mattRandomCount" type="number" min="1" max="100" step="1" value="1" inputmode="numeric"></label><button id="mattRandomSelect" class="good" type="button">Random Select & Save</button>';
-        row.insertBefore(tools,confirm);
-        doc.getElementById('mattRandomSelect').addEventListener('click',function(){
-          const hint=doc.getElementById('publicPickHint');
+        tools.innerHTML='<label>How Many Squares?<input id="mattRandomCount" type="number" min="1" max="100" step="1" value="1" inputmode="numeric"></label><button id="mattSelectSquares" class="good" type="button">Select Squares</button><button id="mattRandomSelect" class="good" type="button">Random Select</button>';
+        row.insertBefore(tools,save);
+
+        const actions=doc.createElement('div');
+        actions.id='mattPickActions';
+        actions.innerHTML='<button id="mattUndo" class="secondary" type="button">Undo</button>';
+        row.insertBefore(actions,save);
+        actions.appendChild(save);
+        save.textContent='Save Picks';
+
+        doc.getElementById('mattSelectSquares').addEventListener('click',function(){
           const name=(doc.getElementById('publicPlayerName')?.value||'').trim();
-          if(!name){if(hint)hint.textContent='Enter your name first.';return}
+          if(!name){if(hint())hint().textContent='Enter your name first.';return}
+          if(hint())hint().textContent='Selection is on. Tap any open squares, then tap Save Picks.';
+          doc.getElementById('board')?.scrollIntoView({behavior:'smooth',block:'start'});
+        });
+
+        doc.getElementById('mattUndo').addEventListener('click',function(){
+          const selected=[...doc.querySelectorAll('#board .cell.publicPending')];
+          if(!selected.length){if(hint())hint().textContent='Nothing selected to undo.';return}
+          clickCell(selected[selected.length-1]);
+          if(hint())hint().textContent='Last square selection undone.';
+        });
+
+        doc.getElementById('mattRandomSelect').addEventListener('click',function(){
+          const name=(doc.getElementById('publicPlayerName')?.value||'').trim();
+          if(!name){if(hint())hint().textContent='Enter your name first.';return}
           const count=Math.floor(Number(doc.getElementById('mattRandomCount').value));
           const open=[...doc.querySelectorAll('#board .cell')].filter(cell=>{
             const idx=Number(cell.dataset.index);
             return Number.isInteger(idx)&&!cell.classList.contains('claimed');
           });
-          if(!Number.isInteger(count)||count<1){if(hint)hint.textContent='Enter how many squares you want.';return}
-          if(count>open.length){if(hint)hint.textContent='Only '+open.length+' open squares remain.';return}
-          doc.querySelectorAll('#board .cell.publicPending').forEach(cell=>cell.dispatchEvent(new MouseEvent('click',{bubbles:true,cancelable:true,view:frame.contentWindow})));
+          if(!Number.isInteger(count)||count<1){if(hint())hint().textContent='Enter how many squares you want.';return}
+          if(count>open.length){if(hint())hint().textContent='Only '+open.length+' open squares remain.';return}
+          doc.querySelectorAll('#board .cell.publicPending').forEach(clickCell);
           for(let i=open.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[open[i],open[j]]=[open[j],open[i]]}
-          open.slice(0,count).forEach(cell=>cell.dispatchEvent(new MouseEvent('click',{bubbles:true,cancelable:true,view:frame.contentWindow})));
-          if(hint)hint.textContent=count+' random square'+(count===1?'':'s')+' selected. Saving…';
-          setTimeout(()=>confirm.click(),80);
+          open.slice(0,count).forEach(clickCell);
+          if(hint())hint().textContent='Auto-saving '+count+' random square'+(count===1?'':'s')+'…';
+          setTimeout(()=>save.click(),180);
         });
       }
 
