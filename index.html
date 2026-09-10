@@ -3042,7 +3042,7 @@ body:not(.playerShareMode) .randomPairRow{grid-template-columns:92px minmax(0,1f
     return token ? SHARED_PAGE+'?board='+encodeURIComponent(token) : '';
   }
 
-  async function copyText(text){
+  function copyText(text){
     if(!text) return false;
     try{
       const ta=document.createElement('textarea');
@@ -3050,12 +3050,7 @@ body:not(.playerShareMode) .randomPairRow{grid-template-columns:92px minmax(0,1f
       ta.style.position='fixed'; ta.style.left='-9999px'; ta.style.opacity='0';
       document.body.appendChild(ta); ta.select(); ta.setSelectionRange(0,ta.value.length);
       const ok=document.execCommand('copy'); ta.remove();
-      if(ok) return true;
-    }catch(e){}
-    try{
-      if(navigator.clipboard && window.isSecureContext){
-        await navigator.clipboard.writeText(text); return true;
-      }
+      return !!ok;
     }catch(e){}
     return false;
   }
@@ -3073,17 +3068,20 @@ body:not(.playerShareMode) .randomPairRow{grid-template-columns:92px minmax(0,1f
 
   async function shareHosted(saved){
     if(!saved) return false;
-    await ensureSaved(saved);
-    const url=liveUrl(saved);
+    let url=liveUrl(saved);
     const urlEl=document.getElementById('shareBoardUrl');
-    if(urlEl) urlEl.textContent=url || 'Save this board first to create its hosted link.';
-    if(!url){
-      if(typeof toast==='function') toast('Save this board first.');
-      return false;
+    if(url){
+      const copied=copyText(url);
+      if(urlEl) urlEl.textContent=url;
+      if(typeof toast==='function') toast(copied?'Share link copied.':'Share link is shown above. Press and hold it to copy.');
+      try{Promise.resolve(ensureSaved(saved)).catch(()=>{});}catch(e){}
+      return copied;
     }
-    const copied=await copyText(url);
-    if(typeof toast==='function') toast(copied?'Share link copied.':'Share link is shown above.');
-    return copied;
+    await ensureSaved(saved);
+    url=liveUrl(saved);
+    if(urlEl) urlEl.textContent=url || 'Save this board first to create its hosted link.';
+    if(typeof toast==='function') toast(url?'Link ready. Tap Copy Share Link again.':'Save this board first.');
+    return false;
   }
 
   window.mattLiveShareUrl=liveUrl;
