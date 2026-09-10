@@ -144,7 +144,8 @@ input{min-height:48px;font-size:19px;padding:7px 10px}
 <div id="toast" class="toast">
 </div>
 <script>(()=>{'use strict';
-const BACKEND='https://script.google.com/macros/s/AKfycbxaB2NC-8eKWBrUqplCGtSQ2tJmOQKlUyh03YjfmaL_KPQIAg-cpryEr13hcDaM7R4-/exec',TOKEN=new URLSearchParams(location.search).get('board')||'',$=id=>document.getElementById(id);let state=null,board=empty(),pending=new Set,lastBatch=[],autoTimer=0,saving=false,lastValidColor='#ff9775';
+function resolveToken(){const valid=v=>/^[A-Za-z0-9_-]{6,200}$/.test(String(v||''))?String(v):'';const q=new URLSearchParams(location.search),h=new URLSearchParams(location.hash.replace(/^#/,''));let token=valid(q.get('board')||q.get('token')||q.get('share')||h.get('board')||h.get('token'));if(!token)try{token=valid(localStorage.getItem('matt-last-board-token'));if(!token){const current=JSON.parse(localStorage.getItem('square_up_auto_current_v6')||'null');token=valid(current&&current.shareToken)}if(!token){const lists=['square_up_saved_v6_FULL','square_up_saved_v6','matts_square_saved_v80_FULL','matts_square_saved_v80'];for(const name of lists){const items=JSON.parse(localStorage.getItem(name)||'[]');if(Array.isArray(items)){items.sort((a,b)=>String(b.updated||'').localeCompare(String(a.updated||'')));token=valid(items.find(x=>valid(x&&x.shareToken))?.shareToken);if(token)break}}}}catch(_){}if(token){try{localStorage.setItem('matt-last-board-token',token)}catch(_){}if(!q.get('board')){q.set('board',token);history.replaceState(null,'',location.pathname+'?'+q.toString()+location.hash)}}return token}
+const BACKEND='https://script.google.com/macros/s/AKfycbxaB2NC-8eKWBrUqplCGtSQ2tJmOQKlUyh03YjfmaL_KPQIAg-cpryEr13hcDaM7R4-/exec',TOKEN=resolveToken(),$=id=>document.getElementById(id);let state=null,board=empty(),pending=new Set,lastBatch=[],autoTimer=0,saving=false,lastValidColor='#ff9775';
 function empty(){return Array.from({length:100}
 ,(_,i)=>({slot:i+1,player:null,color:null,img:null}
 ))}
