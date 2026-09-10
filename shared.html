@@ -2,17 +2,95 @@
 <html lang="en">
 <head>
   <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width,initial-scale=1">
-  <title>Matt's Square App — Opening Shared Board</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <title>Matt's Square App — Shared Board</title>
   <meta name="robots" content="noindex">
+  <style>
+    *{box-sizing:border-box}
+    html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#02060b}
+    #sharedBoard{display:block;width:100%;height:100%;border:0;background:#02060b}
+    #loading{position:fixed;inset:0;display:grid;place-items:center;z-index:2;background:radial-gradient(circle at top,#0a233c,#02060b 60%,#000);color:#ffe19a;font:800 18px system-ui,sans-serif}
+  </style>
 </head>
 <body>
-  <p>Opening Matt's shared board…</p>
+  <div id="loading">Opening Matt's shared board…</div>
+  <iframe id="sharedBoard" title="Matt's Square App shared board"></iframe>
   <script>
-    const target = new URL('./', location.href);
-    target.search = location.search;
-    target.hash = location.hash;
-    location.replace(target.href);
+    (function(){
+      const frame=document.getElementById('sharedBoard');
+      const loading=document.getElementById('loading');
+      const target=new URL('./',location.href);
+      target.search=location.search;
+      target.hash=location.hash;
+
+      const sharedCss=`
+        html,body{width:100%!important;max-width:100%!important;overflow-x:hidden!important}
+        body.playerShareMode .app{
+          width:min(100%,980px)!important;max-width:980px!important;
+          margin:0 auto!important;padding:10px 10px 78px!important
+        }
+        body.playerShareMode .topbar,
+        body.playerShareMode .left,
+        body.playerShareMode .right,
+        body.playerShareMode .savedInlinePanel,
+        body.playerShareMode .boardControlPanel,
+        body.playerShareMode .combinedPlayerPanel,
+        body.playerShareMode #shareCard{display:none!important}
+        body.playerShareMode .layout{
+          display:block!important;grid-template-columns:none!important;
+          width:100%!important;max-width:920px!important;margin:0 auto!important;
+          padding:10px!important;border-radius:20px!important;overflow:visible!important
+        }
+        body.playerShareMode .boardWrap{
+          display:grid!important;grid-template-columns:1fr!important;
+          width:100%!important;max-width:900px!important;margin:0 auto!important;gap:10px!important
+        }
+        body.playerShareMode .boardMetaPanel,
+        body.playerShareMode .publicPickPanel,
+        body.playerShareMode .boardInfoStack,
+        body.playerShareMode .boardShell{width:100%!important;max-width:100%!important}
+        body.playerShareMode .boardShell{margin:0 auto!important}
+        body.playerShareMode .boardGrid{width:100%!important;aspect-ratio:1/1!important}
+        body.playerShareMode .boardMeta{grid-template-columns:minmax(0,1fr) 150px!important}
+        body.playerShareMode .publicPickPanel .pickRow{grid-template-columns:minmax(0,1fr) auto!important}
+        body.playerShareMode .miniStats{grid-template-columns:repeat(3,minmax(0,1fr))!important;overflow:visible!important}
+        body.playerShareMode .miniStats .miniStat:nth-child(4){display:none!important}
+        body.playerShareMode #status{min-height:0!important;padding:2px 6px!important}
+        @media(max-width:620px){
+          body.playerShareMode .app{padding:6px 6px 74px!important}
+          body.playerShareMode .layout{padding:6px!important}
+          body.playerShareMode .boardMeta{grid-template-columns:minmax(0,1fr) 92px!important}
+          body.playerShareMode .publicPickPanel .pickRow{grid-template-columns:1fr!important}
+          body.playerShareMode #publicSavePicks{width:100%!important}
+        }
+      `;
+
+      function protectLayout(){
+        try{
+          const doc=frame.contentDocument;
+          if(!doc||!doc.head)return;
+          let style=doc.getElementById('matt-shared-layout-protection');
+          if(!style){
+            style=doc.createElement('style');
+            style.id='matt-shared-layout-protection';
+            style.textContent=sharedCss;
+            doc.head.appendChild(style);
+          }
+          doc.body&&doc.body.classList.add('playerShareMode');
+          loading.style.display='none';
+        }catch(e){
+          loading.textContent='The shared board could not be opened. Please refresh.';
+        }
+      }
+
+      frame.addEventListener('load',function(){
+        protectLayout();
+        setTimeout(protectLayout,250);
+        setTimeout(protectLayout,1000);
+        setTimeout(protectLayout,2500);
+      });
+      frame.src=target.href;
+    })();
   </script>
 </body>
 </html>
