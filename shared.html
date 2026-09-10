@@ -25,69 +25,127 @@
 
       const sharedCss=`
         html,body{width:100%!important;max-width:100%!important;overflow-x:hidden!important}
-        body.playerShareMode .app{
-          width:min(100%,980px)!important;max-width:980px!important;
-          margin:0 auto!important;padding:10px 10px 78px!important
-        }
-        body.playerShareMode .topbar,
-        body.playerShareMode .left,
-        body.playerShareMode .right,
-        body.playerShareMode .savedInlinePanel,
-        body.playerShareMode .boardControlPanel,
-        body.playerShareMode .combinedPlayerPanel,
-        body.playerShareMode #shareCard{display:none!important}
-        body.playerShareMode .layout{
-          display:block!important;grid-template-columns:none!important;
-          width:100%!important;max-width:920px!important;margin:0 auto!important;
-          padding:10px!important;border-radius:20px!important;overflow:visible!important
-        }
-        body.playerShareMode .boardWrap{
-          display:grid!important;grid-template-columns:1fr!important;
-          width:100%!important;max-width:900px!important;margin:0 auto!important;gap:10px!important
-        }
-        body.playerShareMode .boardMetaPanel,
-        body.playerShareMode .publicPickPanel,
-        body.playerShareMode .boardInfoStack,
-        body.playerShareMode .boardShell{width:100%!important;max-width:100%!important}
+        body.playerShareMode .app{width:min(100%,980px)!important;max-width:980px!important;margin:0 auto!important;padding:10px 10px 78px!important}
+        body.playerShareMode .topbar,body.playerShareMode .left,body.playerShareMode .right,
+        body.playerShareMode .savedInlinePanel,body.playerShareMode .boardControlPanel,
+        body.playerShareMode .combinedPlayerPanel,body.playerShareMode #shareCard{display:none!important}
+        body.playerShareMode .layout{display:block!important;grid-template-columns:none!important;width:100%!important;max-width:920px!important;margin:0 auto!important;padding:10px!important;border-radius:20px!important;overflow:visible!important}
+        body.playerShareMode .boardWrap{display:grid!important;grid-template-columns:1fr!important;width:100%!important;max-width:900px!important;margin:0 auto!important;gap:10px!important}
+        body.playerShareMode .boardMetaPanel,body.playerShareMode .publicPickPanel,
+        body.playerShareMode .boardInfoStack,body.playerShareMode .boardShell{width:100%!important;max-width:100%!important}
         body.playerShareMode .boardShell{margin:0 auto!important}
         body.playerShareMode .boardGrid{width:100%!important;aspect-ratio:1/1!important}
         body.playerShareMode .boardMeta{grid-template-columns:minmax(0,1fr) 150px!important}
-        body.playerShareMode .publicPickPanel .pickRow{grid-template-columns:minmax(0,1fr) auto!important}
+        body.playerShareMode .publicPickPanel .pickRow{grid-template-columns:minmax(0,1fr) 132px!important}
+        body.playerShareMode #publicColorWheelCanvas{display:block!important;width:118px!important;height:118px!important;border-radius:50%!important;cursor:crosshair!important;touch-action:none!important}
         body.playerShareMode .miniStats{grid-template-columns:repeat(3,minmax(0,1fr))!important;overflow:visible!important}
         body.playerShareMode .miniStats .miniStat:nth-child(4){display:none!important}
         body.playerShareMode #status{min-height:0!important;padding:2px 6px!important}
+        #mattRandomTools{display:grid!important;grid-template-columns:minmax(0,160px) minmax(180px,1fr)!important;gap:10px!important;grid-column:1/-1!important;align-items:end!important}
+        #mattRandomTools label{display:grid!important;gap:5px!important;color:#ffe19a!important;font-weight:900!important}
+        #mattRandomCount{width:100%!important;min-height:48px!important;border:1px solid #a77c2f!important;border-radius:12px!important;padding:10px 12px!important;background:#020407!important;color:#fff!important;font-size:18px!important}
+        #mattRandomSelect{width:100%!important;min-height:48px!important}
         @media(max-width:620px){
           body.playerShareMode .app{padding:6px 6px 74px!important}
           body.playerShareMode .layout{padding:6px!important}
           body.playerShareMode .boardMeta{grid-template-columns:minmax(0,1fr) 92px!important}
-          body.playerShareMode .publicPickPanel .pickRow{grid-template-columns:1fr!important}
-          body.playerShareMode #publicSavePicks{width:100%!important}
+          body.playerShareMode .publicPickPanel .pickRow{grid-template-columns:1fr 92px!important}
+          body.playerShareMode #publicColorWheelCanvas{width:86px!important;height:86px!important}
+          body.playerShareMode #publicSavePicks{width:100%!important;grid-column:1/-1!important}
+          #mattRandomTools{grid-template-columns:110px minmax(0,1fr)!important}
         }
       `;
 
-      function protectLayout(){
+      function hsvToRgb(h,s,v){
+        s/=100;v/=100;
+        const c=v*s,x=c*(1-Math.abs((h/60)%2-1)),m=v-c;
+        let r=0,g=0,b=0;
+        if(h<60){r=c;g=x}else if(h<120){r=x;g=c}else if(h<180){g=c;b=x}
+        else if(h<240){g=x;b=c}else if(h<300){r=x;b=c}else{r=c;b=x}
+        return [r,g,b].map(q=>Math.round((q+m)*255));
+      }
+      function rgbHex(rgb){return '#'+rgb.map(v=>v.toString(16).padStart(2,'0')).join('')}
+
+      function installColorWheel(doc){
+        const canvas=doc.getElementById('publicColorWheelCanvas');
+        const input=doc.getElementById('publicPlayerColor');
+        if(!canvas||!input)return;
+        const size=180;
+        canvas.width=size;canvas.height=size;
+        const ctx=canvas.getContext('2d'),cx=size/2,cy=size/2,r=size/2-2,img=ctx.createImageData(size,size);
+        for(let y=0;y<size;y++)for(let x=0;x<size;x++){
+          const dx=x-cx,dy=y-cy,d=Math.hypot(dx,dy),i=(y*size+x)*4;
+          if(d<=r){
+            const hue=(Math.atan2(dy,dx)*180/Math.PI+360)%360;
+            const rgb=hsvToRgb(hue,Math.min(100,d/r*100),100);
+            img.data[i]=rgb[0];img.data[i+1]=rgb[1];img.data[i+2]=rgb[2];img.data[i+3]=255;
+          }else img.data[i+3]=0;
+        }
+        ctx.putImageData(img,0,0);
+        if(canvas.dataset.mattWheelReady)return;
+        canvas.dataset.mattWheelReady='1';
+        function pick(e){
+          const rect=canvas.getBoundingClientRect(),dx=e.clientX-(rect.left+rect.width/2),dy=e.clientY-(rect.top+rect.height/2);
+          const rad=Math.min(rect.width,rect.height)/2,dist=Math.hypot(dx,dy);
+          if(dist>rad)return;
+          const hue=(Math.atan2(dy,dx)*180/Math.PI+360)%360;
+          const hex=rgbHex(hsvToRgb(hue,Math.min(100,dist/rad*100),100));
+          input.value=hex;
+          const preview=doc.querySelector('#publicColorPreview i');
+          const label=doc.querySelector('#publicColorPreview span');
+          if(preview)preview.style.background=hex;
+          if(label)label.textContent=hex.toUpperCase();
+          e.preventDefault();e.stopPropagation();
+        }
+        canvas.addEventListener('pointerdown',pick,{passive:false});
+        canvas.addEventListener('pointermove',e=>{if(e.buttons||e.pressure>0)pick(e)},{passive:false});
+      }
+
+      function installRandomSave(doc){
+        const row=doc.querySelector('.publicPickPanel .pickRow');
+        const confirm=doc.getElementById('publicSavePicks');
+        if(!row||!confirm||doc.getElementById('mattRandomTools'))return;
+        const tools=doc.createElement('div');
+        tools.id='mattRandomTools';
+        tools.innerHTML='<label>How Many Squares?<input id="mattRandomCount" type="number" min="1" max="100" step="1" value="1" inputmode="numeric"></label><button id="mattRandomSelect" class="good" type="button">Random Select & Save</button>';
+        row.insertBefore(tools,confirm);
+        doc.getElementById('mattRandomSelect').addEventListener('click',function(){
+          const hint=doc.getElementById('publicPickHint');
+          const name=(doc.getElementById('publicPlayerName')?.value||'').trim();
+          if(!name){if(hint)hint.textContent='Enter your name first.';return}
+          const count=Math.floor(Number(doc.getElementById('mattRandomCount').value));
+          const open=[...doc.querySelectorAll('#board .cell')].filter(cell=>{
+            const idx=Number(cell.dataset.index);
+            return Number.isInteger(idx)&&!cell.classList.contains('claimed');
+          });
+          if(!Number.isInteger(count)||count<1){if(hint)hint.textContent='Enter how many squares you want.';return}
+          if(count>open.length){if(hint)hint.textContent='Only '+open.length+' open squares remain.';return}
+          doc.querySelectorAll('#board .cell.publicPending').forEach(cell=>cell.dispatchEvent(new MouseEvent('click',{bubbles:true,cancelable:true,view:frame.contentWindow})));
+          for(let i=open.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[open[i],open[j]]=[open[j],open[i]]}
+          open.slice(0,count).forEach(cell=>cell.dispatchEvent(new MouseEvent('click',{bubbles:true,cancelable:true,view:frame.contentWindow})));
+          if(hint)hint.textContent=count+' random square'+(count===1?'':'s')+' selected. Saving…';
+          setTimeout(()=>confirm.click(),80);
+        });
+      }
+
+      function protectAndInstall(){
         try{
           const doc=frame.contentDocument;
-          if(!doc||!doc.head)return;
+          if(!doc||!doc.head||!doc.body)return;
           let style=doc.getElementById('matt-shared-layout-protection');
-          if(!style){
-            style=doc.createElement('style');
-            style.id='matt-shared-layout-protection';
-            style.textContent=sharedCss;
-            doc.head.appendChild(style);
-          }
-          doc.body&&doc.body.classList.add('playerShareMode');
+          if(!style){style=doc.createElement('style');style.id='matt-shared-layout-protection';style.textContent=sharedCss;doc.head.appendChild(style)}
+          doc.body.classList.add('playerShareMode');
+          installColorWheel(doc);
+          installRandomSave(doc);
           loading.style.display='none';
-        }catch(e){
-          loading.textContent='The shared board could not be opened. Please refresh.';
-        }
+        }catch(e){loading.textContent='The shared board could not be opened. Please refresh.'}
       }
 
       frame.addEventListener('load',function(){
-        protectLayout();
-        setTimeout(protectLayout,250);
-        setTimeout(protectLayout,1000);
-        setTimeout(protectLayout,2500);
+        protectAndInstall();
+        setTimeout(protectAndInstall,250);
+        setTimeout(protectAndInstall,1000);
+        setTimeout(protectAndInstall,2500);
       });
       frame.src=target.href;
     })();
