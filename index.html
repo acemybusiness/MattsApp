@@ -3045,16 +3045,34 @@ body:not(.playerShareMode) .randomPairRow{grid-template-columns:92px minmax(0,1f
   function copyText(text){
     if(!text) return false;
     let field=null;
+    let copied=false;
+    const onCopy=function(event){
+      try{
+        if(event.clipboardData){
+          event.preventDefault();
+          event.clipboardData.setData('text/plain',text);
+          copied=true;
+        }
+      }catch(e){}
+    };
     try{
-      field=document.createElement('input');
-      field.type='text';field.value=text;
-      field.style.position='fixed';field.style.left='2px';field.style.top='2px';
-      field.style.width='2px';field.style.height='2px';field.style.opacity='.01';field.style.zIndex='-1';
-      document.body.appendChild(field);field.focus();field.select();field.setSelectionRange(0,text.length);
+      document.addEventListener('copy',onCopy,{once:true});
+      field=document.createElement('textarea');
+      field.value=text;field.setAttribute('readonly','');
+      field.style.position='fixed';field.style.left='0';field.style.top='0';
+      field.style.width='1px';field.style.height='1px';field.style.padding='0';
+      field.style.border='0';field.style.opacity='0';field.style.fontSize='16px';
+      document.body.appendChild(field);
+      try{field.focus({preventScroll:true});}catch(e){field.focus();}
+      field.select();field.setSelectionRange(0,text.length);
       const ok=document.execCommand('copy');
       field.remove();
-      return !!ok;
-    }catch(e){if(field&&field.parentNode)field.remove();}
+      document.removeEventListener('copy',onCopy);
+      return !!(ok&&copied);
+    }catch(e){
+      if(field&&field.parentNode)field.remove();
+      document.removeEventListener('copy',onCopy);
+    }
     return false;
   }
 
