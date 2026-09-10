@@ -41,11 +41,11 @@
         body.playerShareMode .miniStats{grid-template-columns:repeat(3,minmax(0,1fr))!important;overflow:visible!important}
         body.playerShareMode .miniStats .miniStat:nth-child(4){display:none!important}
         body.playerShareMode #status{min-height:0!important;padding:2px 6px!important}
-        #mattRandomTools{display:grid!important;grid-template-columns:minmax(0,150px) minmax(150px,1fr) minmax(170px,1fr)!important;gap:10px!important;grid-column:1/-1!important;align-items:end!important}
+        #mattRandomTools{display:grid!important;grid-template-columns:minmax(0,150px) minmax(150px,1fr) minmax(100px,.55fr) minmax(150px,1fr)!important;gap:10px!important;grid-column:1/-1!important;align-items:end!important}
         #mattRandomTools label{display:grid!important;gap:5px!important;color:#ffe19a!important;font-weight:900!important}
         #mattRandomCount{width:100%!important;min-height:48px!important;border:1px solid #a77c2f!important;border-radius:12px!important;padding:10px 12px!important;background:#020407!important;color:#fff!important;font-size:18px!important}
         #mattSelectSquares,#mattRandomSelect{width:100%!important;min-height:48px!important}
-        #mattPickActions{display:grid!important;grid-template-columns:minmax(120px,.35fr) minmax(180px,1fr)!important;gap:10px!important;grid-column:1/-1!important}
+        #mattSelectSquares{grid-column:1/-1!important}
         #mattUndo,#publicSavePicks{width:100%!important;min-height:48px!important}
         #mattChosenColor{display:flex!important;align-items:center!important;justify-content:center!important;gap:6px!important;margin-top:6px!important;color:#ffe19a!important;font-size:12px!important;font-weight:900!important}
         #mattChosenColor i{display:block!important;width:18px!important;height:18px!important;border:2px solid #fff!important;border-radius:6px!important;background:#1d74d8}
@@ -56,9 +56,8 @@
           body.playerShareMode .publicPickPanel .pickRow{grid-template-columns:1fr 92px!important}
           body.playerShareMode #publicColorWheelCanvas{width:86px!important;height:86px!important}
           body.playerShareMode #publicSavePicks{width:100%!important;grid-column:1/-1!important}
-          #mattRandomTools{grid-template-columns:100px minmax(0,1fr)!important}
-          #mattRandomSelect{grid-column:1/-1!important}
-          #mattPickActions{grid-template-columns:100px minmax(0,1fr)!important}
+          #mattRandomTools{grid-template-columns:74px minmax(0,1fr) 64px minmax(0,1fr)!important;gap:6px!important}
+          #mattRandomTools button{padding:8px 4px!important;font-size:12px!important;white-space:normal!important}
         }
       `;
 
@@ -130,22 +129,10 @@
 
         const tools=doc.createElement('div');
         tools.id='mattRandomTools';
-        tools.innerHTML='<label>How Many Squares?<input id="mattRandomCount" type="number" min="1" max="100" step="1" value="1" inputmode="numeric"></label><button id="mattSelectSquares" class="good" type="button">Select Squares</button><button id="mattRandomSelect" class="good" type="button">Random Select</button>';
+        tools.innerHTML='<label>How Many Squares?<input id="mattRandomCount" type="number" min="1" max="100" step="1" value="1" inputmode="numeric"></label><button id="mattRandomSelect" class="good" type="button">Random Select</button><button id="mattUndo" class="secondary" type="button">Undo</button>';
         row.insertBefore(tools,save);
-
-        const actions=doc.createElement('div');
-        actions.id='mattPickActions';
-        actions.innerHTML='<button id="mattUndo" class="secondary" type="button">Undo</button>';
-        row.insertBefore(actions,save);
-        actions.appendChild(save);
+        tools.appendChild(save);
         save.textContent='Save Picks';
-
-        doc.getElementById('mattSelectSquares').addEventListener('click',function(){
-          const name=(doc.getElementById('publicPlayerName')?.value||'').trim();
-          if(!name){if(hint())hint().textContent='Enter your name first.';return}
-          if(hint())hint().textContent='Selection is on. Tap any open squares, then tap Save Picks.';
-          doc.getElementById('board')?.scrollIntoView({behavior:'smooth',block:'start'});
-        });
 
         doc.getElementById('mattUndo').addEventListener('click',function(){
           const selected=[...doc.querySelectorAll('#board .cell.publicPending')];
@@ -163,12 +150,26 @@
             return Number.isInteger(idx)&&!cell.classList.contains('claimed');
           });
           if(!Number.isInteger(count)||count<1){if(hint())hint().textContent='Enter how many squares you want.';return}
-          if(count>open.length){if(hint())hint().textContent='Only '+open.length+' open squares remain.';return}
+          if(!open.length){if(hint())hint().textContent='This board is full. There are no open squares to select.';return}
+          const actualCount=Math.min(count,open.length);
+          if(actualCount!==count)doc.getElementById('mattRandomCount').value=actualCount;
           doc.querySelectorAll('#board .cell.publicPending').forEach(clickCell);
           for(let i=open.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[open[i],open[j]]=[open[j],open[i]]}
-          open.slice(0,count).forEach(clickCell);
-          if(hint())hint().textContent='Auto-saving '+count+' random square'+(count===1?'':'s')+'…';
-          setTimeout(()=>save.click(),180);
+          const chosen=open.slice(0,actualCount);
+          const playerName=(doc.getElementById('publicPlayerName')?.value||'').trim();
+          const playerColor=doc.getElementById('publicPlayerColor')?.value||'#1d74d8';
+          const raw=String(playerColor).replace('#','');
+          const rgb=parseInt(raw.length===3?raw.split('').map(x=>x+x).join(''):raw,16);
+          const foreground=((((rgb>>16)&255)*299+((rgb>>8)&255)*587+(rgb&255)*114)/1000)>150?'#111':'#fff';
+          chosen.forEach(cell=>{
+            clickCell(cell);
+            cell.style.background=playerColor;
+            cell.style.color=foreground;
+            const nameEl=cell.querySelector('.name');
+            if(nameEl)nameEl.textContent=playerName;
+          });
+          if(hint())hint().textContent=(actualCount<count?'Only '+actualCount+' squares were open. ':'')+'Auto-saving '+actualCount+' random square'+(actualCount===1?'':'s')+'…';
+          setTimeout(()=>save.click(),300);
         });
       }
 
