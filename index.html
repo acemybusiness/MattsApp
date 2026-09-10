@@ -2713,20 +2713,12 @@ function apiUrl(params){
   Object.entries(params||{}).forEach(([k,v])=>u.searchParams.set(k,String(v)));
   return u.toString();
 }
-async function cloudGetBoard(token,attempt){
+async function cloudGetBoard(token){
   if(!token)throw new Error('This board does not have a share link yet.');
-  attempt=attempt||1;
-  try{
-    const r=await fetch(apiUrl({action:'getBoard',token:token,_:Date.now()+'-'+attempt}),{cache:'no-store',redirect:'follow',credentials:'omit',headers:{Accept:'application/json,text/plain,*/*'}});
-    const raw=await r.text();
-    let j;
-    try{j=JSON.parse(raw)}catch(_){throw new Error('The live board service returned a web page instead of board data.');}
-    if(!r.ok||!j||!j.ok||!j.board||!Array.isArray(j.board.board))throw new Error((j&&j.error)||'Linked board was not available.');
-    return j.board;
-  }catch(err){
-    if(attempt<4){await new Promise(resolve=>setTimeout(resolve,500*attempt));return cloudGetBoard(token,attempt+1);}
-    throw err;
-  }
+  const r=await fetch(apiUrl({action:'getBoard',token:token,_:Date.now()}),{cache:'no-store',redirect:'follow'});
+  const j=await r.json();
+  if(!j||!j.ok||!j.board||!Array.isArray(j.board.board))throw new Error((j&&j.error)||'Linked board was not available.');
+  return j.board;
 }
 async function cloudSaveBoard(saved){
   if(!saved)return false;
