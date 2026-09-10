@@ -3044,14 +3044,17 @@ body:not(.playerShareMode) .randomPairRow{grid-template-columns:92px minmax(0,1f
 
   function copyText(text){
     if(!text) return false;
+    let field=null;
     try{
-      const ta=document.createElement('textarea');
-      ta.value=text; ta.setAttribute('readonly','');
-      ta.style.position='fixed'; ta.style.left='-9999px'; ta.style.opacity='0';
-      document.body.appendChild(ta); ta.select(); ta.setSelectionRange(0,ta.value.length);
-      const ok=document.execCommand('copy'); ta.remove();
+      field=document.createElement('input');
+      field.type='text';field.value=text;
+      field.style.position='fixed';field.style.left='2px';field.style.top='2px';
+      field.style.width='2px';field.style.height='2px';field.style.opacity='.01';field.style.zIndex='-1';
+      document.body.appendChild(field);field.focus();field.select();field.setSelectionRange(0,text.length);
+      const ok=document.execCommand('copy');
+      field.remove();
       return !!ok;
-    }catch(e){}
+    }catch(e){if(field&&field.parentNode)field.remove();}
     return false;
   }
 
