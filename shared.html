@@ -1,15 +1,259 @@
-<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#061426"><title>Matt's Square App — Shared Board</title>
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#061426">
+<title>Matt's Square App — Shared Board</title>
 <style>
-:root{--gold:#caa950;--cream:#fff0bd}*{box-sizing:border-box}html{background:#02060b}body{margin:0;min-width:320px;color:#fff;background:radial-gradient(circle at 50% 0,#16375b,#071427 30%,#02060b 78%);font-family:Arial,sans-serif}button,input{font:inherit}button{touch-action:manipulation}.app{width:min(100%,980px);margin:auto;padding:8px 7px 40px}.gold{color:var(--cream);font-family:Georgia,serif;text-shadow:1px 2px #241600,0 0 9px #fff4bd}.hero,.panel,.stats,.boardShell{border:2px solid rgba(202,169,80,.7);background:linear-gradient(135deg,rgba(6,13,23,.97),rgba(10,35,62,.92),rgba(3,9,18,.98));box-shadow:0 0 22px #287abe33,inset 0 0 18px #4874a224}.hero{display:grid;grid-template-columns:80px 1fr auto;align-items:center;gap:9px;border-radius:23px;padding:9px 12px;background:linear-gradient(110deg,#111814,#0e2740 55%,#3d280c)}.crest{width:70px;aspect-ratio:1;border:4px double #d6b758;border-radius:50%;display:grid;place-items:center;background:radial-gradient(circle,#245e91,#06101b 58%,#9c7225);font:bold 25px Georgia;color:#eef9ff;text-shadow:0 0 8px #69bcff,2px 2px #111}.hero h1{margin:0;text-align:center;font-size:clamp(29px,7vw,66px);line-height:.95}.copy{min-height:46px;padding:7px 11px;border:2px solid #b89343;border-radius:15px;background:linear-gradient(#163553,#071629);color:var(--cream);font-weight:900}.panel{margin-top:9px;border-radius:21px;padding:12px}.meta{display:grid;grid-template-columns:minmax(0,1fr) 135px;gap:10px}label{display:block;margin:0 0 5px;color:var(--cream);font-weight:900;font-size:17px}input{width:100%;min-height:55px;border:2px solid #a98537;border-radius:16px;padding:9px 13px;background:#01050a;color:#fff;font-size:23px;outline:none}input:focus{border-color:#ffe28b;box-shadow:0 0 0 3px #ffd76b33}.pick h2{margin:0 0 9px;font-size:clamp(27px,5vw,46px);line-height:1}.pickTop{display:grid;grid-template-columns:minmax(0,1fr) 135px;gap:10px;align-items:end}.wheelBox{display:grid;justify-items:center;position:relative;z-index:3}.wheelBox label{font-size:14px}#wheel{display:block;width:120px;height:120px;border-radius:50%;border:4px solid #27364b;box-shadow:0 0 0 2px #000;touch-action:none;user-select:none;-webkit-user-select:none}.colorRead{margin-top:5px;display:flex;gap:5px;align-items:center;color:var(--cream);font-weight:900;font-size:11px}.swatch{width:19px;height:19px;border-radius:6px;border:2px solid #fff;background:#ff9775}.actions{display:grid;grid-template-columns:108px repeat(3,minmax(0,1fr));gap:7px;margin-top:9px;align-items:end}.count label{font-size:13px;line-height:1.05}.count input{height:56px;min-height:56px;font-size:21px;font-weight:900}.action{height:56px;border:2px solid #d5be7c;border-radius:17px;padding:3px 6px;font-weight:900;font-size:16px;line-height:1.05;color:#081006;background:linear-gradient(#8bf67e,#079329)}.action.secondary{color:var(--cream);background:linear-gradient(#163553,#071629)}.action:disabled{opacity:.48}.status{min-height:46px;margin-top:9px;border:1px solid #8f753b;border-radius:14px;padding:10px;display:grid;place-items:center;text-align:center;background:#0d1219e8;color:#c8d1e2;font-weight:800}.stats{margin-top:9px;border-radius:20px;padding:9px;display:grid;grid-template-columns:repeat(3,1fr);gap:8px}.stat{border:1px solid #90743a;border-radius:15px;text-align:center;padding:9px 3px;color:var(--cream);font:bold 21px Georgia}.stat b{display:block;margin-top:3px;color:#fff;font:bold 42px Arial}.boardShell{margin-top:9px;border-radius:27px;padding:12px;background:#02060a;border-width:4px}.board{display:grid;grid-template-columns:.6fr repeat(10,1fr);grid-template-rows:.6fr repeat(10,1fr);aspect-ratio:1;border:2px solid #b69748;overflow:hidden;background:#050b13}.head,.cell{min-width:0;min-height:0;border:1px solid #2a4158bf;display:grid;place-items:center;overflow:hidden}.head{background:linear-gradient(135deg,#132b4a,#02060a);font-weight:900;font-size:clamp(8px,1.8vw,17px)}.corner{color:#e6c565;font-family:Georgia}.cell{position:relative;background:linear-gradient(135deg,#f9fdff,#dfeeff 72%,#fff5bd);color:#111;cursor:pointer;touch-action:manipulation;user-select:none;-webkit-user-select:none}.cell.claimed,.cell.pending{background:var(--cell);color:var(--fg);font-weight:900}.cell.pending{outline:4px solid #ffd45c;outline-offset:-4px}.cell img{width:100%;height:100%;object-fit:cover}.name{width:94%;text-align:center;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:clamp(8px,2vw,18px)}.slot{position:absolute;left:2px;top:1px;font-size:7px;opacity:.25}.toast{position:fixed;z-index:20;left:50%;bottom:max(18px,env(safe-area-inset-bottom));transform:translate(-50%,20px);width:min(88%,520px);padding:14px;border:2px solid #b6964a;border-radius:17px;background:#071323;color:var(--cream);font-weight:900;text-align:center;opacity:0;pointer-events:none;transition:.2s}.toast.show{opacity:1;transform:translate(-50%,0)}
-@media(max-width:600px){.app{padding:5px 4px 30px}.hero{grid-template-columns:61px 1fr auto;gap:4px;padding:6px}.crest{width:55px;font-size:18px}.hero h1{font-size:clamp(23px,8vw,41px)}.copy{min-height:40px;padding:4px 6px;font-size:11px}.panel{padding:9px}.meta{grid-template-columns:minmax(0,1fr) 88px;gap:6px}label{font-size:14px}input{min-height:48px;font-size:19px;padding:7px 10px}.pickTop{grid-template-columns:minmax(0,1fr) 100px;gap:6px}#wheel{width:91px;height:91px}.actions{grid-template-columns:68px repeat(3,minmax(0,1fr));gap:4px}.action,.count input{height:52px;min-height:52px;font-size:12px;padding:2px}.count label{font-size:9px}.status{font-size:12px;min-height:41px;padding:7px}.stats{gap:4px;padding:6px}.stat{font-size:16px;padding:7px 2px}.stat b{font-size:32px}.boardShell{padding:7px;border-radius:21px}}
-</style></head><body><main class="app"><header class="hero"><div class="crest">MSA</div><h1 class="gold">MATT'S SQUARE APP</h1><button id="copyLink" class="copy">Copy Link</button></header><section class="panel meta"><div><label>Game Name</label><input id="gameName" readonly value="Loading…"></div><div><label>Sq ($)</label><input id="cost" readonly value="0"></div></section><section class="panel pick"><h2 class="gold">PICK YOUR SQUARES</h2><div class="pickTop"><div><label for="playerName">Your Name</label><input id="playerName" autocomplete="name" placeholder="Enter your name"></div><div class="wheelBox"><label>Color</label><canvas id="wheel" width="180" height="180" aria-label="Choose player color"></canvas><div class="colorRead"><i class="swatch"></i><span id="colorText">#FF9775</span></div><input id="playerColor" type="hidden" value="#ff9775"></div></div><div class="actions"><div class="count"><label for="randomCount">How Many Squares?</label><input id="randomCount" type="number" inputmode="numeric" min="1" max="100" value="1"></div><button id="random" class="action">Random<br>Select</button><button id="undo" class="action secondary">Undo</button><button id="save" class="action">Save<br>Picks</button></div><div id="status" class="status" role="status">Loading the live board…</div></section><section class="stats"><div class="stat">Claimed<b id="claimed">0</b></div><div class="stat">Open<b id="open">100</b></div><div class="stat">Pot<b id="pot">$0</b></div></section><section class="boardShell"><div id="board" class="board"></div></section></main><div id="toast" class="toast"></div>
+:root{--gold:#caa950;--cream:#fff0bd}
+*{box-sizing:border-box}
+html{background:#02060b}
+body{margin:0;min-width:320px;color:#fff;background:radial-gradient(circle at 50% 0,#16375b,#071427 30%,#02060b 78%);font-family:Arial,sans-serif}
+button,input{font:inherit}
+button{touch-action:manipulation}
+.app{width:min(100%,980px);margin:auto;padding:8px 7px 40px}
+.gold{color:var(--cream);font-family:Georgia,serif;text-shadow:1px 2px #241600,0 0 9px #fff4bd}
+.hero,.panel,.stats,.boardShell{border:2px solid rgba(202,169,80,.7);background:linear-gradient(135deg,rgba(6,13,23,.97),rgba(10,35,62,.92),rgba(3,9,18,.98));box-shadow:0 0 22px #287abe33,inset 0 0 18px #4874a224}
+.hero{display:grid;grid-template-columns:80px 1fr auto;align-items:center;gap:9px;border-radius:23px;padding:9px 12px;background:linear-gradient(110deg,#111814,#0e2740 55%,#3d280c)}
+.crest{display:block;width:70px;aspect-ratio:1;object-fit:contain}
+.hero h1{margin:0;text-align:center;font-size:clamp(29px,7vw,66px);line-height:.95}
+.copy{min-height:46px;padding:7px 11px;border:2px solid #b89343;border-radius:15px;background:linear-gradient(#163553,#071629);color:var(--cream);font-weight:900}
+.panel{margin-top:9px;border-radius:21px;padding:12px}
+.meta{display:grid;grid-template-columns:minmax(0,1fr) 135px;gap:10px}
+label{display:block;margin:0 0 5px;color:var(--cream);font-weight:900;font-size:17px}
+input{width:100%;min-height:55px;border:2px solid #a98537;border-radius:16px;padding:9px 13px;background:#01050a;color:#fff;font-size:23px;outline:none}
+input:focus{border-color:#ffe28b;box-shadow:0 0 0 3px #ffd76b33}
+.pick{position:relative}
+.pick h2{margin:0 0 9px;padding-right:145px;font-size:clamp(27px,5vw,46px);line-height:1}
+.pickTop{display:block;padding-right:145px;min-height:86px}
+.wheelBox{display:grid;justify-items:center;position:absolute;z-index:3;right:13px;top:12px;width:130px}
+.wheelBox label{font-size:14px}
+#wheel{display:block;width:120px;height:120px;border-radius:50%;border:4px solid #27364b;box-shadow:0 0 0 2px #000;touch-action:none;user-select:none;-webkit-user-select:none}
+.colorRead{margin-top:5px;display:flex;gap:5px;align-items:center;color:var(--cream);font-weight:900;font-size:11px}
+.swatch{width:19px;height:19px;border-radius:6px;border:2px solid #fff;background:#ff9775}
+.actions{display:grid;grid-template-columns:108px repeat(3,minmax(0,1fr));gap:7px;margin-top:9px;align-items:end}
+.count label{font-size:13px;line-height:1.05}
+.count input{height:56px;min-height:56px;font-size:21px;font-weight:900}
+.action{height:56px;border:2px solid #d5be7c;border-radius:17px;padding:3px 6px;font-weight:900;font-size:16px;line-height:1.05;color:#081006;background:linear-gradient(#8bf67e,#079329)}
+.action.secondary{color:var(--cream);background:linear-gradient(#163553,#071629)}
+.action:disabled{opacity:.48}
+.status{min-height:46px;margin-top:9px;border:1px solid #8f753b;border-radius:14px;padding:10px;display:grid;place-items:center;text-align:center;background:#0d1219e8;color:#c8d1e2;font-weight:800}
+.stats{margin-top:9px;border-radius:20px;padding:9px;display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.stat{border:1px solid #90743a;border-radius:15px;text-align:center;padding:9px 3px;color:var(--cream);font:bold 21px Georgia}
+.stat b{display:block;margin-top:3px;color:#fff;font:bold 42px Arial}
+.boardShell{margin-top:9px;border-radius:27px;padding:12px;background:#02060a;border-width:4px}
+.board{display:grid;grid-template-columns:.6fr repeat(10,1fr);grid-template-rows:.6fr repeat(10,1fr);aspect-ratio:1;border:2px solid #b69748;overflow:hidden;background:#050b13}
+.head,.cell{min-width:0;min-height:0;border:1px solid #2a4158bf;display:grid;place-items:center;overflow:hidden}
+.head{background:linear-gradient(135deg,#132b4a,#02060a);font-weight:900;font-size:clamp(8px,1.8vw,17px)}
+.corner img{display:block;width:88%;height:88%;object-fit:contain}
+.cell{position:relative;background:linear-gradient(135deg,#f9fdff,#dfeeff 72%,#fff5bd);color:#111;cursor:pointer;touch-action:manipulation;user-select:none;-webkit-user-select:none}
+.cell.claimed,.cell.pending{background:var(--cell);color:var(--fg);font-weight:900}
+.cell.pending{outline:4px solid #ffd45c;outline-offset:-4px}
+.cell img{width:100%;height:100%;object-fit:cover}
+.name{width:94%;text-align:center;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:clamp(8px,2vw,18px)}
+.slot{position:absolute;left:2px;top:1px;font-size:7px;opacity:.25}
+.toast{position:fixed;z-index:20;left:50%;bottom:max(18px,env(safe-area-inset-bottom));transform:translate(-50%,20px);width:min(88%,520px);padding:14px;border:2px solid #b6964a;border-radius:17px;background:#071323;color:var(--cream);font-weight:900;text-align:center;opacity:0;pointer-events:none;transition:.2s}
+.toast.show{opacity:1;transform:translate(-50%,0)}
+
+@media(max-width:600px){.app{padding:5px 4px 30px}
+.hero{grid-template-columns:61px 1fr auto;gap:4px;padding:6px}
+.crest{width:55px}
+.hero h1{font-size:clamp(23px,8vw,41px)}
+.copy{min-height:40px;padding:4px 6px;font-size:11px}
+.panel{padding:9px}
+.meta{grid-template-columns:minmax(0,1fr) 88px;gap:6px}
+label{font-size:14px}
+input{min-height:48px;font-size:19px;padding:7px 10px}
+.pick h2{padding-right:108px}
+.pickTop{padding-right:108px;min-height:75px}
+.wheelBox{right:8px;top:8px;width:96px}
+#wheel{width:91px;height:91px}
+.actions{grid-template-columns:68px repeat(3,minmax(0,1fr));gap:4px}
+.action,.count input{height:52px;min-height:52px;font-size:12px;padding:2px}
+.count label{font-size:9px}
+.status{font-size:12px;min-height:41px;padding:7px}
+.stats{gap:4px;padding:6px}
+.stat{font-size:16px;padding:7px 2px}
+.stat b{font-size:32px}
+.boardShell{padding:7px;border-radius:21px}
+}
+
+</style>
+</head>
+<body>
+<main class="app">
+<header class="hero">
+<img class="crest" src="./msa-logo.png" alt="Matt's Square App logo">
+<h1 class="gold">MATT'S SQUARE APP</h1>
+<button id="copyLink" class="copy">Copy Link</button>
+</header>
+<section class="panel meta">
+<div>
+<label>Game Name</label>
+<input id="gameName" readonly value="Loading…">
+</div>
+<div>
+<label>Sq ($)</label>
+<input id="cost" readonly value="0">
+</div>
+</section>
+<section class="panel pick">
+<h2 class="gold">PICK YOUR SQUARES</h2>
+<div class="pickTop">
+<div>
+<label for="playerName">Your Name</label>
+<input id="playerName" autocomplete="name" placeholder="Enter your name">
+</div>
+<div class="wheelBox">
+<label>Color</label>
+<canvas id="wheel" width="180" height="180" aria-label="Choose player color">
+</canvas>
+<div class="colorRead">
+<i class="swatch">
+</i>
+<span id="colorText">#FF9775</span>
+</div>
+<input id="playerColor" type="hidden" value="#ff9775">
+</div>
+</div>
+<div class="actions">
+<div class="count">
+<label for="randomCount">How Many Squares?</label>
+<input id="randomCount" type="number" inputmode="numeric" min="1" max="100" value="1">
+</div>
+<button id="random" class="action">Random<br>Select</button>
+<button id="undo" class="action secondary">Undo</button>
+<button id="save" class="action">Save<br>Picks</button>
+</div>
+<div id="status" class="status" role="status">Loading the live board…</div>
+</section>
+<section class="stats">
+<div class="stat">Claimed<b id="claimed">0</b>
+</div>
+<div class="stat">Open<b id="open">100</b>
+</div>
+<div class="stat">Pot<b id="pot">$0</b>
+</div>
+</section>
+<section class="boardShell">
+<div id="board" class="board">
+</div>
+</section>
+</main>
+<div id="toast" class="toast">
+</div>
 <script>(()=>{'use strict';
 const BACKEND='https://script.google.com/macros/s/AKfycbxaB2NC-8eKWBrUqplCGtSQ2tJmOQKlUyh03YjfmaL_KPQIAg-cpryEr13hcDaM7R4-/exec',TOKEN=new URLSearchParams(location.search).get('board')||'',$=id=>document.getElementById(id);let state=null,board=empty(),pending=new Set,lastBatch=[],autoTimer=0,saving=false,lastValidColor='#ff9775';
-function empty(){return Array.from({length:100},(_,i)=>({slot:i+1,player:null,color:null,img:null}))}function esc(v){return String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}function taken(s){return!!(s&&(s.player||s.img))}function key(v){return String(v||'').trim().toLowerCase()}function fg(hex){let h=String(hex||'#fff').replace('#','');if(h.length===3)h=h.split('').map(x=>x+x).join('');const n=parseInt(h,16)||0;return((((n>>16)&255)*299+((n>>8)&255)*587+(n&255)*114)/1000)>150?'#111':'#fff'}function status(t){$('status').textContent=t}function toast(t){$('toast').textContent=t;$('toast').classList.add('show');clearTimeout(toast.t);toast.t=setTimeout(()=>$('toast').classList.remove('show'),2200)}function url(p){const u=new URL(BACKEND);Object.entries(p).forEach(([k,v])=>u.searchParams.set(k,String(v)));return u}async function json(r){const raw=await r.text();let d;try{d=JSON.parse(raw)}catch(_){throw Error('The live board connection returned a web page instead of board data.')}if(!r.ok||!d?.ok)throw Error(d?.error||'The live board request could not be completed.');return d}const wait=ms=>new Promise(r=>setTimeout(r,ms));async function fetchBoard(attempt=1){const opts={cache:'no-store',redirect:'follow',credentials:'omit',headers:{Accept:'application/json,text/plain,*/*'}};try{return await json(await fetch(url({action:'getBoard',token:TOKEN,_:Date.now()+'-'+attempt}),opts))}catch(first){if(attempt<3){await wait(450*attempt);return fetchBoard(attempt+1)}try{return await json(await fetch(url({action:'post',_:Date.now()}),{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8',Accept:'application/json,text/plain,*/*'},credentials:'omit',redirect:'follow',body:JSON.stringify({action:'getBoard',token:TOKEN})}))}catch(_){throw first}}}async function get(){return fetchBoard()}async function claim(i,n,c){return json(await fetch(url({action:'post'}),{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},credentials:'omit',redirect:'follow',body:JSON.stringify({action:'claimSquare',token:TOKEN,squareIndex:i,playerName:n,playerColor:c,requestId:(crypto.randomUUID?crypto.randomUUID():Date.now()+'-'+i)})}))}function normalize(raw){const a=Array.isArray(raw?.board)?raw.board:[];return Array.from({length:100},(_,i)=>{const s=a[i]||{};return{slot:s.slot||s.n||i+1,player:s.player||null,color:s.color||null,img:s.img||null}})}function playerColor(name){const s=board.find(x=>x.player&&key(x.player)===key(name)&&x.color);return s?s.color:''}function colorOwner(color,name){const s=board.find(x=>x.player&&key(x.color)===key(color)&&key(x.player)!==key(name));return s?s.player:''}function setColor(color){lastValidColor=color;$('playerColor').value=color;$('colorText').textContent=color.toUpperCase();document.querySelector('.swatch').style.background=color;if(pending.size)render()}function identity(requirePicks=true){const name=$('playerName').value.trim();if(!name){status('Enter your name first.');$('playerName').focus();return null}if(requirePicks&&!pending.size){status('Select at least one open square first.');return null}const assigned=playerColor(name);if(assigned&&key(assigned)!==key($('playerColor').value)){setColor(assigned);status(name+' already has a color. That color stays with this player.')}const color=assigned||$('playerColor').value||'#ff9775',owner=colorOwner(color,name);if(owner){status('That color is already used by '+owner+'. Choose a different color.');toast('Choose a different color.');return null}return{name,color}}
-function render(){const top=Array.isArray(state?.topNums)?state.topNums:[],left=Array.isArray(state?.leftNums)?state.leftNums:[],full=top.length===10&&left.length===10;let h='<div class="head corner">MSA</div>';for(let c=0;c<10;c++)h+='<div class="head">'+(full?esc(top[c]):'')+'</div>';for(let r=0;r<10;r++){h+='<div class="head">'+(full?esc(left[r]):'')+'</div>';for(let c=0;c<10;c++){const i=r*10+c,s=board[i],p=pending.has(i),color=p?$('playerColor').value:(s.color||'#1d74d8'),name=p?$('playerName').value.trim():s.player;h+='<div class="cell '+(taken(s)?'claimed ':'')+(p?'pending':'')+'" data-index="'+i+'" style="--cell:'+esc(color)+';--fg:'+fg(color)+'">'+(s.img?'<img src="'+esc(s.img)+'" alt="Square '+esc(s.slot)+'">':'<span class="slot">'+esc(s.slot)+'</span><span class="name">'+esc(name||'')+'</span>')+'</div>'}}$('board').innerHTML=h;const n=board.filter(taken).length,c=Number(state?.cost)||0;$('claimed').textContent=n;$('open').textContent=100-n;$('pot').textContent='$'+(n*c).toLocaleString()}
-async function load(quiet=false){if(!TOKEN){status('This link is missing its board code. Ask for a new shared link.');return}if(!quiet)status('Loading the live board…');try{const d=await get();state=d.board;board=normalize(state);$('gameName').value=state.gameName||state.title||"Matt's Board";$('cost').value=state.cost??0;pending.clear();lastBatch=[];render();status(state.locked||state.final?'This board is complete and locked.':'Enter your name, choose a color, then tap squares or use Random Select.')}catch(e){status(e.message);toast('Board could not load.')}}function toggle(i){if(!state||saving)return;if(state.locked||state.final){toast('This board is locked.');return}if(taken(board[i])){toast('That square is already taken.');return}clearTimeout(autoTimer);lastBatch=[];pending.has(i)?pending.delete(i):pending.add(i);render();status(pending.size?pending.size+' square'+(pending.size===1?'':'s')+' selected. Tap Save Picks when finished.':'Tap open squares or use Random Select.')}
-async function save(){if(saving)return;const who=identity(true);if(!who)return;clearTimeout(autoTimer);saving=true;$('save').disabled=$('random').disabled=true;const indexes=[...pending];status('Saving '+indexes.length+' pick'+(indexes.length===1?'':'s')+'…');let ok=0,fail=0;for(const i of indexes){try{await claim(i,who.name,who.color);ok++}catch(_){fail++}}saving=false;$('save').disabled=$('random').disabled=false;pending.clear();lastBatch=[];await load(true);status(fail?ok+' saved. '+fail+' could not be saved because the board changed.':ok+' pick'+(ok===1?'':'s')+' saved successfully.');toast(fail?'Board refreshed after a save conflict.':'Picks saved.')}
-function random(){if(saving)return;const who=identity(false);if(!who)return;const requested=Math.floor(Number($('randomCount').value));if(!Number.isInteger(requested)||requested<1){status('Enter how many squares you want.');return}const open=board.map((s,i)=>({s,i})).filter(x=>!taken(x.s));if(!open.length){status('This board is full. There are no open squares.');return}clearTimeout(autoTimer);pending.clear();for(let i=open.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[open[i],open[j]]=[open[j],open[i]]}const count=Math.min(requested,open.length);lastBatch=open.slice(0,count).map(x=>x.i);lastBatch.forEach(i=>pending.add(i));$('randomCount').value=count;render();status((count<requested?'Only '+count+' squares are open. ':'')+'Auto-saving '+count+' random pick'+(count===1?'':'s')+'… Tap Undo now to cancel the full quick pick.');autoTimer=setTimeout(save,2200)}function undo(){if(saving){status('Those picks are already saving and cannot be undone.');return}clearTimeout(autoTimer);if(!pending.size){status('Nothing selected to undo.');return}const r=lastBatch.length>0;pending.clear();lastBatch=[];render();status(r?'The full random quick pick was undone.':'All unsaved picks were undone.')}
-function hsv(h,s,v){s/=100;v/=100;const c=v*s,x=c*(1-Math.abs((h/60)%2-1)),m=v-c;let r=0,g=0,b=0;if(h<60){r=c;g=x}else if(h<120){r=x;g=c}else if(h<180){g=c;b=x}else if(h<240){g=x;b=c}else if(h<300){r=x;b=c}else{r=c;b=x}return[r,g,b].map(q=>Math.round((q+m)*255))}function hex(a){return'#'+a.map(v=>v.toString(16).padStart(2,'0')).join('')}function wheel(){const cv=$('wheel'),ctx=cv.getContext('2d'),w=cv.width,c=w/2,r=w/2-2,img=ctx.createImageData(w,w);for(let y=0;y<w;y++)for(let x=0;x<w;x++){const dx=x-c,dy=y-c,d=Math.hypot(dx,dy),p=(y*w+x)*4;if(d<=r){const a=hsv((Math.atan2(dy,dx)*180/Math.PI+360)%360,Math.min(100,d/r*100),100);img.data[p]=a[0];img.data[p+1]=a[1];img.data[p+2]=a[2];img.data[p+3]=255}else img.data[p+3]=0}ctx.putImageData(img,0,0);let active=false;function pick(e){const q=cv.getBoundingClientRect(),dx=e.clientX-(q.left+q.width/2),dy=e.clientY-(q.top+q.height/2),r=Math.min(q.width,q.height)/2,d=Math.hypot(dx,dy);if(d>r)return;const color=hex(hsv((Math.atan2(dy,dx)*180/Math.PI+360)%360,Math.min(100,d/r*100),100)),name=$('playerName').value.trim(),assigned=playerColor(name),owner=colorOwner(color,name);if(assigned){setColor(assigned);status(name+' already has a color. That color stays with this player.')}else if(owner){setColor(lastValidColor);status('That color is already used by '+owner+'. Choose a different color.');toast('Choose a different color.')}else setColor(color);e.preventDefault();e.stopPropagation()}cv.addEventListener('pointerdown',e=>{active=true;try{cv.setPointerCapture(e.pointerId)}catch(_){}pick(e)},{passive:false});cv.addEventListener('pointermove',e=>{if(active)pick(e)},{passive:false});cv.addEventListener('pointerup',e=>{active=false;pick(e)},{passive:false});cv.addEventListener('pointercancel',()=>active=false)}
-async function copy(){const text=location.href,ta=document.createElement('textarea');ta.value=text;ta.readOnly=true;ta.style.cssText='position:fixed;left:-9999px';document.body.appendChild(ta);ta.select();let ok=false;try{ok=document.execCommand('copy')}catch(_){}ta.remove();if(!ok&&navigator.share)try{await navigator.share({title:"Matt's Square App Board",url:text});ok=true}catch(_){}toast(ok?'Board link copied.':'Press and hold the address bar to copy this link.')}$('board').addEventListener('click',e=>{const c=e.target.closest('.cell');if(c)toggle(Number(c.dataset.index))});$('playerName').addEventListener('input',()=>{const assigned=playerColor($('playerName').value);if(assigned)setColor(assigned);if(pending.size)render()});$('random').onclick=random;$('undo').onclick=undo;$('save').onclick=save;$('copyLink').onclick=copy;wheel();load();setInterval(()=>{if(!pending.size&&!saving&&!document.hidden)load(true)},8000);
-})();</script></body></html>
+function empty(){return Array.from({length:100}
+,(_,i)=>({slot:i+1,player:null,color:null,img:null}
+))}
+function esc(v){return String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}
+[c]))}
+function taken(s){return!!(s&&(s.player||s.img))}
+function key(v){return String(v||'').trim().toLowerCase()}
+function fg(hex){let h=String(hex||'#fff').replace('#','');if(h.length===3)h=h.split('').map(x=>x+x).join('');const n=parseInt(h,16)||0;return((((n>>16)&255)*299+((n>>8)&255)*587+(n&255)*114)/1000)>150?'#111':'#fff'}
+function status(t){$('status').textContent=t}
+function toast(t){$('toast').textContent=t;$('toast').classList.add('show');clearTimeout(toast.t);toast.t=setTimeout(()=>$('toast').classList.remove('show'),2200)}
+function url(p){const u=new URL(BACKEND);Object.entries(p).forEach(([k,v])=>u.searchParams.set(k,String(v)));return u}
+
+async function json(r){const raw=await r.text();let d;try{d=JSON.parse(raw)}
+catch(_){throw Error('The live board connection returned a web page instead of board data.')}
+if(!r.ok||!d?.ok)throw Error(d?.error||'The live board request could not be completed.');return d}
+const wait=ms=>new Promise(r=>setTimeout(r,ms));
+async function fetchBoard(attempt=1){const opts={cache:'no-store',redirect:'follow',credentials:'omit',headers:{Accept:'application/json,text/plain,*/*'}
+}
+;try{return await json(await fetch(url({action:'getBoard',token:TOKEN,_:Date.now()+'-'+attempt}
+),opts))}
+catch(first){if(attempt<3){await wait(450*attempt);return fetchBoard(attempt+1)}
+try{return await json(await fetch(url({action:'post',_:Date.now()}
+),{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8',Accept:'application/json,text/plain,*/*'}
+,credentials:'omit',redirect:'follow',body:JSON.stringify({action:'getBoard',token:TOKEN}
+)}
+))}
+catch(_){throw first}
+}
+}
+
+async function get(){return fetchBoard()}
+
+async function claim(i,n,c,requestId,attempt=1){try{return await json(await fetch(url({action:'post'}),{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8',Accept:'application/json,text/plain,*/*'},credentials:'omit',redirect:'follow',body:JSON.stringify({action:'claimSquare',token:TOKEN,squareIndex:i,playerName:n,playerColor:c,requestId})}))}catch(e){if(attempt>=4)throw e;await wait(500*attempt);return claim(i,n,c,requestId,attempt+1)}}
+function normalize(raw){const a=Array.isArray(raw?.board)?raw.board:[];return Array.from({length:100}
+,(_,i)=>{const s=a[i]||{}
+;return{slot:s.slot||s.n||i+1,player:s.player||null,color:s.color||null,img:s.img||null}
+}
+)}
+function playerColor(name){const s=board.find(x=>x.player&&key(x.player)===key(name)&&x.color);return s?s.color:''}
+function colorOwner(color,name){const s=board.find(x=>x.player&&key(x.color)===key(color)&&key(x.player)!==key(name));return s?s.player:''}
+function setColor(color){lastValidColor=color;$('playerColor').value=color;$('colorText').textContent=color.toUpperCase();document.querySelector('.swatch').style.background=color;if(pending.size)render()}
+function identity(requirePicks=true){const name=$('playerName').value.trim();if(!name){status('Enter your name first.');$('playerName').focus();return null}
+if(requirePicks&&!pending.size){status('Select at least one open square first.');return null}
+const assigned=playerColor(name);if(assigned&&key(assigned)!==key($('playerColor').value)){setColor(assigned);status(name+' already has a color. That color stays with this player.')}
+const color=assigned||$('playerColor').value||'#ff9775',owner=colorOwner(color,name);if(owner){status('That color is already used by '+owner+'. Choose a different color.');toast('Choose a different color.');return null}
+return{name,color}
+}
+
+function render(){const top=Array.isArray(state?.topNums)?state.topNums:[],left=Array.isArray(state?.leftNums)?state.leftNums:[],full=top.length===10&&left.length===10;let h='<div class="head corner"><img src="./msa-logo.png" alt=""></div>';for(let c=0;c<10;c++)h+='<div class="head">'+(full?esc(top[c]):'')+'</div>';for(let r=0;r<10;r++){h+='<div class="head">'+(full?esc(left[r]):'')+'</div>';for(let c=0;c<10;c++){const i=r*10+c,s=board[i],p=pending.has(i),color=p?$('playerColor').value:(s.color||'#1d74d8'),name=p?$('playerName').value.trim():s.player;h+='<div class="cell '+(taken(s)?'claimed ':'')+(p?'pending':'')+'" data-index="'+i+'" style="--cell:'+esc(color)+';--fg:'+fg(color)+'">'+(s.img?'<img src="'+esc(s.img)+'" alt="Square '+esc(s.slot)+'">':'<span class="slot">'+esc(s.slot)+'</span><span class="name">'+esc(name||'')+'</span>')+'</div>'}
+}
+$('board').innerHTML=h;const n=board.filter(taken).length,c=Number(state?.cost)||0;$('claimed').textContent=n;$('open').textContent=100-n;$('pot').textContent='$'+(n*c).toLocaleString()}
+
+
+async function load(quiet=false){if(!TOKEN){status('This link is missing its board code. Ask for a new shared link.');return false}
+if(!quiet)status('Loading the live board…');try{const d=await get();state=d.board;board=normalize(state);localStorage.setItem('matt-shared-'+TOKEN,JSON.stringify(state));$('gameName').value=state.gameName||state.title||"Matt's Board";$('cost').value=state.cost??0;if(!quiet){pending.clear();lastBatch=[]}render();if(!quiet)status(state.locked||state.final?'This board is complete and locked.':'Enter your name, choose a color, then tap squares or use Random Select.');return true}
+catch(e){if(!state){try{state=JSON.parse(localStorage.getItem('matt-shared-'+TOKEN)||'null');if(state){board=normalize(state);$('gameName').value=state.gameName||state.title||"Matt's Board";$('cost').value=state.cost??0;render();status('Showing the last saved board. Reconnecting to the live board…');return false}}catch(_){}}status(e.message);if(!quiet)toast('Board could not load.');return false}
+}
+function toggle(i){if(!state||saving)return;if(state.locked||state.final){toast('This board is locked.');return}
+if(taken(board[i])){toast('That square is already taken.');return}
+clearTimeout(autoTimer);lastBatch=[];pending.has(i)?pending.delete(i):pending.add(i);render();status(pending.size?pending.size+' square'+(pending.size===1?'':'s')+' selected. Tap Save Picks when finished.':'Tap open squares or use Random Select.')}
+
+
+async function save(){if(saving)return;const who=identity(true);if(!who)return;clearTimeout(autoTimer);saving=true;$('save').disabled=$('random').disabled=true;const indexes=[...pending],failed=[];status('Saving '+indexes.length+' pick'+(indexes.length===1?'':'s')+'…');let ok=0;for(const i of indexes){const requestId=(crypto.randomUUID?crypto.randomUUID():Date.now()+'-'+i);try{await claim(i,who.name,who.color,requestId);ok++;pending.delete(i);board[i]={...board[i],player:who.name,color:who.color};render();status('Saving picks… '+ok+' of '+indexes.length+' saved.')}catch(_){failed.push(i)}}saving=false;$('save').disabled=$('random').disabled=false;pending=new Set(failed);lastBatch=failed.length?[...failed]:[];render();if(failed.length){status(ok+' of '+indexes.length+' saved. '+failed.length+' still selected—tap Save Picks to retry.');toast('Unsaved picks were kept for retry.')}else{status(ok+' pick'+(ok===1?'':'s')+' saved successfully.');toast('Picks saved.');try{await load(true)}catch(_){}}}
+
+function random(){if(saving)return;const who=identity(false);if(!who)return;const requested=Math.floor(Number($('randomCount').value));if(!Number.isInteger(requested)||requested<1){status('Enter how many squares you want.');return}
+const open=board.map((s,i)=>({s,i}
+)).filter(x=>!taken(x.s));if(!open.length){status('This board is full. There are no open squares.');return}
+clearTimeout(autoTimer);pending.clear();for(let i=open.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[open[i],open[j]]=[open[j],open[i]]}
+const count=Math.min(requested,open.length);lastBatch=open.slice(0,count).map(x=>x.i);lastBatch.forEach(i=>pending.add(i));$('randomCount').value=count;render();status((count<requested?'Only '+count+' squares are open. ':'')+'Auto-saving '+count+' random pick'+(count===1?'':'s')+'… Tap Undo now to cancel the full quick pick.');autoTimer=setTimeout(save,2200)}
+function undo(){if(saving){status('Those picks are already saving and cannot be undone.');return}
+clearTimeout(autoTimer);if(!pending.size){status('Nothing selected to undo.');return}
+const r=lastBatch.length>0;pending.clear();lastBatch=[];render();status(r?'The full random quick pick was undone.':'All unsaved picks were undone.')}
+
+function hsv(h,s,v){s/=100;v/=100;const c=v*s,x=c*(1-Math.abs((h/60)%2-1)),m=v-c;let r=0,g=0,b=0;if(h<60){r=c;g=x}
+else if(h<120){r=x;g=c}
+else if(h<180){g=c;b=x}
+else if(h<240){g=x;b=c}
+else if(h<300){r=x;b=c}
+else{r=c;b=x}
+return[r,g,b].map(q=>Math.round((q+m)*255))}
+function hex(a){return'#'+a.map(v=>v.toString(16).padStart(2,'0')).join('')}
+function wheel(){const cv=$('wheel'),ctx=cv.getContext('2d'),w=cv.width,c=w/2,r=w/2-2,img=ctx.createImageData(w,w);for(let y=0;y<w;y++)for(let x=0;x<w;x++){const dx=x-c,dy=y-c,d=Math.hypot(dx,dy),p=(y*w+x)*4;if(d<=r){const a=hsv((Math.atan2(dy,dx)*180/Math.PI+360)%360,Math.min(100,d/r*100),100);img.data[p]=a[0];img.data[p+1]=a[1];img.data[p+2]=a[2];img.data[p+3]=255}
+else img.data[p+3]=0}
+ctx.putImageData(img,0,0);let active=false;
+function pick(e){const q=cv.getBoundingClientRect(),dx=e.clientX-(q.left+q.width/2),dy=e.clientY-(q.top+q.height/2),r=Math.min(q.width,q.height)/2,d=Math.hypot(dx,dy);if(d>r)return;const color=hex(hsv((Math.atan2(dy,dx)*180/Math.PI+360)%360,Math.min(100,d/r*100),100)),name=$('playerName').value.trim(),assigned=playerColor(name),owner=colorOwner(color,name);if(assigned){setColor(assigned);status(name+' already has a color. That color stays with this player.')}
+else if(owner){setColor(lastValidColor);status('That color is already used by '+owner+'. Choose a different color.');toast('Choose a different color.')}
+else setColor(color);e.preventDefault();e.stopPropagation()}
+cv.addEventListener('pointerdown',e=>{active=true;try{cv.setPointerCapture(e.pointerId)}
+catch(_){}
+pick(e)}
+,{passive:false}
+);cv.addEventListener('pointermove',e=>{if(active)pick(e)}
+,{passive:false}
+);cv.addEventListener('pointerup',e=>{active=false;pick(e)}
+,{passive:false}
+);cv.addEventListener('pointercancel',()=>active=false)}
+
+
+async function copy(){const text=location.href,ta=document.createElement('textarea');ta.value=text;ta.readOnly=true;ta.style.cssText='position:fixed;left:-9999px';document.body.appendChild(ta);ta.select();let ok=false;try{ok=document.execCommand('copy')}
+catch(_){}
+ta.remove();if(!ok&&navigator.share)try{await navigator.share({title:"Matt's Square App Board",url:text}
+);ok=true}
+catch(_){}
+toast(ok?'Board link copied.':'Press and hold the address bar to copy this link.')}
+$('board').addEventListener('click',e=>{const c=e.target.closest('.cell');if(c)toggle(Number(c.dataset.index))}
+);$('playerName').addEventListener('input',()=>{const assigned=playerColor($('playerName').value);if(assigned)setColor(assigned);if(pending.size)render()}
+);$('random').onclick=random;$('undo').onclick=undo;$('save').onclick=save;$('copyLink').onclick=copy;wheel();load();setInterval(()=>{if(!pending.size&&!saving&&!document.hidden)load(true)}
+,8000);
+}
+)();</script>
+</body>
+</html>
