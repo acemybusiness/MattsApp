@@ -1,0 +1,10 @@
+{
+  "name": "matts-square-app",
+  "private": true,
+  "version": "80.0.0",
+  "dependencies": {
+    "@capacitor/android": "7.4.3",
+    "@capacitor/cli": "7.4.3",
+    "@capacitor/core": "7.4.3"
+  }
+}

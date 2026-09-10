@@ -1,0 +1,16 @@
+{
+  "appTitle": "Matt's Square App",
+  "permanentAppId": "APP-MATT-SQUARE",
+  "packageId": "com.samanthasapps.mattsquare",
+  "owner": "SRL",
+  "version": "v80",
+  "versionCode": 80,
+  "stage": "Finished",
+  "platforms": [
+    "PWA",
+    "Android APK"
+  ],
+  "sourceCommit": "74d6f90c5989d642cd6c34fd7d9c51f0d1bdfe3c",
+  "cosmeticBaseline": "locked",
+  "pwaUrl": "https://acemybusiness.github.io/MattsApp/"
+}

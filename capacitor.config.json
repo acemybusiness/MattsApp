@@ -1,0 +1,8 @@
+{
+  "appId": "com.samanthasapps.mattsquare",
+  "appName": "Matt's Square App",
+  "webDir": "www",
+  "server": {
+    "androidScheme": "https"
+  }
+}
