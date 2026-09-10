@@ -2220,9 +2220,6 @@ $('name').addEventListener('input',()=>{const existing=pc($('name').value);if(ex
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init);else init();
 })();
 <\/script>
-<script id="pwa-registration">
-if('serviceWorker' in navigator){window.addEventListener('load',()=>navigator.serviceWorker.register('./sw.js').catch(()=>{}));}
-</script>
 </body></html>`;
   }
   async function shareParticipantFile(saved){
@@ -3146,5 +3143,8 @@ body:not(.playerShareMode) .randomPairRow{grid-template-columns:92px minmax(0,1f
 })();
 </script>
 
+<script id="pwa-registration">
+if('serviceWorker' in navigator){window.addEventListener('load',()=>navigator.serviceWorker.register('./sw.js').catch(()=>{}));}
+</script>
 </body>
 </html>
