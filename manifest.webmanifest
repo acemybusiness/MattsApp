@@ -1,20 +1,16 @@
 {
-  "id": "/MattsApp/",
+  "id": "/",
   "name": "Matt's Square App",
   "short_name": "Matt's App",
   "description": "Play, Select, Win",
-  "start_url": "/MattsApp/",
-  "scope": "/MattsApp/",
+  "start_url": "/",
+  "scope": "/",
   "display": "standalone",
   "orientation": "portrait-primary",
   "background_color": "#071321",
   "theme_color": "#071321",
   "icons": [
-    {
-      "src": "msa-logo.png",
-      "sizes": "128x128",
-      "type": "image/png",
-      "purpose": "any"
-    }
+    {"src": "icons/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any maskable"},
+    {"src": "icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any maskable"}
   ]
 }
