@@ -215,7 +215,7 @@ function random(){if(saving)return;const who=identity(false);if(!who)return;cons
 const open=board.map((s,i)=>({s,i}
 )).filter(x=>!taken(x.s));if(!open.length){status('This board is full. There are no open squares.');return}
 clearTimeout(autoTimer);pending.clear();for(let i=open.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[open[i],open[j]]=[open[j],open[i]]}
-const count=Math.min(requested,open.length);lastBatch=open.slice(0,count).map(x=>x.i);lastBatch.forEach(i=>pending.add(i));$('randomCount').value=count;render();status((count<requested?'Only '+count+' squares are open. ':'')+'Auto-saving '+count+' random pick'+(count===1?'':'s')+'… Tap Undo now to cancel the full quick pick.');autoTimer=setTimeout(save,2200)}
+const count=Math.min(requested,open.length);lastBatch=open.slice(0,count).map(x=>x.i);lastBatch.forEach(i=>pending.add(i));$('randomCount').value=count;render();status((count<requested?'Only '+count+' squares are open. ':'')+count+' random pick'+(count===1?'':'s')+' selected. Tap Save Picks to confirm or Undo to cancel.')}
 function undo(){if(saving){status('Those picks are already saving and cannot be undone.');return}
 clearTimeout(autoTimer);if(!pending.size){status('Nothing selected to undo.');return}
 const r=lastBatch.length>0;pending.clear();lastBatch=[];render();status(r?'The full random quick pick was undone.':'All unsaved picks were undone.')}
