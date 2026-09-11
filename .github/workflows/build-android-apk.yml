@@ -1,4 +1,5 @@
 name: Build Matt's Square App APK
+
 on:
   workflow_dispatch:
   push:
@@ -9,9 +10,13 @@ on:
       - msa-logo.png
       - manifest.webmanifest
       - sw.js
+      - icons/**
+      - android-icon-res/**
       - package.json
+      - package-lock.json
       - capacitor.config.json
       - .github/workflows/build-android-apk.yml
+
 jobs:
   build-apk:
     runs-on: ubuntu-latest
@@ -20,25 +25,28 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 20
+          cache: npm
       - uses: actions/setup-java@v4
         with:
           distribution: temurin
           java-version: 21
-      - run: npm install --ignore-scripts
+      - run: npm ci
       - name: Prepare locked web build
         run: |
-          mkdir -p www
+          mkdir -p www/icons
           cp index.html shared.html msa-logo.png manifest.webmanifest sw.js www/
+          cp icons/icon-192.png icons/icon-512.png www/icons/
       - name: Create Android project
         run: |
           npx cap add android
           npx cap sync android
-          sed -i 's/versionCode 1/versionCode 80/' android/app/build.gradle
-          sed -i 's/versionName "1.0"/versionName "80"/' android/app/build.gradle
+          cp -R android-icon-res/. android/app/src/main/res/
+          sed -i 's/versionCode 1/versionCode 81/' android/app/build.gradle
+          sed -i 's/versionName "1.0"/versionName "80.1"/' android/app/build.gradle
       - name: Build APK
         run: cd android && ./gradlew assembleDebug
       - uses: actions/upload-artifact@v4
         with:
-          name: Matts-Square-App-v80-APK
+          name: Matts-Square-App-v80.1-Icon-Fix-APK
           path: android/app/build/outputs/apk/debug/app-debug.apk
           if-no-files-found: error
