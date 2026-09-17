@@ -10,6 +10,17 @@
   "background_color": "#071321",
   "theme_color": "#071321",
   "icons": [
-    {"src": "msa-logo.png", "sizes": "128x128", "type": "image/png", "purpose": "any"}
+    {
+      "src": "msa-app-icon.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "msa-app-icon.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
   ]
 }
