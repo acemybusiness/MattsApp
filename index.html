@@ -3325,6 +3325,13 @@ body:not(.playerShareMode) .randomPairRow{grid-template-columns:92px minmax(0,1f
     catch(e){return [];}
   }
 
+  function deletedBoardIds(){
+    try{
+      const ids=JSON.parse(localStorage.getItem('matt_deleted_board_ids_v8072')||'[]');
+      return new Set(Array.isArray(ids)?ids.map(String):[]);
+    }catch(e){return new Set();}
+  }
+
   function countClaims(state){
     return Array.isArray(state&&state.board)?state.board.filter(cell=>cell&&(cell.player||cell.img)).length:0;
   }
@@ -3391,8 +3398,10 @@ body:not(.playerShareMode) .randomPairRow{grid-template-columns:92px minmax(0,1f
       let added=0;
       let refreshed=0;
       let failed=0;
+      const deletedIds=deletedBoardIds();
       for(const meta of manifest){
         if(!meta||!meta.shareToken||!meta.boardId)continue;
+        if(deletedIds.has(String(meta.boardId)))continue;
         try{
           const remote=await getCloudBoard(meta.shareToken);
           const index=list.findIndex(item=>String(item.boardId||item.id)===String(meta.boardId));
@@ -3446,6 +3455,113 @@ body:not(.playerShareMode) .randomPairRow{grid-template-columns:92px minmax(0,1f
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',install);
   else install();
   [500,1500,3000].forEach(delay=>setTimeout(markVersion,delay));
+})();
+</script>
+
+
+<script id="v8072-delete-everywhere">
+(function(){
+  'use strict';
+  const VERSION='v80.7.2';
+  const BACKEND='https://script.google.com/macros/s/AKfycbxaB2NC-8eKWBrUqplCGtSQ2tJmOQKlUyh03YjfmaL_KPQIAg-cpryEr13hcDaM7R4-/exec';
+
+  function backendBase(){
+    try{
+      const query=new URLSearchParams(location.search).get('api');
+      if(query)return query;
+      const saved=localStorage.getItem('matt_v80_api_url');
+      if(saved)return saved;
+    }catch(e){}
+    return BACKEND;
+  }
+
+  async function deleteCloudBoard(saved){
+    const controller=new AbortController();
+    const timer=setTimeout(()=>controller.abort(),15000);
+    try{
+      const endpoint=new URL(backendBase());
+      endpoint.searchParams.set('action','post');
+      const response=await fetch(endpoint.toString(),{
+        method:'POST',
+        headers:{'Content-Type':'text/plain;charset=utf-8'},
+        body:JSON.stringify({
+          action:'deleteBoard',
+          boardId:saved.boardId||saved.id||'',
+          token:saved.shareToken||'',
+          deletedBy:'Matt'
+        }),
+        redirect:'follow',
+        signal:controller.signal
+      });
+      const result=await response.json();
+      if(!result||!result.ok)throw new Error((result&&result.error)||'Google delete was not confirmed.');
+      return result;
+    }finally{
+      clearTimeout(timer);
+    }
+  }
+
+  function rememberDeleted(boardId){
+    if(!boardId)return;
+    try{
+      const current=JSON.parse(localStorage.getItem('matt_deleted_board_ids_v8072')||'[]');
+      const ids=new Set(Array.isArray(current)?current.map(String):[]);
+      ids.add(String(boardId));
+      localStorage.setItem('matt_deleted_board_ids_v8072',JSON.stringify(Array.from(ids)));
+    }catch(e){}
+  }
+
+  async function persistAfterDelete(list){
+    if(typeof safeStoreSaved==='function')safeStoreSaved(list);
+    else try{localStorage.setItem('matts_square_saved_v80_FULL',JSON.stringify(list));}catch(e){}
+    try{if(typeof idbSet==='function')await idbSet('matts_square_saved_v80',list);}catch(e){}
+    if(typeof renderSavedList==='function')renderSavedList();
+    if(typeof renderModal==='function')renderModal();
+  }
+
+  window.deleteSaved=async function(id){
+    const list=typeof getSaved==='function'?getSaved():[];
+    const target=list.find(item=>String(item.id||item.boardId)===String(id));
+    if(!target)return false;
+    const label=target.gameName||target.title||'this board';
+    const confirmed=confirm('Remove “'+label+'” from every phone and laptop? The Google copy will be moved to Deleted_Boards so it can be recovered.');
+    if(!confirmed)return false;
+    const status=document.getElementById('status');
+    if(status)status.textContent='Removing “'+label+'” from all devices…';
+    try{
+      await deleteCloudBoard(target);
+      const boardId=String(target.boardId||target.id||'');
+      rememberDeleted(boardId);
+      const next=list.filter(item=>String(item.id||item.boardId)!==String(id)&&String(item.boardId||item.id)!==boardId);
+      await persistAfterDelete(next);
+      if(typeof activeBoardId!=='undefined'&&String(activeBoardId||'')===boardId){
+        activeBoardId='';
+        activeShareToken='';
+        activeBoardLocked=false;
+        const share=document.getElementById('shareCard');
+        if(share)share.style.display='none';
+      }
+      if(status)status.textContent='“'+label+'” removed from all devices and archived for recovery.';
+      if(typeof toast==='function')toast('Board removed everywhere ✓');
+      return true;
+    }catch(error){
+      console.error('Delete Everywhere failed',error);
+      if(status)status.textContent='Board was not deleted. Google could not confirm the removal.';
+      if(typeof toast==='function')toast('Delete not completed — the board was kept safe.');
+      return false;
+    }
+  };
+
+  function markVersion(){
+    const tag=document.querySelector('.appVersionTag');
+    if(tag)tag.textContent=VERSION;
+    document.title="Matt's Square App — "+VERSION;
+    document.documentElement.dataset.mattVersion=VERSION;
+  }
+  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',markVersion);
+  else markVersion();
+  [400,1200,3000].forEach(delay=>setTimeout(markVersion,delay));
+  window.MATTS_DELETE_EVERYWHERE={version:VERSION,recoverableArchive:true};
 })();
 </script>
 
