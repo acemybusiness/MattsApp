@@ -3336,13 +3336,29 @@ body:not(.playerShareMode) .randomPairRow{grid-template-columns:92px minmax(0,1f
     return Array.isArray(state&&state.board)?state.board.filter(cell=>cell&&(cell.player||cell.img)).length:0;
   }
 
+  function shareCodeFromToken(token){
+    const alphabet='ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+    const text=String(token||'');
+    if(!text)return '';
+    let hash=2166136261;
+    for(let i=0;i<text.length;i++)hash=Math.imul(hash^text.charCodeAt(i),16777619)>>>0;
+    let code='';
+    for(let i=0;i<6;i++){
+      hash=Math.imul(hash^(hash>>>13),2246822519)>>>0;
+      code+=alphabet[hash%alphabet.length];
+    }
+    return code;
+  }
+
   function remoteToSaved(remote,meta){
     const boardId=String(remote.boardId||meta.boardId||'');
     const updated=meta.updatedAt||remote.updated||new Date().toISOString();
+    const shareToken=remote.shareToken||meta.shareToken||'';
     return {
       id:boardId,
       boardId:boardId,
-      shareToken:remote.shareToken||meta.shareToken||'',
+      shareToken:shareToken,
+      shareCode:remote.shareCode||meta.shareCode||shareCodeFromToken(shareToken),
       publicPath:remote.publicPath||meta.publicPath||'',
       title:remote.gameName||meta.gameName||'Untitled Board',
       gameName:remote.gameName||meta.gameName||'',
@@ -3368,6 +3384,7 @@ body:not(.playerShareMode) .randomPairRow{grid-template-columns:92px minmax(0,1f
       const merged=mergeLinkedRemote(local,incoming);
       merged.publicPath=incoming.publicPath||local.publicPath||'';
       merged.status=incoming.status||local.status||'OPEN';
+      merged.shareCode=incoming.shareCode||local.shareCode||'';
       merged.title=local.title||incoming.title;
       merged.updated=incoming.updated||local.updated;
       merged.source=local.source||incoming.source;
@@ -3462,7 +3479,7 @@ body:not(.playerShareMode) .randomPairRow{grid-template-columns:92px minmax(0,1f
 <script id="v8072-delete-everywhere">
 (function(){
   'use strict';
-  const VERSION='v80.7.2';
+  const VERSION='v80.7.3';
   const BACKEND='https://script.google.com/macros/s/AKfycbxXyngar6GxVTkJhh9OigkAALx1jT_bge_4v2e4Izut1en1dw4dRI7grxvpI1RT51m3/exec';
 
   function backendBase(){
