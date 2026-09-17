@@ -2327,7 +2327,7 @@ $('name').addEventListener('input',()=>{const existing=pc($('name').value);if(ex
   'use strict';
   const VERSION='MAv.1.4';
   const TOKEN=new URLSearchParams(location.search).get('board')||'';
-  const MATT_V80_BACKEND='https://script.google.com/macros/s/AKfycbxaB2NC-8eKWBrUqplCGtSQ2tJmOQKlUyh03YjfmaL_KPQIAg-cpryEr13hcDaM7R4-/exec';
+  const MATT_V80_BACKEND='https://script.google.com/macros/s/AKfycbxXyngar6GxVTkJhh9OigkAALx1jT_bge_4v2e4Izut1en1dw4dRI7grxvpI1RT51m3/exec';
   const pending=new Set();
   let busy=false;
 
@@ -2745,7 +2745,7 @@ function backendBase(){
     const saved=localStorage.getItem('matt_v80_api_url');
     if(saved)return saved;
   }catch(e){}
-  return 'https://script.google.com/macros/s/AKfycbxaB2NC-8eKWBrUqplCGtSQ2tJmOQKlUyh03YjfmaL_KPQIAg-cpryEr13hcDaM7R4-/exec';
+  return 'https://script.google.com/macros/s/AKfycbxXyngar6GxVTkJhh9OigkAALx1jT_bge_4v2e4Izut1en1dw4dRI7grxvpI1RT51m3/exec';
 }
 function apiUrl(params){
   const u=new URL(backendBase());
@@ -3272,7 +3272,7 @@ body:not(.playerShareMode) .randomPairRow{grid-template-columns:92px minmax(0,1f
   const VERSION='v80.7.1';
   const OWNER='Matt';
   const SYNC_INTERVAL=60000;
-  const BACKEND='https://script.google.com/macros/s/AKfycbxaB2NC-8eKWBrUqplCGtSQ2tJmOQKlUyh03YjfmaL_KPQIAg-cpryEr13hcDaM7R4-/exec';
+  const BACKEND='https://script.google.com/macros/s/AKfycbxXyngar6GxVTkJhh9OigkAALx1jT_bge_4v2e4Izut1en1dw4dRI7grxvpI1RT51m3/exec';
   let catalogBusy=false;
   let lastCatalogSync=0;
 
@@ -3463,7 +3463,7 @@ body:not(.playerShareMode) .randomPairRow{grid-template-columns:92px minmax(0,1f
 (function(){
   'use strict';
   const VERSION='v80.7.2';
-  const BACKEND='https://script.google.com/macros/s/AKfycbxaB2NC-8eKWBrUqplCGtSQ2tJmOQKlUyh03YjfmaL_KPQIAg-cpryEr13hcDaM7R4-/exec';
+  const BACKEND='https://script.google.com/macros/s/AKfycbxXyngar6GxVTkJhh9OigkAALx1jT_bge_4v2e4Izut1en1dw4dRI7grxvpI1RT51m3/exec';
 
   function backendBase(){
     try{
