@@ -3266,6 +3266,190 @@ body:not(.playerShareMode) .randomPairRow{grid-template-columns:92px minmax(0,1f
 })();
 </script>
 
+<script id="v8071-cross-device-board-sync">
+(function(){
+  'use strict';
+  const VERSION='v80.7.1';
+  const OWNER='Matt';
+  const SYNC_INTERVAL=60000;
+  const BACKEND='https://script.google.com/macros/s/AKfycbxaB2NC-8eKWBrUqplCGtSQ2tJmOQKlUyh03YjfmaL_KPQIAg-cpryEr13hcDaM7R4-/exec';
+  let catalogBusy=false;
+  let lastCatalogSync=0;
+
+  function backendBase(){
+    try{
+      const query=new URLSearchParams(location.search).get('api');
+      if(query)return query;
+      const saved=localStorage.getItem('matt_v80_api_url');
+      if(saved)return saved;
+    }catch(e){}
+    return BACKEND;
+  }
+
+  function apiUrl(params){
+    const u=new URL(backendBase());
+    Object.entries(params||{}).forEach(([key,value])=>u.searchParams.set(key,String(value)));
+    return u.toString();
+  }
+
+  async function fetchJson(url,options,timeoutMs=15000){
+    const controller=new AbortController();
+    const timer=setTimeout(()=>controller.abort(),timeoutMs);
+    try{
+      const response=await fetch(url,Object.assign({cache:'no-store',redirect:'follow'},options||{},{signal:controller.signal}));
+      const data=await response.json();
+      if(!data||!data.ok)throw new Error((data&&data.error)||'Live board request failed.');
+      return data;
+    }finally{
+      clearTimeout(timer);
+    }
+  }
+
+  async function listCloudBoards(){
+    return fetchJson(apiUrl({action:'post'}),{
+      method:'POST',
+      headers:{'Content-Type':'text/plain;charset=utf-8'},
+      body:JSON.stringify({action:'listBoards',owner:OWNER})
+    });
+  }
+
+  async function getCloudBoard(token){
+    if(!token)throw new Error('Missing share token.');
+    const result=await fetchJson(apiUrl({action:'board',token:token,_:Date.now()}));
+    if(!result.board||!Array.isArray(result.board.board))throw new Error('Incomplete live board.');
+    return result.board;
+  }
+
+  function localBoards(){
+    try{return typeof getSaved==='function'&&Array.isArray(getSaved())?getSaved():[];}
+    catch(e){return [];}
+  }
+
+  function countClaims(state){
+    return Array.isArray(state&&state.board)?state.board.filter(cell=>cell&&(cell.player||cell.img)).length:0;
+  }
+
+  function remoteToSaved(remote,meta){
+    const boardId=String(remote.boardId||meta.boardId||'');
+    const updated=meta.updatedAt||remote.updated||new Date().toISOString();
+    return {
+      id:boardId,
+      boardId:boardId,
+      shareToken:remote.shareToken||meta.shareToken||'',
+      publicPath:remote.publicPath||meta.publicPath||'',
+      title:remote.gameName||meta.gameName||'Untitled Board',
+      gameName:remote.gameName||meta.gameName||'',
+      gameDate:remote.gameDate||'',
+      status:remote.status||meta.status||'OPEN',
+      cost:Number(remote.cost??meta.cost??0),
+      board:remote.board,
+      topNums:Array.isArray(remote.topNums)?remote.topNums:[],
+      leftNums:Array.isArray(remote.leftNums)?remote.leftNums:[],
+      final:!!(remote.final||meta.final),
+      locked:!!(remote.locked||remote.final||meta.final),
+      claimed:Number(remote.claimedCount??meta.claimedCount??countClaims(remote)),
+      updated:updated,
+      numbersPopulated:Array.isArray(remote.topNums)&&remote.topNums.length===10&&Array.isArray(remote.leftNums)&&remote.leftNums.length===10,
+      source:'GOOGLE_SYNC'
+    };
+  }
+
+  function mergeCloudIntoLocal(local,remote,meta){
+    const incoming=remoteToSaved(remote,meta);
+    if(!local)return incoming;
+    if(typeof mergeLinkedRemote==='function'){
+      const merged=mergeLinkedRemote(local,incoming);
+      merged.publicPath=incoming.publicPath||local.publicPath||'';
+      merged.status=incoming.status||local.status||'OPEN';
+      merged.title=local.title||incoming.title;
+      merged.updated=incoming.updated||local.updated;
+      merged.source=local.source||incoming.source;
+      return merged;
+    }
+    return Object.assign({},local,incoming,{id:local.id||incoming.id,title:local.title||incoming.title});
+  }
+
+  async function storeCatalog(list){
+    if(typeof safeStoreSaved==='function')safeStoreSaved(list);
+    else{
+      try{localStorage.setItem('matts_square_saved_v80_FULL',JSON.stringify(list));}catch(e){}
+    }
+    try{if(typeof idbSet==='function')await idbSet('matts_square_saved_v80',list);}catch(e){}
+    if(typeof renderSavedList==='function')renderSavedList();
+    if(typeof renderModal==='function')renderModal();
+  }
+
+  async function syncCloudCatalog(options){
+    const opts=options||{};
+    if(catalogBusy||document.hidden)return {ok:false,skipped:true};
+    if(!opts.force&&Date.now()-lastCatalogSync<15000)return {ok:true,skipped:true};
+    catalogBusy=true;
+    try{
+      const catalog=await listCloudBoards();
+      const manifest=Array.isArray(catalog.boards)?catalog.boards:[];
+      const list=localBoards().slice();
+      let added=0;
+      let refreshed=0;
+      let failed=0;
+      for(const meta of manifest){
+        if(!meta||!meta.shareToken||!meta.boardId)continue;
+        try{
+          const remote=await getCloudBoard(meta.shareToken);
+          const index=list.findIndex(item=>String(item.boardId||item.id)===String(meta.boardId));
+          const prior=index>=0?list[index]:null;
+          const merged=mergeCloudIntoLocal(prior,remote,meta);
+          if(index>=0){list[index]=merged;refreshed++;}
+          else{list.unshift(merged);added++;}
+        }catch(error){
+          failed++;
+          console.warn('Board catalog item could not sync',meta.boardId,error);
+        }
+      }
+      list.sort((a,b)=>(Date.parse(b.updated||0)||0)-(Date.parse(a.updated||0)||0));
+      await storeCatalog(list);
+      lastCatalogSync=Date.now();
+      const status=document.getElementById('status');
+      if(status&&opts.announce){
+        status.textContent=failed
+          ? 'Boards synced across devices • '+added+' added • '+failed+' unavailable'
+          : 'Boards synced across devices • '+added+' added • '+refreshed+' refreshed';
+      }
+      return {ok:true,added:added,refreshed:refreshed,failed:failed,total:manifest.length};
+    }catch(error){
+      console.warn('Cross-device board sync unavailable',error);
+      if(opts.announce){
+        const status=document.getElementById('status');
+        if(status)status.textContent='Saved boards are available on this device. Cross-device sync will retry.';
+      }
+      return {ok:false,error:String(error&&error.message||error)};
+    }finally{
+      catalogBusy=false;
+    }
+  }
+
+  function markVersion(){
+    const tag=document.querySelector('.appVersionTag');
+    if(tag)tag.textContent=VERSION;
+    document.title="Matt's Square App — "+VERSION;
+    document.documentElement.dataset.mattVersion=VERSION;
+  }
+
+  function install(){
+    markVersion();
+    setTimeout(()=>syncCloudCatalog({announce:true,force:true}),1800);
+    setInterval(()=>syncCloudCatalog({announce:false}),SYNC_INTERVAL);
+    window.addEventListener('focus',()=>syncCloudCatalog({announce:false}));
+    document.addEventListener('visibilitychange',()=>{if(!document.hidden)syncCloudCatalog({announce:false});});
+  }
+
+  window.MATTS_CROSS_DEVICE_SYNC={version:VERSION,sync:()=>syncCloudCatalog({announce:true,force:true}),status:()=>({busy:catalogBusy,lastSync:lastCatalogSync})};
+  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',install);
+  else install();
+  [500,1500,3000].forEach(delay=>setTimeout(markVersion,delay));
+})();
+</script>
+
+
 <script id="pwa-registration">
 if('serviceWorker' in navigator){
   window.addEventListener('load',()=>navigator.serviceWorker.register('./sw.js',{updateViaCache:'none'}).then(reg=>reg.update()).catch(()=>{}));
