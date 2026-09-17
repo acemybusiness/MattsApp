@@ -1378,7 +1378,7 @@ body.playerShareMode #publicPickHint{margin-top:8px!important;padding:7px 9px!im
 </style>
 <link rel="manifest" href="manifest.webmanifest">
 <meta name="theme-color" content="#071321">
-<link rel="apple-touch-icon" href="msa-logo.png">
+<link rel="apple-touch-icon" href="msa-app-icon.png">
 <meta name="matt-optimization-candidate" content="v80.5-two-logo-spots-cleanup-2026-09-17">
 </head>
 
@@ -1751,7 +1751,13 @@ async function shareSaved(id){
   showShareFor(f);
 }
 function deleteSaved(id){safeStoreSaved(getSaved().filter(x=>x.id!==id));renderSavedList();renderModal();toast('Saved board deleted.')}
-function exportSaved(id,action='download'){const cur=getState(),f=getSaved().find(x=>x.id===id);if(f){setState(f);setTimeout(()=>{exportPNG(action);setTimeout(()=>setState(cur),120)},60)}}
+function exportSaved(id,action='download'){
+  const cur=getState(),f=getSaved().find(x=>x.id===id);
+  if(!f)return;
+  setState(f);
+  exportPNG(action);
+  setTimeout(()=>setState(cur),180);
+}
 function clearBoard(){if(confirm('Clear the current board? Saved boards will stay saved.')){saveSnapshot();board=Array.from({length:100},(_,i)=>({slot:i+1,player:null,color:null,img:null,time:null}));topNums=[];leftNums=[];render();toast('Board cleared.')}}
 const imgCache={};function cacheBoardImages(){board.forEach(s=>{if(s.img&&!imgCache[s.img]){const im=new Image();im.src=s.img;imgCache[s.img]=im}})}
 function exportPNG(action='download'){
@@ -1835,7 +1841,26 @@ function exportPNG(action='download'){
   ctx.shadowBlur=0;
   
 const fileName=(($('gameName').value||'matts-square-app-board').replace(/[^a-z0-9]+/gi,'_').toLowerCase())+'.png';
-// Standalone-safe export: PNG saves locally; Share sends the actual PNG file.
+// Keep Android downloads inside the original tap. Waiting for toBlob can make
+// Chrome treat the download as an untrusted popup and silently block it.
+if(action!=='share'){
+  try{
+    const a=document.createElement('a');
+    a.href=c.toDataURL('image/png');
+    a.download=fileName;
+    a.style.display='none';
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    const st=$('status');if(st)st.textContent='PNG saved/downloaded: '+fileName;
+    toast('PNG saved/downloaded — check Files or Downloads.');
+  }catch(err){
+    const st=$('status');if(st)st.textContent='PNG could not be created.';
+    toast('PNG could not be created.');
+  }
+  return;
+}
+// Native Share needs a real File, so only that path remains asynchronous.
 c.toBlob(async blob=>{
   if(!blob){
     const s=$('status'); if(s)s.textContent='PNG could not be created.';
@@ -1858,21 +1883,19 @@ c.toBlob(async blob=>{
         }
       }
     }
-    // If Android/browser cannot share local files, save the PNG instead of opening a blank page.
+    // If Android/browser cannot share local files, save the PNG instead.
     toast('Direct image sharing is not supported here. Saving the PNG instead.');
   }
 
-  const url=URL.createObjectURL(blob);
   const a=document.createElement('a');
-  a.href=url;
+  a.href=c.toDataURL('image/png');
   a.download=fileName;
   a.style.display='none';
   document.body.appendChild(a);
   a.click();
   a.remove();
-  setTimeout(()=>URL.revokeObjectURL(url),2500);
   const st=$('status'); if(st)st.textContent='PNG saved/downloaded: '+fileName;
-  toast(action==='share'?'PNG saved — use Android Share from Downloads/Files.':'PNG saved/downloaded — check Files or Downloads.');
+  toast('PNG saved — use Android Share from Downloads/Files.');
 },'image/png');
 
 }
@@ -2810,6 +2833,12 @@ window.renderShareCardPassive=renderShareCardPassive;
 async function loadLinkedSaved(id,quiet){
   const local=findSaved(id);
   if(!local)return false;
+  // Never make the local Load button wait for Google. Show the saved board
+  // immediately, then refresh it in the background when the bridge is online.
+  if(typeof clearOcrState==='function')clearOcrState(true);
+  if(typeof setState==='function')setState(local);
+  if(typeof renderShareCardPassive==='function')renderShareCardPassive(local);
+  const modal=document.getElementById('loadModal');if(modal)modal.classList.remove('show');
   let state=local;
   if(local.shareToken){
     try{
@@ -2821,10 +2850,10 @@ async function loadLinkedSaved(id,quiet){
       if(!quiet&&typeof toast==='function')toast('Loaded saved board. Live link unavailable right now.');
     }
   }
-  if(typeof clearOcrState==='function')clearOcrState(true);
-  if(typeof setState==='function')setState(state);
-  if(typeof renderShareCardPassive==='function')renderShareCardPassive(state);
-  const m=document.getElementById('loadModal');if(m)m.classList.remove('show');
+  if(state!==local){
+    if(typeof setState==='function')setState(state);
+    if(typeof renderShareCardPassive==='function')renderShareCardPassive(state);
+  }
   return true;
 }
 window.loadState=function(id){loadLinkedSaved(id,false)};
@@ -3208,8 +3237,39 @@ body:not(.playerShareMode) .randomPairRow{grid-template-columns:92px minmax(0,1f
 })();
 </script>
 
+<script id="v807-live-function-repair">
+(function(){
+  'use strict';
+  function savedById(id){
+    try{return (typeof getSaved==='function'?getSaved():[]).find(x=>String(x.id||x.boardId)===String(id));}
+    catch(e){return null;}
+  }
+  // The Share card and URL appear immediately. Cloud synchronization continues
+  // separately and can no longer make the button look unresponsive.
+  window.shareSaved=function(id){
+    const saved=savedById(id);
+    if(!saved)return false;
+    if(typeof window.showShareFor==='function')window.showShareFor(saved);
+    const share=window.shareInteractive||window.shareLinked;
+    if(typeof share==='function'){
+      try{Promise.resolve(share(saved)).catch(()=>{});}catch(e){}
+    }
+    return true;
+  };
+  function markVersion(){
+    const tag=document.querySelector('.appVersionTag');
+    if(tag)tag.textContent='v80.7';
+  }
+  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',markVersion);
+  else markVersion();
+  [300,1000,2100].forEach(ms=>setTimeout(markVersion,ms));
+})();
+</script>
+
 <script id="pwa-registration">
-if('serviceWorker' in navigator){window.addEventListener('load',()=>navigator.serviceWorker.register('./sw.js').catch(()=>{}));}
+if('serviceWorker' in navigator){
+  window.addEventListener('load',()=>navigator.serviceWorker.register('./sw.js',{updateViaCache:'none'}).then(reg=>reg.update()).catch(()=>{}));
+}
 </script>
 </body>
 </html>
