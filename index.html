@@ -1452,7 +1452,7 @@ body.playerShareMode #publicPickHint{margin-top:8px!important;padding:7px 9px!im
     </aside>
   </main>
 </div>
-<footer class="footer appSignature">© 2026 SRL - AMB</footer>
+<footer class="footer appSignature">© 2026 SRL • v81 - AMB</footer>
 <div id="toast" class="toast"></div>
 <div id="loadModal" class="modal"><div class="modalBox"><button id="closeModal" class="secondary" style="float:right">Close</button><h2>Load Board</h2><div id="modalSaved" class="savedList"></div></div></div>
 <div id="renameBoardModal" class="modal" aria-hidden="true"><div class="modalBox renameBoardBox"><h2>Board Name Changed</h2><p id="renameBoardMessage" class="renameBoardMessage"></p><div class="renameBoardActions"><button id="replaceBoardNameBtn" class="gold" type="button">Replace Saved Name</button><button id="startNewFromNameBtn" class="good" type="button">Start New Board</button><button id="cancelRenameBoardBtn" class="secondary" type="button">Cancel</button></div></div></div>
@@ -1562,7 +1562,17 @@ function idbGetImage(id){return openSavedDB().then(db=>new Promise((resolve,reje
 function canvasToBlob(canvas,type='image/jpeg',quality=.80){return new Promise((resolve,reject)=>canvas.toBlob(b=>b?resolve(b):reject(new Error('Image conversion failed')),type,quality))}
 async function imageUrlFor(ref){if(!ref)return'';if(blobUrlCache.has(ref))return blobUrlCache.get(ref);const blob=await idbGetImage(ref);if(!blob)return'';const url=URL.createObjectURL(blob);blobUrlCache.set(ref,url);return url}
 async function hydrateBoardImages(){let changed=false;for(const cell of board){if(cell.imgRef&&!cell.img){try{const u=await imageUrlFor(cell.imgRef);if(u){cell.img=u;changed=true}}catch(e){console.warn('Board image hydrate failed',e)}}}if(changed)render()}
-async function verifySavedBoard(saved){if(!saved)return false;await idbSet(STORE_KEY,getSaved());const verify=await idbGet(STORE_KEY);const hit=Array.isArray(verify)&&verify.find(x=>String(x.boardId||x.id)===String(saved.boardId||saved.id));return !!(hit&&Array.isArray(hit.board)&&hit.board.length===100)}
+async function verifySavedBoard(saved){
+  if(!saved)return false;
+  const savedId=String(saved.boardId||saved.id||'');
+  const current=(Array.isArray(getSaved())?getSaved():[]).filter(x=>String(x.boardId||x.id||'')!==savedId);
+  const protectedList=[saved,...current];
+  safeStoreSaved(protectedList);
+  await idbSet(STORE_KEY,protectedList);
+  const verify=await idbGet(STORE_KEY);
+  const hit=Array.isArray(verify)&&verify.find(x=>String(x.boardId||x.id)===savedId);
+  return !!(hit&&Array.isArray(hit.board)&&hit.board.length===100);
+}
 
 function lightweightSavedList(list){
   return (Array.isArray(list)?list:[]).map(s=>({id:s.id,boardId:s.boardId||s.id,shareToken:s.shareToken||'',title:s.title,final:s.final,claimed:s.claimed,updated:s.updated,gameName:s.gameName,gameDate:s.gameDate||'',cost:s.cost,numbersPopulated:s.numbersPopulated}));
@@ -3199,6 +3209,8 @@ body:not(.playerShareMode) .randomPairRow{grid-template-columns:92px minmax(0,1f
    },true);
  }
  async function verifiedManualSave(){
+   window.MATTS_SAVE_IN_PROGRESS=true;
+   try{if(document.activeElement&&typeof document.activeElement.blur==='function')document.activeElement.blur();}catch(e){}
    const btn=document.getElementById('saveBtn');
    if(btn)btn.disabled=true;
    const st=document.getElementById('status');if(st)st.textContent='Saving and verifying board…';
@@ -3222,11 +3234,24 @@ body:not(.playerShareMode) .randomPairRow{grid-template-columns:92px minmax(0,1f
      if(st)st.textContent='Save could not be verified. Your board is still open — do not close it yet.';
      if(typeof toast==='function')toast('Save not verified — board kept open.');
      return false;
-   }finally{if(btn)btn.disabled=false}
+   }finally{
+     window.MATTS_SAVE_IN_PROGRESS=false;
+     if(btn)btn.disabled=false;
+   }
+ }
+ function dismissPhoneKeyboard(){
+   try{if(document.activeElement&&typeof document.activeElement.blur==='function')document.activeElement.blur();}catch(e){}
  }
  function install(){
    installLogoFallback();
    const btn=document.getElementById('saveBtn');if(btn){btn.onclick=verifiedManualSave;btn.dataset.v803verified='1'}
+   ['newBtn','saveBtn','loadBtn','pngBtn'].forEach(id=>{
+     const action=document.getElementById(id);
+     if(action&&!action.dataset.keyboardDismiss){
+       action.dataset.keyboardDismiss='1';
+       action.addEventListener('pointerdown',dismissPhoneKeyboard,{capture:true});
+     }
+   });
    window.persistManualSaveVerified=verifiedManualSave;
    // Candidate/test files must never create content:// or file:// share URLs.
    window.mattLiveShareUrl=function(saved){const token=saved&&(saved.shareToken||saved.shareCode);return token?LIVE_ROOT+'/shared.html?board='+encodeURIComponent(token):''};
@@ -3403,6 +3428,22 @@ body:not(.playerShareMode) .randomPairRow{grid-template-columns:92px minmax(0,1f
     if(typeof renderModal==='function')renderModal();
   }
 
+  function mergeLatestLocalBeforeStore(list){
+    const merged=Array.isArray(list)?list.slice():[];
+    const current=localBoards();
+    current.forEach(local=>{
+      if(!local)return;
+      const localId=String(local.boardId||local.id||'');
+      if(!localId)return;
+      const index=merged.findIndex(item=>String(item.boardId||item.id||'')===localId);
+      if(index<0){merged.unshift(local);return;}
+      const localTime=Date.parse(local.updated||0)||0;
+      const mergedTime=Date.parse(merged[index].updated||0)||0;
+      if(localTime>mergedTime||window.MATTS_SAVE_IN_PROGRESS)merged[index]=local;
+    });
+    return merged;
+  }
+
   async function syncCloudCatalog(options){
     const opts=options||{};
     if(catalogBusy||document.hidden)return {ok:false,skipped:true};
@@ -3431,8 +3472,9 @@ body:not(.playerShareMode) .randomPairRow{grid-template-columns:92px minmax(0,1f
           console.warn('Board catalog item could not sync',meta.boardId,error);
         }
       }
-      list.sort((a,b)=>(Date.parse(b.updated||0)||0)-(Date.parse(a.updated||0)||0));
-      await storeCatalog(list);
+      const protectedList=mergeLatestLocalBeforeStore(list);
+      protectedList.sort((a,b)=>(Date.parse(b.updated||0)||0)-(Date.parse(a.updated||0)||0));
+      await storeCatalog(protectedList);
       lastCatalogSync=Date.now();
       const status=document.getElementById('status');
       if(status&&opts.announce){
@@ -3479,7 +3521,7 @@ body:not(.playerShareMode) .randomPairRow{grid-template-columns:92px minmax(0,1f
 <script id="v8072-delete-everywhere">
 (function(){
   'use strict';
-  const VERSION='v80.7.3';
+  const VERSION='v81';
   const BACKEND='https://script.google.com/macros/s/AKfycbxXyngar6GxVTkJhh9OigkAALx1jT_bge_4v2e4Izut1en1dw4dRI7grxvpI1RT51m3/exec';
 
   function backendBase(){
