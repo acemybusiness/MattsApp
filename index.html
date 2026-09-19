@@ -1452,7 +1452,7 @@ body.playerShareMode #publicPickHint{margin-top:8px!important;padding:7px 9px!im
     </aside>
   </main>
 </div>
-<footer class="footer appSignature">© 2026 SRL • v81 - AMB</footer>
+<footer class="footer appSignature">© 2026 SRL • v85 - AMB</footer>
 <div id="toast" class="toast"></div>
 <div id="loadModal" class="modal"><div class="modalBox"><button id="closeModal" class="secondary" style="float:right">Close</button><h2>Load Board</h2><div id="modalSaved" class="savedList"></div></div></div>
 <div id="renameBoardModal" class="modal" aria-hidden="true"><div class="modalBox renameBoardBox"><h2>Board Name Changed</h2><p id="renameBoardMessage" class="renameBoardMessage"></p><div class="renameBoardActions"><button id="replaceBoardNameBtn" class="gold" type="button">Replace Saved Name</button><button id="startNewFromNameBtn" class="good" type="button">Start New Board</button><button id="cancelRenameBoardBtn" class="secondary" type="button">Cancel</button></div></div></div>
@@ -3630,5 +3630,167 @@ if('serviceWorker' in navigator){
   window.addEventListener('load',()=>navigator.serviceWorker.register('./sw.js',{updateViaCache:'none'}).then(reg=>reg.update()).catch(()=>{}));
 }
 </script>
+
+<script id="v85-verified-board-save">
+(function(){
+  'use strict';
+  const VERSION='v85';
+  const OWNER='Matt';
+  const BACKEND='https://script.google.com/macros/s/AKfycbxXyngar6GxVTkJhh9OigkAALx1jT_bge_4v2e4Izut1en1dw4dRI7grxvpI1RT51m3/exec';
+  let saving=false;
+
+  function backendBase(){
+    try{
+      const query=new URLSearchParams(location.search).get('api');
+      if(query)return query;
+      const saved=localStorage.getItem('matt_v80_api_url');
+      if(saved)return saved;
+    }catch(e){}
+    return BACKEND;
+  }
+
+  function apiUrl(params){
+    const u=new URL(backendBase());
+    Object.entries(params||{}).forEach(([k,v])=>u.searchParams.set(k,String(v)));
+    return u.toString();
+  }
+
+  async function fetchJson(url,options,timeoutMs=18000){
+    const controller=new AbortController();
+    const timer=setTimeout(()=>controller.abort(),timeoutMs);
+    try{
+      const response=await fetch(url,Object.assign({cache:'no-store',redirect:'follow'},options||{},{signal:controller.signal}));
+      const data=await response.json();
+      if(!data||!data.ok)throw new Error((data&&data.error)||'Live board request failed.');
+      return data;
+    }finally{
+      clearTimeout(timer);
+    }
+  }
+
+  function status(text){
+    const el=document.getElementById('status');
+    if(el)el.textContent=text;
+  }
+
+  function setSaveDisabled(disabled){
+    ['saveTop','doneBtn','saveBtn','saveHomeBtn'].forEach(id=>{
+      const el=document.getElementById(id);
+      if(el)el.disabled=!!disabled;
+    });
+  }
+
+  async function cloudSaveAndVerify(saved){
+    if(!saved)throw new Error('No board was created to save.');
+    const token=String(saved.shareToken||'').trim();
+    if(!token)throw new Error('Board share token is missing.');
+
+    await fetchJson(apiUrl({action:'post'}),{
+      method:'POST',
+      headers:{'Content-Type':'text/plain;charset=utf-8'},
+      body:JSON.stringify({
+        action:'saveBoard',
+        owner:OWNER,
+        board:saved,
+        publicPath:'https://matts.acemybusiness.app/shared.html?board='+encodeURIComponent(token),
+        version:VERSION
+      })
+    });
+
+    const verify=await fetchJson(apiUrl({action:'board',token:token,_:Date.now()}));
+    if(!verify.board||!Array.isArray(verify.board.board)||verify.board.board.length!==100){
+      throw new Error('Google did not return a complete saved board.');
+    }
+
+    const expectedId=String(saved.boardId||saved.id||'');
+    const actualId=String(verify.board.boardId||verify.board.id||'');
+    if(expectedId&&actualId&&expectedId!==actualId){
+      throw new Error('Google returned a different board than the one just saved.');
+    }
+
+    return verify.board;
+  }
+
+  window.mattCloudSave=async function(saved){
+    try{
+      await cloudSaveAndVerify(saved);
+      status('Saved and verified online — board is ready on Matt’s other devices.');
+      return true;
+    }catch(err){
+      console.error('v85 cloud save verification failed',err);
+      status('Saved on this phone, but online verification failed: '+err.message);
+      return false;
+    }
+  };
+
+  async function verifiedSave(final){
+    if(saving)return false;
+    saving=true;
+    window.MATTS_SAVE_IN_PROGRESS=true;
+    setSaveDisabled(true);
+    try{
+      try{document.activeElement&&document.activeElement.blur&&document.activeElement.blur();}catch(e){}
+      status('Saving board to this phone and Google…');
+
+      const saved=(typeof saveNamed==='function')
+        ? saveNamed(typeof final==='boolean'?final:(typeof boardFull==='function'?boardFull():false))
+        : null;
+      if(!saved)throw new Error('The board could not be saved locally.');
+
+      const localOk=(typeof verifySavedBoard==='function')?await verifySavedBoard(saved):true;
+      if(!localOk)throw new Error('The local saved-board copy could not be verified.');
+
+      const cloudOk=await window.mattCloudSave(saved);
+      if(!cloudOk)throw new Error('The Google copy could not be verified.');
+
+      if(typeof render==='function')render();
+      if(typeof renderSavedList==='function')renderSavedList();
+      if(typeof renderModal==='function')renderModal();
+      if(typeof window.renderShareCardPassive==='function')window.renderShareCardPassive(saved);
+      else if(typeof window.showShareFor==='function')window.showShareFor(saved);
+
+      status('Saved ✓ Verified on this phone and online.');
+      if(typeof toast==='function')toast('Saved ✓ Board verified online.');
+      return true;
+    }catch(err){
+      console.error('v85 verified save failed',err);
+      status('Save not fully verified. Keep this board open and tap Save again. '+err.message);
+      if(typeof toast==='function')toast('Save not verified — tap Save again.');
+      return false;
+    }finally{
+      saving=false;
+      window.MATTS_SAVE_IN_PROGRESS=false;
+      setSaveDisabled(false);
+    }
+  }
+
+  window.persistManualSave=verifiedSave;
+  try{persistManualSave=verifiedSave;}catch(e){}
+  window.persistManualSaveVerified=verifiedSave;
+
+  function wire(){
+    ['saveTop','doneBtn','saveBtn','saveHomeBtn'].forEach(id=>{
+      const el=document.getElementById(id);
+      if(!el||el.dataset.v85save)return;
+      el.dataset.v85save='1';
+      el.addEventListener('click',function(e){
+        e.preventDefault();
+        e.stopImmediatePropagation();
+        verifiedSave(typeof boardFull==='function'?boardFull():false);
+      },true);
+    });
+    const footer=document.querySelector('.appSignature');
+    if(footer)footer.textContent='© 2026 SRL • v85 - AMB';
+    const tag=document.querySelector('.appVersionTag');
+    if(tag)tag.textContent='v85';
+    document.documentElement.dataset.mattVersion='v85';
+  }
+
+  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',wire);
+  else wire();
+  [300,1000,2200].forEach(ms=>setTimeout(wire,ms));
+})();
+</script>
+
 </body>
 </html>
