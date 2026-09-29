@@ -1962,9 +1962,118 @@ function previewOcrFile(){const file=getOcrFile();if(!file)return;clearOcrState(
 function autoDetectBoardSquare(){const img=ocrState.img;if(!img){toast('Load a board image first.');return}const tmp=$('ocrWorkCanvas'),ctx=tmp.getContext('2d',{willReadFrequently:true});const maxSide=800,scale=Math.min(maxSide/img.width,maxSide/img.height,1);tmp.width=Math.round(img.width*scale);tmp.height=Math.round(img.height*scale);ctx.drawImage(img,0,0,tmp.width,tmp.height);const data=ctx.getImageData(0,0,tmp.width,tmp.height).data;const cols=new Array(tmp.width).fill(0),rows=new Array(tmp.height).fill(0);for(let y=0;y<tmp.height;y++){for(let x=0;x<tmp.width;x++){const i=(y*tmp.width+x)*4;const lum=0.299*data[i]+0.587*data[i+1]+0.114*data[i+2];if(lum<165){cols[x]++;rows[y]++}}}const smooth=arr=>arr.map((_,i)=>{let sum=0,count=0;for(let k=-3;k<=3;k++){const j=i+k;if(j>=0&&j<arr.length){sum+=arr[j];count++}}return sum/count});const c2=smooth(cols),r2=smooth(rows);const cThresh=Math.max(8,tmp.height*0.12),rThresh=Math.max(8,tmp.width*0.12);const findEdge=(arr,thr,fromStart)=>{if(fromStart){for(let i=0;i<arr.length;i++){if(arr[i]>=thr)return i}}else{for(let i=arr.length-1;i>=0;i--){if(arr[i]>=thr)return i}}return null};let left=findEdge(c2,cThresh,true), right=findEdge(c2,cThresh,false), top=findEdge(r2,rThresh,true), bottom=findEdge(r2,rThresh,false);if(left===null||right===null||top===null||bottom===null||right-left<50||bottom-top<50){const minDim=Math.min(img.width,img.height);ocrState.crop={x:(img.width-minDim*0.9)/2,y:(img.height-minDim*0.9)/2,size:minDim*0.9};ensureQuadFromCrop();syncSlidersToCrop();drawOcrStage();toast('Auto detect used a safe fallback. Adjust the crop if needed.');return}const sx=img.width/tmp.width, sy=img.height/tmp.height;left*=sx; right*=sx; top*=sy; bottom*=sy;let w=right-left, h=bottom-top;let size=Math.min(w,h);let x=left+(w-size)/2, y=top+(h-size)/2;const pad=size*0.02;x=Math.max(0,x-pad);y=Math.max(0,y-pad);size=Math.min(size+pad*2,img.width-x,img.height-y);ocrState.crop={x,y,size};ensureQuadFromCrop();syncSlidersToCrop();drawOcrStage();toast('Board grid auto detected.')}
 function cleanOcrName(raw){let t=String(raw||'').replace(/\b\d{1,3}\b/g,' ').replace(/[^A-Za-z0-9'&.\- ]+/g,' ').replace(/\s+/g,' ').trim();if($('ocrNameMode').value==='typed'){t=t.toLowerCase().replace(/\b\w/g,m=>m.toUpperCase())}return t}
 function cellHasInk(imageData){const d=imageData.data;let dark=0,total=d.length/4;for(let i=0;i<d.length;i+=4){const lum=0.299*d[i]+0.587*d[i+1]+0.114*d[i+2];if(lum<180)dark++}return dark/Math.max(1,total)>0.035}
-function buildRectifiedBoard(){const img=ocrState.img,quad=ocrState.quad;if(!img||!quad)return null;const src=$('ocrSourceCanvas'),sctx=src.getContext('2d',{willReadFrequently:true});src.width=img.width;src.height=img.height;sctx.clearRect(0,0,src.width,src.height);sctx.drawImage(img,0,0);const srcData=sctx.getImageData(0,0,src.width,src.height).data;const out=$('ocrWorkCanvas'),octx=out.getContext('2d');const size=1000;out.width=size;out.height=size;const outImg=octx.createImageData(size,size);const dst=outImg.data;for(let y=0;y<size;y++){const v=y/(size-1);for(let x=0;x<size;x++){const u=x/(size-1);const p=bilerpPoint(quad,u,v);const sx=clamp(Math.round(p.x),0,src.width-1), sy=clamp(Math.round(p.y),0,src.height-1);const si=(sy*src.width+sx)*4, di=(y*size+x)*4;dst[di]=srcData[si];dst[di+1]=srcData[si+1];dst[di+2]=srcData[si+2];dst[di+3]=255}}octx.putImageData(outImg,0,0);return out}
+function buildRectifiedBoard(){
+  const img=ocrState.img,quad=ocrState.quad;
+  if(!img||!quad)return null;
+  const src=$('ocrSourceCanvas'),sctx=src.getContext('2d',{willReadFrequently:true});
+  src.width=img.width;src.height=img.height;
+  sctx.clearRect(0,0,src.width,src.height);sctx.drawImage(img,0,0);
+  const srcData=sctx.getImageData(0,0,src.width,src.height).data;
+
+  const dist=(a,b)=>Math.hypot((b.x-a.x),(b.y-a.y));
+  const topW=dist(quad[0],quad[1]),bottomW=dist(quad[3],quad[2]);
+  const leftH=dist(quad[0],quad[3]),rightH=dist(quad[1],quad[2]);
+  const aspect=Math.max(.45,Math.min(2.4,((topW+bottomW)/2)/Math.max(1,(leftH+rightH)/2)));
+  const maxSide=1100;
+  let outW,outH;
+  if(aspect>=1){outW=maxSide;outH=Math.max(420,Math.round(maxSide/aspect));}
+  else{outH=maxSide;outW=Math.max(420,Math.round(maxSide*aspect));}
+
+  const out=$('ocrWorkCanvas'),octx=out.getContext('2d');
+  out.width=outW;out.height=outH;
+  const outImg=octx.createImageData(outW,outH),dst=outImg.data;
+  for(let y=0;y<outH;y++){
+    const v=y/Math.max(1,outH-1);
+    for(let x=0;x<outW;x++){
+      const u=x/Math.max(1,outW-1),p=bilerpPoint(quad,u,v);
+      const sx=clamp(Math.round(p.x),0,src.width-1),sy=clamp(Math.round(p.y),0,src.height-1);
+      const si=(sy*src.width+sx)*4,di=(y*outW+x)*4;
+      dst[di]=srcData[si];dst[di+1]=srcData[si+1];dst[di+2]=srcData[si+2];dst[di+3]=255;
+    }
+  }
+  octx.putImageData(outImg,0,0);
+  return out;
+}
 
 
+
+function groupGridPeaks(scores,minGap){
+  const peaks=[];
+  const max=Math.max(...scores,1);
+  const threshold=max*.42;
+  let start=-1,best=-1,bestVal=-1;
+  for(let i=0;i<=scores.length;i++){
+    const v=i<scores.length?scores[i]:0;
+    if(v>=threshold){
+      if(start<0){start=i;best=i;bestVal=v}
+      if(v>bestVal){best=i;bestVal=v}
+    }else if(start>=0){
+      if(!peaks.length||best-peaks[peaks.length-1]>=minGap)peaks.push(best);
+      else if(bestVal>(scores[peaks[peaks.length-1]]||0))peaks[peaks.length-1]=best;
+      start=-1;best=-1;bestVal=-1;
+    }
+  }
+  return peaks;
+}
+function chooseTwelveGridLines(peaks,length){
+  if(peaks.length<12)return null;
+  let best=null,bestErr=Infinity;
+  for(let i=0;i<=peaks.length-12;i++){
+    const cand=peaks.slice(i,i+12),gaps=[];
+    for(let j=1;j<cand.length;j++)gaps.push(cand[j]-cand[j-1]);
+    const avg=gaps.reduce((a,b)=>a+b,0)/gaps.length;
+    if(avg<length/30||avg>length/5)continue;
+    const err=gaps.reduce((s,g)=>s+Math.abs(g-avg)/avg,0);
+    const span=cand[cand.length-1]-cand[0];
+    const coveragePenalty=Math.abs(span-length*.88)/Math.max(1,length);
+    const total=err+coveragePenalty*3;
+    if(total<bestErr){bestErr=total;best=cand;}
+  }
+  return best;
+}
+function detectPaperGridGeometry(work){
+  const ctx=work.getContext('2d',{willReadFrequently:true});
+  const w=work.width,h=work.height,d=ctx.getImageData(0,0,w,h).data;
+  const cols=new Array(w).fill(0),rows=new Array(h).fill(0);
+  for(let y=0;y<h;y++){
+    for(let x=0;x<w;x++){
+      const i=(y*w+x)*4,r=d[i],g=d[i+1],b=d[i+2];
+      const lum=.299*r+.587*g+.114*b;
+      const dark=lum<150;
+      const green=(g>r*1.15&&g>b*1.10&&g>85);
+      if(dark||green){cols[x]++;rows[y]++;}
+    }
+  }
+  const smooth=(arr,r=2)=>arr.map((_,i)=>{
+    let s=0,n=0;
+    for(let k=-r;k<=r;k++){const j=i+k;if(j>=0&&j<arr.length){s+=arr[j];n++;}}
+    return s/Math.max(1,n);
+  });
+  const xs=chooseTwelveGridLines(groupGridPeaks(smooth(cols),Math.max(5,w/70)),w);
+  const ys=chooseTwelveGridLines(groupGridPeaks(smooth(rows),Math.max(4,h/70)),h);
+  if(xs&&ys)return {xs,ys,detected:true};
+
+  // Safe fallback: the uploaded grid is 11 columns by 11 rows, with a dedicated corner cell.
+  const fx=Array.from({length:12},(_,i)=>Math.round(i*w/11));
+  const fy=Array.from({length:12},(_,i)=>Math.round(i*h/11));
+  return {xs:fx,ys:fy,detected:false};
+}
+function cellBounds(geom,col,row){
+  const x0=geom.xs[col],x1=geom.xs[col+1],y0=geom.ys[row],y1=geom.ys[row+1];
+  return {x:x0,y:y0,w:Math.max(1,x1-x0),h:Math.max(1,y1-y0)};
+}
+function cornerLooksReserved(work,geom){
+  const b=cellBounds(geom,0,0),ctx=work.getContext('2d',{willReadFrequently:true});
+  const im=ctx.getImageData(Math.max(0,Math.floor(b.x)),Math.max(0,Math.floor(b.y)),Math.max(1,Math.floor(b.w)),Math.max(1,Math.floor(b.h))).data;
+  let dark=0,green=0,total=im.length/4;
+  for(let i=0;i<im.length;i+=4){
+    const r=im[i],g=im[i+1],bl=im[i+2],lum=.299*r+.587*g+.114*bl;
+    if(lum<145)dark++;
+    if(g>r*1.15&&g>bl*1.10&&g>85)green++;
+  }
+  // Corner may be blank, labeled, or lightly marked; it should not resemble a full edge-number cell.
+  return (dark/Math.max(1,total))<.24 || (green/Math.max(1,total))<.18;
+}
 
 function validDigitPermutation(arr){
   return Array.isArray(arr)&&arr.length===10&&arr.every(n=>Number.isInteger(n)&&n>=0&&n<=9)&&new Set(arr).size===10;
@@ -1984,21 +2093,23 @@ function prepDigitCell(srcCanvas,sx,sy,sw,sh){
   ctx.putImageData(im,0,0);
   return cv;
 }
-async function recognizeImportedEdgeNumbers(work){
+async function recognizeImportedEdgeNumbers(work,geom){
   if(typeof Tesseract==='undefined') return null;
   let worker=null;
   try{
     setOcrProgress('Reading the original board numbers...');
     worker=await Tesseract.createWorker('eng');
     await worker.setParameters({tessedit_char_whitelist:'0123456789',tessedit_pageseg_mode:'10'});
-    const unitX=work.width/11,unitY=work.height/11,top=[],left=[];
+    const top=[],left=[];
     for(let col=1;col<=10;col++){
-      const r=await worker.recognize(prepDigitCell(work,col*unitX,0,unitX,unitY));
+      const b=cellBounds(geom,col,0);
+      const r=await worker.recognize(prepDigitCell(work,b.x,b.y,b.w,b.h));
       const m=String(r.data?.text||'').match(/[0-9]/);
       top.push(m?Number(m[0]):-1);
     }
     for(let row=1;row<=10;row++){
-      const r=await worker.recognize(prepDigitCell(work,0,row*unitY,unitX,unitY));
+      const b=cellBounds(geom,0,row);
+      const r=await worker.recognize(prepDigitCell(work,b.x,b.y,b.w,b.h));
       const m=String(r.data?.text||'').match(/[0-9]/);
       left.push(m?Number(m[0]):-1);
     }
@@ -2026,28 +2137,25 @@ async function importGridAsImages(){
   const work=buildRectifiedBoard();
   if(!work){toast('Line up the board first.');return}
 
-  saveSnapshot();
-  board=emptyBoard();
-  topNums=[];
-  leftNums=[];
+  const geom=detectPaperGridGeometry(work);
+  const reservedCorner=cornerLooksReserved(work,geom);
 
-  // Manual paper boards contain an 11x11 grid:
-  // corner + 10 top-number cells + 10 left-number cells + the 100 pick cells.
-  // Import only the inner 10x10 picks into the app board.
+  saveSnapshot();
+  board=emptyBoard();topNums=[];leftNums=[];
+
+  // Cell 0,0 is the dedicated corner/logo position. Never import it as a pick.
+  // Top row cells 1..10 are number candidates. Left column cells 1..10 are number candidates.
+  // Only rows 1..10 x columns 1..10 become the 100 pick squares.
   const cellCanvas=$('ocrCellCanvas'),cctx=cellCanvas.getContext('2d');
   cellCanvas.width=180;cellCanvas.height=180;
-  const unitX=work.width/11,unitY=work.height/11;
   let imported=0;
 
-  for(let row=0;row<10;row++){
-    for(let col=0;col<10;col++){
-      const idx=row*10+col,slot=idx+1;
-      const padX=Math.max(2,unitX*0.035),padY=Math.max(2,unitY*0.035);
-      const sx=(col+1)*unitX+padX,sy=(row+1)*unitY+padY;
-      const sw=unitX-padX*2,sh=unitY-padY*2;
-      cctx.clearRect(0,0,180,180);
-      cctx.fillStyle='#fff';cctx.fillRect(0,0,180,180);
-      cctx.drawImage(work,sx,sy,sw,sh,0,0,180,180);
+  for(let row=1;row<=10;row++){
+    for(let col=1;col<=10;col++){
+      const idx=(row-1)*10+(col-1),slot=idx+1,b=cellBounds(geom,col,row);
+      const padX=Math.max(1,b.w*.035),padY=Math.max(1,b.h*.035);
+      cctx.clearRect(0,0,180,180);cctx.fillStyle='#fff';cctx.fillRect(0,0,180,180);
+      cctx.drawImage(work,b.x+padX,b.y+padY,Math.max(1,b.w-padX*2),Math.max(1,b.h-padY*2),0,0,180,180);
       const blob=await canvasToBlob(cellCanvas,'image/jpeg',0.82);
       const ref='matt-img-'+Date.now().toString(36)+'-'+idx+'-'+Math.random().toString(36).slice(2,8);
       await idbPutImage(ref,blob);
@@ -2057,29 +2165,22 @@ async function importGridAsImages(){
     }
   }
 
-  // If the photographed board already has a complete 0-9 set on both edges,
-  // keep those exact numbers. Otherwise the existing auto-number logic remains the fallback.
-  const detected=await recognizeImportedEdgeNumbers(work);
-  if(detected){
-    topNums=detected.top.slice();
-    leftNums=detected.left.slice();
-  }else{
-    topNums=[];
-    leftNums=[];
-  }
+  const detected=reservedCorner?await recognizeImportedEdgeNumbers(work,geom):null;
+  if(detected){topNums=detected.top.slice();leftNums=detected.left.slice();}
+  else{topNums=[];leftNums=[];}
 
   render();
   autoSaveCurrent(false);
 
-  if($('ocrPanel')) $('ocrPanel').classList.add('collapsed');
-  if($('ocrStageCanvas')) $('ocrStageCanvas').style.display='none';
-  if($('ocrProgress')) $('ocrProgress').textContent='Image imported.';
+  if($('ocrPanel'))$('ocrPanel').classList.add('collapsed');
+  if($('ocrStageCanvas'))$('ocrStageCanvas').style.display='none';
+  if($('ocrProgress'))$('ocrProgress').textContent='Image imported.';
   try{document.querySelector('.boardWrap')?.scrollIntoView({behavior:'smooth',block:'start'});}
   catch(e){window.scrollTo({top:0,behavior:'smooth'});}
 
   $('status').textContent=detected
-    ? 'Image imported with the original top and left numbers. Review the board, then tap Save.'
-    : 'Image imported. No complete edge-number set was confirmed, so the normal automatic numbers were used.';
+    ? 'Image imported with the photographed number sets aligned to the app headers.'
+    : 'Image imported. The corner was reserved for the logo; no complete edge-number set was confirmed, so automatic numbers were used.';
   toast(detected?'Image and original numbers imported.':'Image imported.');
 }
 async function readGridOcr(){if(!ocrState.img){toast('Load a board image first.');return}if(typeof Tesseract==='undefined'){toast('OCR library is not ready yet.');return}drawOcrStage();const work=buildRectifiedBoard();if(!work){toast('Load a board image first.');return}const cellCanvas=$('ocrCellCanvas'),cctx=cellCanvas.getContext('2d',{willReadFrequently:true});cellCanvas.width=220;cellCanvas.height=220;const entries=[];const unit=100;let checked=0;setOcrProgress('Scanning the 10x10 grid...');for(let r=0;r<10;r++){for(let c=0;c<10;c++){const slot=r*10+c+1;const pad=8;const sx=c*unit+pad, sy=r*unit+pad, sw=unit-pad*2, sh=unit-pad*2;cctx.clearRect(0,0,220,220);cctx.drawImage(work,sx,sy,sw,sh,0,0,220,220);let imgData=cctx.getImageData(0,0,220,220);if(!cellHasInk(imgData)){checked++;if(checked%10===0)setOcrProgress(`Checked ${checked}/100 squares...`);continue}const d=imgData.data;for(let i=0;i<d.length;i+=4){const lum=0.299*d[i]+0.587*d[i+1]+0.114*d[i+2];const val=lum>165?255:0;d[i]=val;d[i+1]=val;d[i+2]=val;d[i+3]=255}cctx.putImageData(imgData,0,0);try{const result=await Tesseract.recognize(cellCanvas,'eng',{logger:m=>{if(m.status==='recognizing text'){setOcrProgress(`Reading square ${slot}/100...`)}}});const name=cleanOcrName(result.data?.text||'');if(name){entries.push({slot,name})}}catch(err){console.error('OCR cell failed',slot,err)}checked++}}$('ocrReview').value=entries.map(x=>`${x.slot}, ${x.name}`).join('\n');setOcrProgress(entries.length?`Read ${entries.length} filled squares from the 10x10 grid.`:'Grid scan finished. No readable names were found.');toast(entries.length?`Grid OCR found ${entries.length} squares.`:'Grid scan finished. No readable names found.')}
