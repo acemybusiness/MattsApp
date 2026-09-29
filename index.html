@@ -2034,29 +2034,91 @@ function chooseTwelveGridLines(peaks,length){
 function detectPaperGridGeometry(work){
   const ctx=work.getContext('2d',{willReadFrequently:true});
   const w=work.width,h=work.height,d=ctx.getImageData(0,0,w,h).data;
+
+  // First look for the green L-shaped header used by the photographed paper board:
+  // one horizontal strip across the top and one vertical strip down the left.
+  const greenRows=new Array(h).fill(0),greenCols=new Array(w).fill(0);
+  let greenMinX=w,greenMaxX=-1,greenMinY=h,greenMaxY=-1;
+  for(let y=0;y<h;y++){
+    for(let x=0;x<w;x++){
+      const i=(y*w+x)*4,r=d[i],g=d[i+1],b=d[i+2];
+      const green=(g>70 && g>r*1.10 && g>b*1.05 && (g-r)>12);
+      if(green){
+        greenRows[y]++;greenCols[x]++;
+        if(x<greenMinX)greenMinX=x;if(x>greenMaxX)greenMaxX=x;
+        if(y<greenMinY)greenMinY=y;if(y>greenMaxY)greenMaxY=y;
+      }
+    }
+  }
+
+  function strongestBand(scores,minStrength,minWidth,maxWidth){
+    const max=Math.max(...scores,0);
+    if(max<minStrength)return null;
+    const threshold=max*.58;
+    let best=null,start=-1,sum=0;
+    for(let i=0;i<=scores.length;i++){
+      const v=i<scores.length?scores[i]:0;
+      if(v>=threshold){
+        if(start<0){start=i;sum=0}
+        sum+=v;
+      }else if(start>=0){
+        const end=i-1,width=end-start+1;
+        if(width>=minWidth&&width<=maxWidth){
+          const candidate={start,end,width,sum};
+          if(!best||candidate.sum>best.sum)best=candidate;
+        }
+        start=-1;sum=0;
+      }
+    }
+    return best;
+  }
+
+  const topBand=strongestBand(greenRows,Math.max(20,w*.20),Math.max(8,h*.025),Math.max(20,h*.22));
+  const leftBand=strongestBand(greenCols,Math.max(20,h*.20),Math.max(8,w*.025),Math.max(20,w*.22));
+
+  if(topBand&&leftBand&&greenMaxX>leftBand.end&&greenMaxY>topBand.end){
+    const x0=Math.max(0,leftBand.start-2);
+    const x1=Math.min(w,leftBand.end+2);
+    const y0=Math.max(0,topBand.start-2);
+    const y1=Math.min(h,topBand.end+2);
+
+    // Use the visible green header extents as the board's right/bottom edges.
+    const xEnd=Math.min(w,Math.max(x1+10,greenMaxX+2));
+    const yEnd=Math.min(h,Math.max(y1+10,greenMaxY+2));
+
+    if(xEnd-x1>w*.45 && yEnd-y1>h*.45){
+      const xs=[x0,x1],ys=[y0,y1];
+      for(let i=1;i<=10;i++)xs.push(Math.round(x1+(xEnd-x1)*i/10));
+      for(let i=1;i<=10;i++)ys.push(Math.round(y1+(yEnd-y1)*i/10));
+      return {xs,ys,detected:true,source:'green-header'};
+    }
+  }
+
+  // Fallback to line-based grid detection when there is no colored header.
   const cols=new Array(w).fill(0),rows=new Array(h).fill(0);
   for(let y=0;y<h;y++){
     for(let x=0;x<w;x++){
       const i=(y*w+x)*4,r=d[i],g=d[i+1],b=d[i+2];
       const lum=.299*r+.587*g+.114*b;
-      const dark=lum<150;
-      const green=(g>r*1.15&&g>b*1.10&&g>85);
-      if(dark||green){cols[x]++;rows[y]++;}
+      if(lum<145){cols[x]++;rows[y]++;}
     }
   }
   const smooth=(arr,r=2)=>arr.map((_,i)=>{
-    let s=0,n=0;
-    for(let k=-r;k<=r;k++){const j=i+k;if(j>=0&&j<arr.length){s+=arr[j];n++;}}
-    return s/Math.max(1,n);
+    let sum=0,n=0;
+    for(let k=-r;k<=r;k++){const j=i+k;if(j>=0&&j<arr.length){sum+=arr[j];n++;}}
+    return sum/Math.max(1,n);
   });
   const xs=chooseTwelveGridLines(groupGridPeaks(smooth(cols),Math.max(5,w/70)),w);
   const ys=chooseTwelveGridLines(groupGridPeaks(smooth(rows),Math.max(4,h/70)),h);
-  if(xs&&ys)return {xs,ys,detected:true};
+  if(xs&&ys)return {xs,ys,detected:true,source:'grid-lines'};
 
-  // Safe fallback: the uploaded grid is 11 columns by 11 rows, with a dedicated corner cell.
-  const fx=Array.from({length:12},(_,i)=>Math.round(i*w/11));
-  const fy=Array.from({length:12},(_,i)=>Math.round(i*h/11));
-  return {xs:fx,ys:fy,detected:false};
+  // Last-resort evenly spaced 11x11 board.
+  return {
+    xs:Array.from({length:12},(_,i)=>Math.round(i*w/11)),
+    ys:Array.from({length:12},(_,i)=>Math.round(i*h/11)),
+    detected:false,
+    source:'fallback'
+  };
 }
 function cellBounds(geom,col,row){
   const x0=geom.xs[col],x1=geom.xs[col+1],y0=geom.ys[row],y1=geom.ys[row+1];
