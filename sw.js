@@ -1,6 +1,6 @@
 // Matt's Square App — service worker for MSA v1
 // Change APP_VERSION on every release so phones drop the old cache and load the new build.
-const APP_VERSION = "msa-v1-2";
+const APP_VERSION = "msa-v1-3";
 const CACHE_NAME = "matts-square-" + APP_VERSION;
 
 // Only files this app actually uses. Missing optional files are skipped instead of
