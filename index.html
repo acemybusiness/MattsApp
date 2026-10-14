@@ -3,14 +3,14 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-<title>Matt's Square App — MSA v1.1</title>
-<meta name="app-version" content="MSA v1.1">
+<title>Matt's Square App — MSA v1.3</title>
+<meta name="app-version" content="MSA v1.3">
 <link rel="icon" type="image/png" href="./msa-logo.png" />
 <link rel="manifest" href="manifest.webmanifest">
 <meta name="theme-color" content="#071321">
 <link rel="apple-touch-icon" href="msa-logo.png">
 <style id="msa-v1-styles">
-/* MSA v1.1 — one stylesheet (merged from the earlier patch layers; overridden and unused rules removed) */
+/* MSA v1.3 — one stylesheet (merged from the earlier patch layers; overridden and unused rules removed) */
 *{box-sizing:border-box}
 html,body{margin:0;min-height:100%;font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif}
 button,input{font:inherit}
@@ -460,6 +460,15 @@ body:not(.playerShareMode) .randomPairRow{grid-template-columns:92px minmax(0,1f
 @media(max-width:620px){body:not(.playerShareMode) .app{max-width:100%!important;padding-left:4px!important;padding-right:4px!important}body:not(.playerShareMode) .layout{max-width:100%!important;padding:6px!important}body:not(.playerShareMode) .boardWrap{max-width:100%!important}body:not(.playerShareMode) .combinedTopRow{grid-template-columns:1fr 88px!important;gap:8px!important}body:not(.playerShareMode) .combinedActionRow{grid-template-columns:1fr!important;gap:8px!important}}
 @media(min-width:621px){body.playerShareMode .app{width:min(100%,980px)!important;max-width:980px!important;margin:0 auto!important;padding:10px 10px 78px!important}body.playerShareMode .topbar,body.playerShareMode .left,body.playerShareMode .right,body.playerShareMode .savedInlinePanel,body.playerShareMode .boardControlPanel,body.playerShareMode .combinedPlayerPanel,body.playerShareMode #shareCard{display:none!important}body.playerShareMode .layout{display:block!important;width:100%!important;max-width:920px!important;margin:0 auto!important;padding:10px!important;border-radius:20px!important;overflow:visible!important}body.playerShareMode .boardWrap{display:grid!important;grid-template-columns:1fr!important;width:100%!important;max-width:900px!important;margin:0 auto!important;gap:10px!important}body.playerShareMode .boardMetaPanel,body.playerShareMode .publicPickPanel,body.playerShareMode .boardInfoStack,body.playerShareMode .boardShell{width:100%!important;max-width:100%!important}body.playerShareMode .boardShell{margin:0 auto!important}body.playerShareMode .boardGrid{width:100%!important;aspect-ratio:1/1!important}body.playerShareMode .boardMeta{grid-template-columns:minmax(0,1fr) 150px!important}body.playerShareMode .publicPickPanel .pickRow{grid-template-columns:minmax(0,1fr) auto!important}body.playerShareMode .miniStats{grid-template-columns:repeat(3,minmax(0,1fr))!important;overflow:visible!important}body.playerShareMode .miniStats .miniStat:nth-child(4){display:none!important}body.playerShareMode #status{min-height:0!important;padding:2px 6px!important}}
 @media(min-width:621px){@media (max-width:620px){body.playerShareMode .app{padding:6px 6px 74px!important}body.playerShareMode .layout{padding:6px!important}body.playerShareMode .boardMeta{grid-template-columns:minmax(0,1fr) 92px!important}body.playerShareMode .publicPickPanel .pickRow{grid-template-columns:1fr!important}body.playerShareMode #publicSavePicks{width:100%!important}}}
+.linkBoardBox{clear:both;margin:10px 0 14px;padding:10px;border:1px solid rgba(212,166,74,.45);border-radius:14px;background:rgba(0,0,0,.25)}
+.linkBoardBox label{display:block;margin-bottom:6px;font-weight:800}
+.linkRow{display:flex;gap:8px;align-items:stretch}
+.linkRow input{flex:1;min-width:0}
+.linkRow button{flex:0 0 auto}
+.linkBoardBox .tiny{margin:6px 0 0}
+.liveStatus{margin-top:8px;font-size:12px;font-weight:700;opacity:.9}
+.liveStatus:empty{display:none}
+.appVersion{opacity:.6;font-size:.8em;margin-left:6px}
 </style>
 </head>
 <body>
@@ -483,7 +492,7 @@ body:not(.playerShareMode) .randomPairRow{grid-template-columns:92px minmax(0,1f
 <div id="ocrProgress" class="progressText">Upload an image, set the grid dots, then import as an image.</div>
 <div class="ocrButtonsFour imageOnly bottomImportBackup"><button id="ocrImportImagesBtn" class="good full" type="button">Import as Image</button></div>
 </div></section>
-      <section id="shareCard" class="shareCard" style="display:none"><h3>Share This Board</h3><div class="shareId" id="shareBoardId"></div><div class="shareUrl" id="shareBoardUrl">Share Board sends an interactive board so others can pick open squares. PNG saves an image copy.</div><div class="shareBtns"><button id="copyShareBtn" type="button">Copy Share Link</button><button id="openShareBtn" class="secondary" type="button">Save PNG</button><button id="qrShareBtn" class="gold" type="button">Hide</button></div><div id="qrBox" class="qrBox"></div></section>
+      <section id="shareCard" class="shareCard" style="display:none"><h3>Share This Board</h3><div class="shareId" id="shareBoardId"></div><div class="shareUrl" id="shareBoardUrl">Share Board sends an interactive board so others can pick open squares. PNG saves an image copy.</div><div class="shareBtns"><button id="copyShareBtn" type="button">Copy Share Link</button><button id="openShareBtn" class="secondary" type="button">Save PNG</button><button id="qrShareBtn" class="gold" type="button">Hide</button></div><div id="qrBox" class="qrBox"></div><div id="liveStatus" class="liveStatus"></div></section>
       <section class="panel publicPickPanel"><h3>Pick Your Squares</h3><div class="pickRow"><div class="field"><label>Your Name</label><input id="publicPlayerName" placeholder="Enter your name"></div><div class="publicWheelField"><label>Color</label><canvas id="publicColorWheelCanvas" width="126" height="126" aria-label="Choose player color"></canvas><input id="publicPlayerColor" type="hidden" value="#1d74d8"><div id="publicColorPreview" class="publicColorPreview"><i></i><span>Tap the wheel</span></div></div><button id="publicSavePicks" class="good" type="button">Confirm Picks</button></div><div class="hint" id="publicPickHint">Enter your name, tap a color, choose open squares, then confirm.</div></section>
       <section class="panel boardInfoStack"><div class="miniStats"><div class="miniStat"><span class="lab">Claimed</span><b id="claimedCount">0</b></div><div class="miniStat"><span class="lab">Open</span><b id="remainCount">100</b></div><div class="miniStat"><span class="lab">Pot</span><b id="pot" class="money">$0</b></div><div class="miniStat"><span class="lab">Total</span><b>100</b></div></div></section>
       <section class="panel combinedPlayerPanel">
@@ -518,9 +527,9 @@ body:not(.playerShareMode) .randomPairRow{grid-template-columns:92px minmax(0,1f
     <aside class="right"></aside>
   </main>
 </div>
-<footer class="footer appSignature">© 2026 SRL - AMB</footer>
+<footer class="footer appSignature">© 2026 SRL - AMB <span id="appVersion" class="appVersion"></span></footer>
 <div id="toast" class="toast"></div>
-<div id="loadModal" class="modal"><div class="modalBox"><button id="closeModal" class="secondary" style="float:right">Close</button><h2>Load Board</h2><div id="modalSaved" class="savedList"></div></div></div>
+<div id="loadModal" class="modal"><div class="modalBox"><button id="closeModal" class="secondary" style="float:right">Close</button><h2>Load Board</h2><div class="linkBoardBox"><label for="linkBoardInput">Open a board from your other device</label><div class="linkRow"><input id="linkBoardInput" type="url" inputmode="url" autocomplete="off" placeholder="Paste the board’s share link"><button id="linkBoardBtn" class="good" type="button">Open</button></div><p class="tiny">On the other device tap Share, copy the link, and paste it here. Both devices then stay in sync.</p></div><div id="modalSaved" class="savedList"></div></div></div>
 <div id="renameBoardModal" class="modal" aria-hidden="true"><div class="modalBox renameBoardBox"><h2>Board Name Changed</h2><p id="renameBoardMessage" class="renameBoardMessage"></p><div class="renameBoardActions"><button id="replaceBoardNameBtn" class="gold" type="button">Replace Saved Name</button><button id="startNewFromNameBtn" class="good" type="button">Start New Board</button><button id="cancelRenameBoardBtn" class="secondary" type="button">Cancel</button></div></div></div>
 <canvas id="exportCanvas" class="hiddenCanvas"></canvas><canvas id="ocrWorkCanvas" class="hiddenCanvas"></canvas><canvas id="ocrCellCanvas" class="hiddenCanvas"></canvas><canvas id="ocrSourceCanvas" class="hiddenCanvas"></canvas>
 <script id="msa-v1-app">
@@ -535,7 +544,7 @@ body:not(.playerShareMode) .randomPairRow{grid-template-columns:92px minmax(0,1f
    ========================================================================== */
 
 /* ---------- 1. Setup ---------- */
-const APP_VERSION='MSA v1.1';
+const APP_VERSION='MSA v1.3';
 const $=id=>document.getElementById(id);
 const STORE_KEY='square_up_saved_v6';
 const AUTO_KEY='square_up_auto_current_v6';
@@ -562,7 +571,7 @@ const LOGO_URL=(function(){
 
 let savedCache=[];let idbReady=false;
 let board=emptyBoard();let topNums=[];let leftNums=[];
-let selectionOn=false;let subtractMode=false;let dragging=false;let lastSnapshot=null;let undoStack=[];
+let selectionOn=false;let subtractMode=false;let dragging=false;let undoStack=[];
 let activeBoardId='';let activeShareToken=publicToken;let activeBoardLocked=false;
 let completionSaveScheduled=false;
 let pendingRenameSaveFinal=false;let renameChoiceBypass=false;
@@ -582,9 +591,14 @@ function safeImg(u){const s=String(u||'');return /^(blob:|https:)/i.test(s)?s:nu
 function safeNums(a){return Array.isArray(a)&&a.length===10&&a.every(n=>Number.isInteger(+n)&&+n>=0&&+n<=9)?a.map(Number):[]}
 function sanitizeCell(x,i){
   x=x||{};const player=x.player!=null&&String(x.player).trim()?String(x.player):null;
-  return{slot:i+1,player,color:player?(safeColor(x.color)||'#8a8f98'):null,imgRef:x.imgRef?String(x.imgRef):null,
+  const c={slot:i+1,player,color:player?(safeColor(x.color)||'#8a8f98'):null,imgRef:x.imgRef?String(x.imgRef):null,
     img:safeImg(x.img),time:x.time||null};
+  // A "removed" marker: the square was cleared on purpose, so other devices clear it too.
+  if(!player&&!c.imgRef&&x.cleared){c.cleared=true;c.clearedPlayer=x.clearedPlayer!=null?String(x.clearedPlayer):null}
+  return c;
 }
+function tms(t){if(typeof t==='number')return t;const n=Date.parse(t||'');return Number.isFinite(n)?n:0}
+function openCell(i){return{slot:i+1,player:null,color:null,imgRef:null,img:null,time:null}}
 function isClaimedCell(s){return !!(s&&(s.player||s.img||s.imgRef))}
 function boardFull(){return board.every(isClaimedCell)}
 function boardHasContent(){return board.some(isClaimedCell)}
@@ -635,7 +649,28 @@ function attachWheel(canvas,onPick){
 function renderColorWheel(){drawWheel($('colorWheelCanvas'),$('playerColor').value||'#219a12')}
 
 /* ---------- 4. Board ---------- */
-function saveSnapshot(){if(activeBoardLocked)return;const snap=JSON.stringify({board,topNums,leftNums});lastSnapshot=snap;undoStack.push(snap);if(undoStack.length>75)undoStack.shift()}
+// Undo remembers only what YOUR last action changed (before → after for each square it touched),
+// so undoing never erases picks that arrived from another device or player in the meantime.
+function saveSnapshot(){
+  if(activeBoardLocked)return;
+  const entry={before:JSON.stringify(board),after:null};undoStack.push(entry);if(undoStack.length>75)undoStack.shift();
+  queueMicrotask(()=>{entry.after=JSON.stringify(board)});
+}
+function sameOwner(a,b){return String(a&&a.player||'')===String(b&&b.player||'')&&String(a&&a.imgRef||'')===String(b&&b.imgRef||'')}
+function undoLast(){
+  const entry=undoStack.pop();if(!entry)return false;
+  const before=JSON.parse(entry.before),after=entry.after?JSON.parse(entry.after):board,now=Date.now();
+  let changed=0;
+  board=board.map((cur,i)=>{
+    const b=before[i]||openCell(i),a=after[i]||openCell(i);
+    if(sameOwner(a,b)||!sameOwner(cur,a))return cur; // not part of my last action, or changed since by someone else
+    changed++;
+    if(isClaimedCell(b))return{slot:i+1,player:b.player||null,color:b.color||null,imgRef:b.imgRef||null,img:b.img||null,time:now};
+    return{...openCell(i),time:now,cleared:true,clearedPlayer:a.player||null};
+  });
+  clearNumbersIfNeeded();
+  return changed>0;
+}
 function ensureNumbers(){
   if(publicToken)return false; // players only ever see the numbers the owner drew
   if(boardFull()&&(topNums.length!==10||leftNums.length!==10)){
@@ -644,13 +679,26 @@ function ensureNumbers(){
       completionSaveScheduled=true;
       setTimeout(()=>{
         completionSaveScheduled=false;
-        const name=($('gameName')?.value||'').trim();
-        if(boardFull()&&name&&!activeBoardLocked)persistManualSave(true);else autoSaveCurrent();
+        finishFullBoard();
       },80);
     }
     return true;
   }
   return false;
+}
+// Before a full board locks, check the online copy once: if another device finished first,
+// use its result; if someone picked a square online first, they keep it. Then lock.
+async function finishFullBoard(){
+  const s=activeSaved();
+  if(s&&s.shareToken&&!activeBoardLocked){
+    try{
+      const remote=await cloudGetBoard(s.shareToken);
+      if(remoteLockWins(getState(),remote)){adoptLockedRemote(s,remote);return}
+      applyRemoteToScreen(remote);
+    }catch(e){}
+  }
+  const name=($('gameName')?.value||'').trim();
+  if(boardFull()&&name&&!activeBoardLocked)persistManualSave(true);else autoSaveCurrent();
 }
 function clearNumbersIfNeeded(){if(!boardFull()){topNums=[];leftNums=[]}}
 function getActive(){return{name:$('playerName').value.trim(),color:safeColor($('playerColor').value)||'#219a12'}}
@@ -705,20 +753,20 @@ function render(){
   $('claimedCount').textContent=claimed;$('remainCount').textContent=100-claimed;$('pot').textContent='$'+(claimed*cost).toLocaleString();
   renderPlayers();autoSaveCurrent();
 }
-function claimSquare(i,active){saveSnapshot();board[i]={...board[i],player:active.name,color:active.color,img:null,time:Date.now()}}
-function clearSquare(i){noteClear(i,board[i].player);saveSnapshot();board[i]={...board[i],player:null,color:null,img:null,time:null};clearNumbersIfNeeded()}
+function claimSquare(i,active){saveSnapshot();board[i]={slot:i+1,player:active.name,color:active.color,imgRef:null,img:null,time:Date.now()}}
+function clearSquare(i){const was=board[i].player;saveSnapshot();board[i]={...openCell(i),time:Date.now(),cleared:true,clearedPlayer:was};clearNumbersIfNeeded()}
 function squareAction(i,allowToggle=true){
   if(activeBoardLocked){toast('This board is locked and cannot be changed.');return}
   if(!selectionOn){toast('Turn Selection ON before choosing or removing squares.');return}
   const active=getActive();if(!validateActivePlayerColor(true))return;
   const cell=board[i];
   if(isClaimedCell(cell)){
-    if(allowToggle&&active.name&&cell.player===active.name){clearSquare(i);status('Square unselected for '+active.name);render();toast('Square unselected.');return}
+    if(allowToggle&&active.name&&cell.player===active.name){clearSquare(i);status('Square unselected for '+active.name);render();scheduleAutoSync();toast('Square unselected.');return}
     toast(cell.player?'That square belongs to '+cell.player+'. Select that player to unselect it.':'That square is already claimed.');return;
   }
   if(!active.name){toast('Enter or select a player name first.');$('playerName').focus();return}
   claimSquare(i,getActive());status('Square selected for '+active.name);
-  const wasFull=boardFull();render();
+  const wasFull=boardFull();render();scheduleAutoSync();
   if(wasFull){saveNamed(true);toast('Board full — numbers auto populated and board auto saved.')}
 }
 // Random Fill works without Select mode (V1.2 behavior).
@@ -730,14 +778,14 @@ function randomFill(){
   const open=board.map((s,i)=>isClaimedCell(s)?null:i).filter(v=>v!==null);
   if(open.length<qty){toast('Not enough open squares.');return}
   saveSnapshot();const a=getActive();
-  shuffle(open).slice(0,qty).forEach(i=>board[i]={...board[i],player:a.name,color:a.color,img:null,time:Date.now()});
+  shuffle(open).slice(0,qty).forEach(i=>board[i]={slot:i+1,player:a.name,color:a.color,imgRef:null,img:null,time:Date.now()});
   dragging=false;status('Random filled '+qty+' square'+(qty===1?'':'s')+' for '+a.name);
-  const fullNow=boardFull();render();
+  const fullNow=boardFull();render();scheduleAutoSync();
   if(fullNow){saveNamed(true);toast('Board full — numbers auto populated and board auto saved.')}else toast('Random Fill complete.');
 }
 
 /* ---------- 5. State ---------- */
-function serialBoard(){return board.map((x,i)=>({slot:i+1,player:x.player||null,color:x.color||null,imgRef:x.imgRef||null,time:x.time||null}))}
+function serialBoard(){return board.map((x,i)=>{const c={slot:i+1,player:x.player||null,color:x.color||null,imgRef:x.imgRef||null,time:x.time||null};if(x.cleared&&!c.player&&!c.imgRef){c.cleared=true;c.clearedPlayer=x.clearedPlayer||null}return c})}
 function getState(){return{board:serialBoard(),topNums,leftNums,locked:activeBoardLocked,gameName:$('gameName').value,gameDate:$('gameDate').value||'',cost:$('cost').value,playerName:$('playerName').value,playerColor:$('playerColor').value,boardId:activeBoardId,shareToken:activeShareToken,updated:new Date().toISOString(),numbersPopulated:boardFull()}}
 // opts.keepControls: keep what the person is typing/selecting (used by background sync).
 function setState(s,opts={}){
@@ -922,6 +970,7 @@ function saveNamed(final=false){
   }
   const duplicate=list.find(x=>normalizeBoardName(x.gameName||String(x.title||'').replace(/\s+—\s+Completed$/i,''))===normalizeBoardName(gameName)&&String(x.boardId||x.id||'')!==String(activeBoardId||''));
   if(duplicate){status('That Game Name is already saved. Choose a different board name.');toast('Board name already exists — choose a different Game Name.');$('gameName')?.focus();return null}
+  if(state.boardId&&deletedIds.has(String(state.boardId))){state.boardId='';state.shareToken='';activeBoardId='';activeShareToken=''}
   const id=makeSaveId(state,list);activeBoardId=id;state.boardId=id;
   activeShareToken=state.shareToken||makeShareToken();state.shareToken=activeShareToken;
   const existing=list.find(x=>(x.boardId||x.id)===id);
@@ -929,6 +978,7 @@ function saveNamed(final=false){
   const claimed=state.board.filter(c=>c.player||c.imgRef).length;
   const label=state.gameName||state.gameDate||'Untitled Board';
   const saved={...state,id,boardId:id,title:label+(final?' — Completed':''),final,locked:!!(locking||activeBoardLocked),claimed,updated:new Date().toISOString()};
+  if(saved.locked)saved.lockedAt=(existing&&existing.lockedAt)||Date.now();
   const idx=list.findIndex(x=>(x.boardId||x.id)===id);if(idx>=0)list[idx]=saved;else list.unshift(saved);
   safeStoreSaved(list);
   if(locking){activeBoardLocked=true;selectionOn=false;dragging=false}
@@ -995,22 +1045,26 @@ async function cloudSaveNow(saved){
   if(!saved)return false;
   let toPush=saved;
   try{
-    if(saved.shareToken&&!isLockedRecord(saved)){
+    if(saved.shareToken){
       let remote=null;
       try{remote=await cloudGetBoard(saved.shareToken)}
       catch(err){if(!err||!err.fromBackend)throw err} // backend says "no such board yet" → first upload
       if(remote){
-        toPush=mergeLinkedRemote(saved,remote);
-        if(JSON.stringify(toPush.board)!==JSON.stringify(saved.board)){
-          persistSavedRecord(toPush);
-          if(String(activeBoardId)===String(toPush.boardId||toPush.id))applyRemoteToScreen(remote);
+        // Another device already finished (locked) this board first → its result is final; don't overwrite it.
+        if(remoteLockWins(saved,remote)){adoptLockedRemote(saved,remote);return true}
+        if(!isLockedRecord(saved)){
+          toPush=mergeLinkedRemote(saved,remote);
+          if(JSON.stringify(toPush.board)!==JSON.stringify(saved.board)){
+            persistSavedRecord(toPush);
+            if(isActiveRecord(toPush))applyRemoteToScreen(remote);
+          }
         }
       }
     }
     await apiPost({action:'saveBoard',board:toPush,publicPath:liveShareUrl(toPush),version:APP_VERSION});
-    forgetClears(toPush.boardId||toPush.id);
+    if(isActiveRecord(toPush))liveStatus('Live ✓ uploaded '+new Date().toLocaleTimeString([], {hour:'numeric',minute:'2-digit',second:'2-digit'})+' — '+toPush.board.filter(c=>c&&c.player).length+' named squares online');
     return true;
-  }catch(err){console.error(err);status('Saved on this device. Online sync error: '+err.message+' — nothing online was changed.');return false}
+  }catch(err){console.error(err);status('Saved on this device. Online sync error: '+err.message+' — nothing online was changed.');liveStatus('⚠ Upload failed: '+err.message);return false}
 }
 async function cloudGetBoard(token){
   if(!token)throw new Error('This board does not have a share link yet.');
@@ -1078,76 +1132,164 @@ async function loadState(id){
   const local=findSaved(id);if(!local)return false;
   let state=local;
   if(local.shareToken&&!isLockedRecord(local)){ // a locked board is final: never pull changes into it
-    try{state=mergeLinkedRemote(local,await cloudGetBoard(local.shareToken));persistSavedRecord(state);toast('Linked board refreshed and loaded.')}
+    try{state=mergeLinkedRemote(local,await cloudGetBoard(local.shareToken));replaceSavedRecord(state);toast('Linked board refreshed and loaded.')}
     catch(err){toast('Loaded saved board. Live link unavailable right now.')}
   }
   clearOcrState(true);setState(state);showShareFor(state);resetPolling();
   $('loadModal').classList.remove('show');return true;
 }
 async function shareSaved(id){const s=findSaved(id);if(!s)return;showShareFor(s);await shareHosted(s)}
+// Delete = gone. If it's the board on screen, the screen clears too, so tapping New
+// (which saves what's on screen) can't bring it back, and background sync can't re-add it.
+const deletedIds=new Set();
 function deleteSaved(id){
   const target=findSaved(id);if(!target)return;
-  if(!confirm('Delete “'+(target.gameName||target.title||'this board')+'” from Saved Boards?'))return;
+  const key=String(target.boardId||target.id||'');
+  deletedIds.add(key);deletedIds.add(String(target.id||''));
   safeStoreSaved(getSaved().filter(x=>String(x.id)!==String(id)));
-  if(String(activeBoardId||'')===String(target.boardId||target.id||'')){activeBoardId='';activeShareToken='';activeBoardLocked=false;$('shareCard').style.display='none';render()}
-  toast('Saved board deleted. Current board stays on screen.');
+  deleteBoardImages(target);
+  if(String(activeBoardId||'')===key){
+    clearTimeout(autoSyncTimer);autoSyncTimer=0;
+    resetCurrentBoard(true,true);$('gameName').value='';$('shareCard').style.display='none';render();writeAutoSave();
+  }
+  toast('Board deleted.');
+}
+function deleteBoardImages(rec){
+  const refs=(rec.board||[]).map(c=>c&&c.imgRef).filter(Boolean);if(!refs.length)return;
+  const stillUsed=new Set();getSaved().forEach(s=>(s.board||[]).forEach(c=>{if(c&&c.imgRef)stillUsed.add(c.imgRef)}));
+  openSavedDB().then(db=>{const tx=db.transaction(IDB_IMAGE_STORE,'readwrite');const st=tx.objectStore(IDB_IMAGE_STORE);refs.forEach(r=>{if(!stillUsed.has(r))st.delete(r)});tx.oncomplete=tx.onerror=()=>db.close()}).catch(()=>{});
 }
 let exporting=false;
 function exportSaved(id,action='download'){const cur=getState(),f=findSaved(id);if(f){exporting=true;setState(f,{quiet:true});setTimeout(()=>{exportPNG(action);setTimeout(()=>{setState(cur,{quiet:true});exporting=false},120)},60)}}
 
 /* ---------- 12. Linked-board sync (owner side) ---------- */
+function liveStatus(t){const el=$('liveStatus');if(el)el.textContent=t}
 function isLockedRecord(r){return !!(r&&(r.locked||r.final))}
-// Squares the owner cleared on this device, so the online copy can't put them back
-// before the next upload. Key: boardId|index → player name that was removed.
-const clearedLocally=new Map();
-function noteClear(i,player){if(activeBoardId&&player)clearedLocally.set(activeBoardId+'|'+i,String(player))}
-function forgetClears(boardId){for(const k of [...clearedLocally.keys()])if(k.startsWith(boardId+'|'))clearedLocally.delete(k)}
-// Rules for folding the online board into a board on this device:
-//  1. A locked board (numbers drawn / completed) never changes. Nothing is folded in.
-//  2. A square that is already taken here (a name OR a photo square) is never replaced.
-//  3. Only open squares here can receive picks made online.
-//  4. A square the owner just cleared here stays cleared.
+function isActiveRecord(r){return !!activeBoardId&&String(activeBoardId)===String(r.boardId||r.id)}
+/* How two copies of the same board are combined (phone ↔ laptop ↔ online).
+   Nothing is ever replaced wholesale; each square is decided on its own:
+   • A locked board on this device never changes.
+   • If the online board was locked first (by another device), that finished board is used.
+   • Photo squares are never replaced.
+   • Open here + taken online → taken.            • Same name both sides → unchanged.
+   • Different names → whoever picked first keeps it.
+   • Removed on one device (removal marker newer than the pick) → removed on all devices.  */
+function mergeCell(l,rRaw,i){
+  if(!rRaw)return l;const r=sanitizeCell(rRaw,i);
+  if(l.imgRef)return l;
+  const lt=tms(l.time),rt=tms(r.time);
+  if(l.player){
+    if(r.player){if(r.player===l.player)return l;return(lt&&rt&&rt<lt)?r:l}
+    if(r.cleared&&r.clearedPlayer===l.player&&rt>lt)return r;
+    return l;
+  }
+  if(l.cleared){
+    if(r.player)return(r.player===l.clearedPlayer&&!(rt>lt))?l:r;
+    if(r.imgRef)return r;
+    return(r.cleared&&rt>lt)?r:l;
+  }
+  if(r.player||r.imgRef||r.cleared)return r;
+  return l;
+}
+function remoteLockWins(local,remote){
+  if(!isLockedRecord(remote)||!Array.isArray(remote.board)||remote.board.length!==100)return false;
+  if(!isLockedRecord(local))return true;
+  if(JSON.stringify(safeNums(remote.topNums))===JSON.stringify(safeNums(local.topNums))&&JSON.stringify(safeNums(remote.leftNums))===JSON.stringify(safeNums(local.leftNums)))return false;
+  const ra=tms(remote.lockedAt),la=tms(local.lockedAt);
+  return !!(ra&&la&&ra<la); // both locked: the one locked first wins; unknown → this device wins
+}
+function lockedRemoteState(local,remote){
+  const lb=Array.isArray(local.board)?local.board:[];
+  return{...local,board:remote.board.map((c,i)=>{const r=sanitizeCell(c,i),l=lb[i];return(l&&l.imgRef&&l.imgRef===r.imgRef)?l:r}),
+    topNums:safeNums(remote.topNums),leftNums:safeNums(remote.leftNums),locked:true,final:!!(remote.final||remote.locked),
+    lockedAt:remote.lockedAt||null,title:remote.title||local.title,claimed:remote.board.filter(isClaimedCell).length};
+}
+function adoptLockedRemote(local,remote){
+  const st=lockedRemoteState(local,remote);
+  replaceSavedRecord(st);
+  if(isActiveRecord(st)){const keep=board.map(c=>c.img);setState({...getState(),board:st.board,topNums:st.topNums,leftNums:st.leftNums,locked:true},{keepControls:true,quiet:true});board.forEach((c,i)=>{if(c.imgRef&&!c.img&&keep[i])c.img=keep[i]});render();status('This board was completed on another device — showing the final board.')}
+}
 function mergeLinkedRemote(localState,remoteState){
   const out={...localState};
   out.shareToken=localState.shareToken||remoteState.shareToken;out.shareCode=localState.shareCode||remoteState.shareCode;
   if(isLockedRecord(localState))return out;
-  const id=String(localState.boardId||localState.id||'');
+  if(remoteLockWins(localState,remoteState))return lockedRemoteState(localState,remoteState);
   const lb=Array.isArray(localState.board)?localState.board:[];const rb=Array.isArray(remoteState.board)?remoteState.board:[];
-  out.board=Array.from({length:100},(_,i)=>{
-    const l=lb[i]||{slot:i+1,player:null,color:null,img:null,time:null};
-    if(isClaimedCell(l)||!rb[i])return l;
-    const r=sanitizeCell(rb[i],i);
-    if(!r.player)return l; // photo squares can't travel between devices; only named picks do
-    if(clearedLocally.get(id+'|'+i)===r.player)return l;
-    return{slot:i+1,player:r.player,color:r.color,imgRef:null,img:null,time:r.time||null};
-  });
+  out.board=Array.from({length:100},(_,i)=>mergeCell(lb[i]?sanitizeCell(lb[i],i):openCell(i),rb[i],i));
   out.claimed=out.board.filter(isClaimedCell).length;
   return out;
 }
-function persistSavedRecord(saved){const list=getSaved().slice();const idx=list.findIndex(x=>String(x.id||x.boardId)===String(saved.id||saved.boardId));if(idx>=0)list[idx]={...list[idx],board:saved.board,claimed:saved.claimed,updated:new Date().toISOString()};else list.unshift(saved);safeStoreSaved(list)}
-// Put online picks on the screen without touching what the owner is typing or selecting.
+function persistSavedRecord(saved){const list=getSaved().slice();const idx=list.findIndex(x=>String(x.id||x.boardId)===String(saved.id||saved.boardId));if(idx<0)return false;list[idx]={...list[idx],board:saved.board,claimed:saved.claimed,updated:new Date().toISOString()};safeStoreSaved(list);return true}
+function replaceSavedRecord(saved){const list=getSaved().slice();const idx=list.findIndex(x=>String(x.id||x.boardId)===String(saved.id||saved.boardId));if(idx<0)return false;list[idx]={...list[idx],...saved,updated:new Date().toISOString()};safeStoreSaved(list);return true}
+// Put online changes on the screen without touching what the owner is typing or selecting.
 function applyRemoteToScreen(remote){
   if(activeBoardLocked)return false;
   const cur=getState();const merged=mergeLinkedRemote(cur,remote);
-  if(JSON.stringify(merged.board)===JSON.stringify(cur.board))return false;
+  if(JSON.stringify(merged.board)===JSON.stringify(cur.board)&&!merged.locked)return false;
   const keepImgs=board.map(c=>c.img);
-  setState({...cur,board:merged.board},{keepControls:true,quiet:true});
+  setState({...cur,board:merged.board,topNums:merged.topNums||cur.topNums,leftNums:merged.leftNums||cur.leftNums,locked:!!merged.locked},{keepControls:true,quiet:true});
   board.forEach((c,i)=>{if(c.imgRef&&!c.img&&keepImgs[i])c.img=keepImgs[i]});
-  render();status('Linked board synced • '+merged.claimed+'/100 claimed');
+  render();status(merged.locked?'This board was completed on another device — showing the final board.':'Linked board synced • '+merged.board.filter(isClaimedCell).length+'/100 claimed');
   return true;
 }
 let lastRemoteStamp='';
 async function refreshActiveLinkedBoard(){
-  if(exporting||saveInFlight||activeBoardLocked)return false;
+  if(exporting||saveInFlight||activeBoardLocked||autoSyncTimer)return false;
   const saved=activeSaved();if(!saved||!saved.shareToken||isLockedRecord(saved))return false;
-  const remote=await cloudGetBoard(saved.shareToken);
-  const stamp=String(remote.updated||'')+'|'+JSON.stringify((remote.board||[]).map(c=>c&&c.player||''));
+  let remote;
+  try{remote=await cloudGetBoard(saved.shareToken)}catch(err){liveStatus('⚠ Couldn’t reach the live board: '+(err&&err.message||err));throw err}
+  liveStatus('Live ✓ checked '+new Date().toLocaleTimeString([], {hour:'numeric',minute:'2-digit',second:'2-digit'})+' — '+(remote.board||[]).filter(c=>c&&c.player).length+' named squares online');
+  const stamp=String(remote.updated||'')+'|'+!!remote.locked+'|'+JSON.stringify((remote.board||[]).map(c=>c&&[c.player||'',c.cleared?1:0,c.time||'']));
   if(stamp===lastRemoteStamp)return false;lastRemoteStamp=stamp;
-  if(String(activeBoardId)!==String(saved.boardId||saved.id)||activeBoardLocked)return false; // board changed while waiting
-  const mergedSaved=mergeLinkedRemote(saved,remote);
-  const changedSaved=JSON.stringify(mergedSaved.board)!==JSON.stringify(saved.board);
+  if(!isActiveRecord(saved)||activeBoardLocked||autoSyncTimer)return false; // board changed while waiting
+  const latest=activeSaved()||saved;
+  if(remoteLockWins(latest,remote)){adoptLockedRemote(latest,remote);return true}
+  const mergedSaved=mergeLinkedRemote(latest,remote);
+  const changedSaved=JSON.stringify(mergedSaved.board)!==JSON.stringify(latest.board);
   if(changedSaved)persistSavedRecord(mergedSaved);
   return applyRemoteToScreen(remote)||changedSaved;
+}
+// Owner changes on a shared board go online by themselves (1.5 s after the last tap),
+// so the other device and players see them without pressing Save.
+let autoSyncTimer=0;
+function scheduleAutoSync(){
+  if(publicToken)return;const s=activeSaved();if(!s||!s.shareToken||isLockedRecord(s))return;
+  clearTimeout(autoSyncTimer);autoSyncTimer=setTimeout(autoSyncNow,1500);
+}
+async function autoSyncNow(){
+  autoSyncTimer=0;const s=activeSaved();if(!s||activeBoardLocked||isLockedRecord(s))return;
+  const rec={...s,board:serialBoard(),claimed:board.filter(isClaimedCell).length};
+  persistSavedRecord(rec);
+  const ok=await cloudSave({...findSaved(rec.id)||rec});
+  if(ok)status('Synced • '+board.filter(isClaimedCell).length+'/100 claimed');
+  resetPolling();
+}
+// Open a board that was made on another device (paste its share link). Both stay in sync after this.
+async function linkBoardFromInput(){
+  const raw=$('linkBoardInput').value.trim();
+  if(!raw){toast('Paste the board’s share link first.');return}
+  let token=raw;try{const u=new URL(raw);token=u.searchParams.get('board')||''}catch(e){}
+  token=token.trim();
+  if(!/^[A-Za-z0-9_-]{4,64}$/.test(token)){toast('That doesn’t look like a board link.');return}
+  const already=getSaved().find(s=>s.shareToken===token);
+  if(already){$('linkBoardInput').value='';await loadState(already.id);toast('This board is already on this device — refreshed.');return}
+  const btn=$('linkBoardBtn');btn.disabled=true;
+  let remote;
+  try{remote=await cloudGetBoard(token)}catch(e){btn.disabled=false;toast('Couldn’t find that board online. Check the link.');return}
+  btn.disabled=false;
+  let id=String(remote.boardId||remote.id||('linked_'+token.slice(0,8)));
+  if(getSaved().some(s=>String(s.id)===id||String(s.boardId)===id))id=id+'-'+token.slice(0,4);
+  const cells=remote.board.length===100?remote.board.map(sanitizeCell):emptyBoard();
+  const name=String(remote.gameName||remote.title||'Linked board').replace(/\s+—\s+Completed$/i,'');
+  const rec={board:cells.map((c,i)=>{const o={slot:i+1,player:c.player,color:c.color,imgRef:c.imgRef,time:c.time};if(c.cleared){o.cleared=true;o.clearedPlayer=c.clearedPlayer}return o}),
+    topNums:safeNums(remote.topNums),leftNums:safeNums(remote.leftNums),gameName:name,gameDate:String(remote.gameDate||''),cost:remote.cost??0,
+    playerName:'',playerColor:'#219a12',shareToken:token,shareCode:String(remote.shareCode||''),id,boardId:id,
+    title:String(remote.title||name),locked:isLockedRecord(remote),final:!!remote.final,lockedAt:remote.lockedAt||null,
+    claimed:cells.filter(isClaimedCell).length,updated:new Date().toISOString(),numbersPopulated:cells.every(isClaimedCell)};
+  safeStoreSaved([rec,...getSaved()]);
+  $('linkBoardInput').value='';
+  await loadState(rec.id);
+  toast('Linked ✓ This board now stays in sync with your other device.');
 }
 // Polling: every 5s while things change, slowing to 30s when nothing does. Paused when hidden.
 let pollDelay=POLL_MIN,pollTimer=0,pollBusy=false;
@@ -1297,7 +1439,7 @@ function releaseBoardImageUrls(){board.forEach(c=>{if(c.imgRef&&blobUrlCache.has
 function resetCurrentBoard(preserveSettings=true,clearOcr=true){
   releaseBoardImageUrls();
   board=emptyBoard();topNums=[];leftNums=[];activeBoardId='';activeShareToken='';activeBoardLocked=false;
-  selectionOn=false;subtractMode=false;dragging=false;lastSnapshot=null;undoStack=[];lastRemoteStamp='';
+  selectionOn=false;subtractMode=false;dragging=false;undoStack=[];lastRemoteStamp='';
   if(clearOcr)clearOcrState(true);
   if(!preserveSettings){$('gameName').value='';$('gameDate').value='';$('cost').value='0';$('playerName').value='';$('playerColor').value='#219a12'}
   render();status('New blank board ready.');
@@ -1403,16 +1545,23 @@ async function confirmPicks(){
   if(!pendingPicks.size){hint('Tap at least one open square first.');return}
   let color=safeColor($('publicPlayerColor').value)||'#1d74d8';
   const existing=playerAssignedColor(name);
+  let note='';
   if(existing)color=existing;
-  else{const owner=colorAssignedTo(color,name);if(owner){hint('That color is already used by '+owner+'. Tap a different color on the wheel.');return}}
-  let ok=0,fail=0;const btn=$('publicSavePicks');btn.disabled=true;hint('Saving your picks…');
-  for(const index of [...pendingPicks]){
-    try{await apiPost({action:'claimSquare',token:publicToken,squareIndex:index,playerName:name,playerColor:color,requestId:(crypto.randomUUID?crypto.randomUUID():Date.now()+'-'+index)});ok++}catch(e){fail++}
+  else if(colorAssignedTo(color,name)){color=freeColor(color);setPublicColor(color);note=' Your color was already taken, so you got a new one.'}
+  const tried=[...pendingPicks];let errMsg='';
+  const btn=$('publicSavePicks');btn.disabled=true;hint('Saving your picks…');
+  for(const index of tried){
+    try{await apiPost({action:'claimSquare',token:publicToken,squareIndex:index,playerName:name,playerColor:color,requestId:(crypto.randomUUID?crypto.randomUUID():Date.now()+'-'+index)})}
+    catch(e){errMsg=errMsg||String(e&&e.message||e)}
   }
   pendingPicks.clear();await loadLive(true);resetPolling();
-  hint(fail?`${ok} saved. ${fail} square${fail===1?' was':'s were'} already taken.`:`${ok} pick${ok===1?'':'s'} saved successfully.`);
+  // Re-read the online board and count what actually stuck under this name.
+  const stuck=tried.filter(i=>board[i]&&board[i].player===name).length,missing=tried.length-stuck;
+  hint(missing?`${stuck} of ${tried.length} saved online. ${missing} did not save${errMsg?' — server said: '+errMsg:' (someone may have taken them first)'}.`:`✓ ${stuck} pick${stuck===1?'':'s'} saved online and verified.${note}`);
   btn.disabled=false;
 }
+// A color nobody on this board is using (keeps the picked shade, turns the hue).
+function freeColor(start){const hsv=rgbToHsv(start);for(let k=1;k<36;k++){const c=hsvToHex((hsv.h+k*47)%360,Math.max(55,hsv.s),100);if(!colorAssignedTo(c,''))return c}return '#'+Math.floor(Math.random()*0xffffff).toString(16).padStart(6,'0')}
 function setPublicColor(hex){$('publicPlayerColor').value=hex;drawWheel($('publicColorWheelCanvas'),hex);const p=document.querySelector('#publicColorPreview i');if(p)p.style.background=hex;const l=document.querySelector('#publicColorPreview span');if(l)l.textContent=hex.toUpperCase()}
 function startPlayerMode(){
   document.body.classList.add('playerShareMode');status('Shared board mode. Connecting to the live board…');
@@ -1432,20 +1581,23 @@ function startPlayerMode(){
 
 /* ---------- 17. Boot ---------- */
 function toggleOcr(){const p=$('ocrPanel');const closed=p.classList.toggle('collapsed');$('toggleOcrPanel').textContent=closed?'Open':'Hide';if(!closed)p.scrollIntoView({behavior:'smooth',block:'start'})}
+let dragSeen=new Set();
 function wireOwnerControls(){
-  $('board').addEventListener('pointerdown',e=>{if(publicToken)return;const cell=e.target.closest('.cell');if(!cell)return;if(selectionOn){e.preventDefault();dragging=true;squareAction(+cell.dataset.index,true)}else{dragging=false;toast('Turn Selection ON before choosing or removing squares.')}});
-  $('board').addEventListener('pointerover',e=>{if(!dragging||!selectionOn)return;const cell=e.target.closest('.cell');if(cell){e.preventDefault();squareAction(+cell.dataset.index,false)}});
+  $('board').addEventListener('pointerdown',e=>{if(publicToken)return;const cell=e.target.closest('.cell');if(!cell)return;if(activeBoardLocked){toast('This board is locked and cannot be changed.');return}if(selectionOn){e.preventDefault();dragging=true;dragSeen=new Set([+cell.dataset.index]);squareAction(+cell.dataset.index,true)}else{dragging=false;toast('Turn Selection ON before choosing or removing squares.')}});
+  // Each square is handled once per drag (the board redraws under the pointer, which re-fires 'over').
+  $('board').addEventListener('pointerover',e=>{if(!dragging||!selectionOn)return;const cell=e.target.closest('.cell');if(!cell)return;const i=+cell.dataset.index;if(dragSeen.has(i))return;dragSeen.add(i);e.preventDefault();squareAction(i,false)});
   window.addEventListener('pointerup',()=>dragging=false);
   $('playerPickGrid').addEventListener('click',e=>{const row=e.target.closest('.playerPickBtn');if(!row)return;if(activeBoardLocked){toast('This board is locked and cannot be changed.');return}$('playerName').value=row.dataset.name;$('playerColor').value=row.dataset.color;render();toast('Selected '+row.dataset.name)});
   $('selectToggle').onclick=()=>{if(activeBoardLocked){toast('This board is locked and cannot be changed.');return}selectionOn=!selectionOn;if(!selectionOn)dragging=false;render();toast(selectionOn?'Selection on.':'Selection off. Scroll is safe.')};
   $('actionToggle').onclick=()=>{if(activeBoardLocked){toast('This board is locked and cannot be changed.');return}subtractMode=false;if(!selectionOn){toast('Turn Select ON before choosing squares.');return}render();toast('Add mode ready.')};
-  $('undoBtn').onclick=()=>{if(activeBoardLocked){toast('This board is locked and cannot be changed.');return}const snap=undoStack.pop();if(snap){const st=JSON.parse(snap);board=st.board;topNums=st.topNums||[];leftNums=st.leftNums||[];lastSnapshot=undoStack.length?undoStack[undoStack.length-1]:null;render();toast('Undo applied.')}else toast('Nothing to undo yet.')};
+  $('undoBtn').onclick=()=>{if(activeBoardLocked){toast('This board is locked and cannot be changed.');return}if(!undoStack.length){toast('Nothing to undo yet.');return}undoLast();render();scheduleAutoSync();toast('Undo applied.')};
   $('saveBtn').onclick=verifiedManualSave;$('doneBtn').onclick=verifiedManualSave;
   $('randomBtn').onclick=randomFill;$('newBtn').onclick=startNewBoard;
   $('loadBtn').onclick=()=>{renderModal();$('loadModal').classList.add('show')};$('closeModal').onclick=()=>$('loadModal').classList.remove('show');
   $('pngBtn').onclick=()=>exportPNG('download');
   $('replaceBoardNameBtn').onclick=resolveReplaceSavedName;$('startNewFromNameBtn').onclick=resolveStartNewBoardFromRenamedName;$('cancelRenameBoardBtn').onclick=hideRenameBoardPrompt;
-  $('savedList').addEventListener('click',onSavedAction);$('modalSaved').addEventListener('click',onSavedAction);
+  $('savedList').addEventListener('click',onSavedAction);
+  $('linkBoardBtn').onclick=linkBoardFromInput;$('linkBoardInput').addEventListener('keydown',e=>{if(e.key==='Enter')linkBoardFromInput()});$('modalSaved').addEventListener('click',onSavedAction);
   $('topOcrBtn').onclick=()=>{if($('ocrPanel').classList.contains('collapsed'))toggleOcr()};
   $('toggleOcrPanel').onclick=toggleOcr;
   $('ocrFile').addEventListener('change',()=>{if($('ocrPanel').classList.contains('collapsed'))toggleOcr();if($('ocrFile').files?.[0])$('ocrCameraFile').value='';previewOcrFile()});
@@ -1463,6 +1615,7 @@ function wireOwnerControls(){
   window.addEventListener('resize',()=>requestAnimationFrame(lockSavedListToThree));
 }
 async function boot(){
+  const v=$('appVersion');if(v)v.textContent=APP_VERSION;
   document.title="Matt's Square App — "+APP_VERSION;
   // Flush the debounced auto-save when the app is backgrounded or closed.
   document.addEventListener('visibilitychange',()=>{if(document.hidden){if(autoSaveTimer)writeAutoSave()}else if(pollTimer||publicToken||activeSaved()){resetPolling()}});
